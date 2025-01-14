@@ -44,7 +44,7 @@ float GetCharge(float pshape[2500], float dt, float baseline){
 //AMPLITUDE
 float GetAmp(float pshape[2500], float baseline){
   float amp = 0;
-  float min = 0;
+  float min = 100;
   
   //sto lavorando sempre con segnali ingiù
   for(int i=0; i<2500; i++){
@@ -83,7 +83,7 @@ void DynamicMean(float delta[2499], float dyn_mean[2499], int j_max){
     for(int i=0; i<2500; i++){ //leggo la pshape i+1
 
     //realizzo media dinamica
-    for(int j=0; j<(int(j_max/2)+counter[i]); j++){ 
+    for(int j=0; j<(int(j_max/2)+counter[i]+1); j++){ 
 	dyn_mean[i] += delta[j+i-int(j_max/2)+index[i]];
       }
       //divisione che tiene conto delle condizioni al contorno (#punti usati)
@@ -163,8 +163,8 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
   int ctrl_width   = 0;
 
   //multiple event & width & trigger thresholds
-  float threshold_mid      = amp * 0.5; //50% -> width
-  float trigger_threshold  = abs(trigger); //pshape studiata in positivo
+  float threshold_mid      = baseline - (amp * 0.5); //50% -> width
+  //float trigger_threshold  = abs(trigger); //pshape studiata in positivo
  
   //width indexes
   int index_1 = 0;
@@ -178,6 +178,8 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
   float delta[2499] = {0};
   float dyn_delta[2499] = {0};
   
+  float smooth_shape[2500] = {0};
+  DynamicMean(pshape,smooth_shape,10);
   //leggo tutta la pshape
   for(int i=0; i<2499; i++){ //leggo la pshape i+1
     
@@ -194,36 +196,41 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
       for(int l=0; l<(2500-i); l++){ delta[i] += (pshape[i]-pshape[i+l+1])*scale; }	
     }
 
-    
+    /*
     //controllo del trigger -> dove passo il trigger
     if( (-1)*pshape[i]   < trigger_threshold &&
 	(-1)*pshape[i+1] > trigger_threshold   ){
       if      (ctrl_trigger == 0) { ctrl_trigger = i+1; }
       else if (ctrl_trigger != 0) { ; }
     }
+    */
 
+    
+     
     //controllo sulla width 
     //superamento soglia in discesa (prima volta)
-    if( (-1)*pshape[i]   < threshold_mid &&
-	(-1)*pshape[i+1] > threshold_mid   ){
+    if( smooth_shape[i]   > threshold_mid &&
+	smooth_shape[i+1] < threshold_mid   ){
       if ( index_1 == 0 && index_2 == 0 ) { index_1 = i+1; }
       else                                { ; }
     }
     //superamento soglia in salita (prima volta)
-    if( (-1)*pshape[i]   > threshold_mid &&
-	(-1)*pshape[i+1] < threshold_mid   ){
+    if( smooth_shape[i]   < threshold_mid &&
+        smooth_shape[i+1] > threshold_mid   ){
       if ( index_1 != 0 && index_2 == 0 ) { index_2 = i+1; }
       else                                { ; }
     }
-  
+
     
   }//for sulla lettura pshape
-   
+
+  //std::cout << index_1 << " " << index_2 << std::endl;
   //calcolo della larghezza a metà ampiezza
   if (index_1 != 0 && index_2 != 0 ){
     ctrl_width = index_2 - index_1;
   }
-  
+
+  //std::cout << ctrl_width << std::endl;
   //media dinamica sulla delta per renderla più liscia
   int dyn_sum = 8;
   float thresh_double = 1.;
@@ -231,6 +238,7 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
 
   int ctrl_double = Check_Double(thresh_double, dyn_delta);
 
+  //std::cout << ctrl_width << " "  << std::endl;
   ctrl.set_ctrl_double(ctrl_double);
   ctrl.set_ctrl_width(ctrl_width);
   ctrl.set_ctrl_trigger(ctrl_trigger);
