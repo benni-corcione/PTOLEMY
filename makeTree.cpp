@@ -3,12 +3,16 @@
 #include <string>
 #include <stdlib.h>
 #include <sstream>
+#include <filesystem>
+#include <algorithm>
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
 #include "TMath.h"
 #include "pshape_functions.h"
+
+void search_and_remove(const std::filesystem::path& directory, const std::filesystem::path& file_name);
 
 int main(int argc, char* argv[]){
 
@@ -26,7 +30,30 @@ int main(int argc, char* argv[]){
   char* meas      =       argv[2]  ;
   
   //unificazioni vari tree già esistenti
-  std::stringstream stream;  
+  std::stringstream stream;
+
+  //elimino tutti i tree singoli inutili
+  //stream << "rm -f C1--*" << std::endl;
+  //non cosa sia il file DS_Store.root che mi crea
+  stream << "rm -f DS_*" << std::endl;
+  system(stream.str().c_str());
+
+  std::string directory  = "data/root/CD" + std::to_string(CD_number)
+                    + "/" + std::string(meas)
+                    + "/" + std::to_string(voltage)
+                    + "V/";
+
+  std::string file1  = "CD" + std::to_string(CD_number)
+                    + "_" + std::to_string(voltage)
+                    + "V_treeraw.root";
+
+   std::string file2  = "CD" + std::to_string(CD_number)
+                    + "_" + std::to_string(voltage)
+                    + "V_tree.root";
+
+   search_and_remove(directory, file1);
+   search_and_remove(directory, file2);
+
   stream << "cd data/root/CD" << std::to_string(CD_number)
 	 << "/" << std::string(meas) 
 	 << "/" << std::to_string(voltage) << "V" << std::endl;
@@ -35,13 +62,9 @@ int main(int argc, char* argv[]){
 	 << "_" << std::to_string(voltage)
 	 << "V_treeraw.root " << "C"
 	 << "*" << std::endl;
-
-  //elimino tutti i tree singoli inutili
-  //stream << "rm -f C1--*" << std::endl;
-  //non cosa sia il file DS_Store.root che mi crea
-  stream << "rm -f DS_*" << std::endl;
+  
   system(stream.str().c_str());
-
+   
   std::cout << "All the trees were unified in one single tree named CD" << CD_number << "_" << voltage << "V_treeraw.root" << std::endl;
  
   //apertura file con il tree
@@ -101,9 +124,10 @@ int main(int argc, char* argv[]){
 
   //riempimento del tree
   for(unsigned iEntry=0; iEntry<nentries; iEntry++){
- 
+
     tree_raw->GetEntry(iEntry);
-   
+
+ 
     //functions defined in utility.h
     event           = event_raw;
     lumi            = lumi_raw;
@@ -112,12 +136,12 @@ int main(int argc, char* argv[]){
     baseline_error  = GetBaselineError(pshape, baseline);
     charge          = GetCharge(pshape, sampling_raw, baseline);
     amp             = GetAmp(pshape, baseline);
-
+     
     ctrl         = Ctrl_pshape(pshape, amp, trigger, baseline);
     ctrl_double  = ctrl.get_ctrl_double();
     ctrl_trigger = ctrl.get_ctrl_trigger();
     ctrl_width   = ctrl.get_ctrl_width();
-    
+
     tree->Fill();
     
   } //for on tree entries
@@ -129,11 +153,28 @@ int main(int argc, char* argv[]){
   std::cout << "tree entries: " << tree->GetEntries() << std::endl;
   std::cout << "tree saved in " << outfile_name << std::endl;
   outfile->Close();
-  
+   
     
   return(0);
 }
 	       	       
   
 
-  
+void search_and_remove(const std::filesystem::path& directory, const std::filesystem::path& file_name){
+     std::stringstream stream;  
+     auto d = std::filesystem::directory_iterator(directory);
+
+    auto found = std::find_if(d, end(d), [&file_name](const auto& dir_entry)
+    {
+        return dir_entry.path().filename() == file_name;
+    });
+
+    if (found != end(d))
+    {
+        //elimino tutti i tree singoli inutili
+      stream << "cd " << directory.c_str() << std::endl;
+      stream << "rm -f " << file_name.c_str() << std::endl;
+      system(stream.str().c_str());
+      
+    }
+}  
