@@ -14,6 +14,7 @@
 //prendo deltaY 
 //ciclare sul rawtree e disegnare eventi triggeranti
 
+int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold);
 //servono sia evento sia lumi!
 int main(int argc, char* argv[]){
 
@@ -42,15 +43,16 @@ int main(int argc, char* argv[]){
   int   lum;
   float sampling;
 
-  tree->SetBranchAddress( "event" ,        &ev       );
-  tree->SetBranchAddress( "lumi"  ,        &lum      );
-  tree->SetBranchAddress( "pshape",        &pshape   );
-  tree->SetBranchAddress( "sampling_time", &sampling );
+  tree->SetBranchAddress( "event" ,         &ev       );
+  tree->SetBranchAddress( "lumi"  ,         &lum      );
+  tree->SetBranchAddress( "pshape",         &pshape   );
+  tree->SetBranchAddress( "sampling_time",  &sampling );
 
   //differenza y di un punto con quello dopo n_sum punti
   TCanvas* c1 = new TCanvas("c1", "c1", 1800, 850); //1800 850
   c1->cd();
 
+  int conteggio = 0;
   //questi sembrano i parametri ottimali
   int n_sum = 45;
   
@@ -61,11 +63,12 @@ int main(int argc, char* argv[]){
     float delta[2499] = {0};
     float dyn_delta[2499] = {0};
     
+    
     tree->GetEntry(iEntry);
-
+     
     //////////////////////////////////
     //if pe studiare la singola pshape
-    if (ev==80 && lum==149){
+    // if (ev==80 && lum==149){
     
     TH1D* wave = new TH1D("wave", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* delta_histo = new TH1D("delta_histo", "", 2499,0.,2499*sampling*1.E+6);
@@ -75,6 +78,9 @@ int main(int argc, char* argv[]){
     for(int i=0; i<2499; ++i ){
       wave->SetBinContent(i+1,pshape[i]);
 
+     
+      
+      //if(pshape[i]>(base+(4*base_err)) && pshape[i+70]<){check_up++;}
       //riempimento array delta
       //attenzione alle condizioni al contorno
       if(i < 2499-n_sum) {
@@ -88,7 +94,7 @@ int main(int argc, char* argv[]){
       delta_histo->SetBinContent (i+1,delta[i]);
     }//ho finito di leggere la forma d'onda
 
-
+    
     //medi dinamica sulla delta per renderla più liscia
     int check = 0;
     int dyn_sum = 8;
@@ -104,6 +110,7 @@ int main(int argc, char* argv[]){
     float threshold = 1.0;
     
     //leggo vettore dei delta
+
     for(int i=0; i<2499; ++i ){
       if(i < 2489){
 	if(dyn_delta[i]  <threshold &&
@@ -137,11 +144,16 @@ int main(int argc, char* argv[]){
       }
     }//ho finito di leggere il vettore delta
 
-    std::cout << check << std::endl;
-
+    int check_up = Check_Up(pshape, dyn_delta, threshold);
+    if(check_up>0){check=0;}
     
     //ho incontrato una doppia almeno
-    if(check > 0 ){
+    if(check > 1 ){
+      //std::cout << (base+(5*base_err)) << std::endl;
+      float base     = GetBaseline(pshape);
+      float base_err = GetBaselineError(pshape, base);
+      std::cout << "baseline error: " << base_err << std::endl;
+      conteggio++;
       gStyle->SetOptStat(0);
       wave->SetLineColor(kBlack);
       wave->SetLineWidth(5);
@@ -154,7 +166,7 @@ int main(int argc, char* argv[]){
       wave->GetYaxis()->SetTitleOffset(+0.75);
       wave->GetXaxis()->SetTitleOffset(+0.9);
       
-      wave->GetYaxis()->SetRangeUser(-1.5,3);
+      wave->GetYaxis()->SetRangeUser(-1.,1.2);
     
       c1->SetBottomMargin(0.2);
       c1->SetLeftMargin(3);
@@ -182,6 +194,7 @@ int main(int argc, char* argv[]){
       //-p crea anche le parent se prima non esistono
       
       c1->SaveAs(Form("%s/event%dlumi%d.png",outdir.c_str(),ev,lum));
+      std::cout << std::endl;
       c1->Clear();
           delete(line);
    
@@ -195,13 +208,37 @@ int main(int argc, char* argv[]){
 
     ////////////////////
     //termine dell'if per singola pshape
-    }
+    //}
     
   } //prossima entry del tree
-  
+
+  std::cout << "numero di eventi: " << conteggio << std::endl;
   file->Close();
   delete(c1);
   //ho finito di leggere tutte le pshape
   
   return 0;
+}
+
+int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold){
+  int check_up   =  0;
+  float base     = GetBaseline(pshape);
+  float base_err = GetBaselineError(pshape, base);
+
+  for(int i=0; i<2499; i++){
+
+    //controllo su bumpetti
+    if(i>25 && i<2474){
+      if(   pshape[i]>(pshape[i-25]+(4*base_err))
+	 && pshape[i]>(pshape[i+25]+(4*base_err))
+	 && pshape[i]>(base-4*base_err))         {
+	if(dyn_delta[i]>threshold){check_up++;}
+      }
+    }
+
+    //controllo su errore baseline
+    if(base_err>0.006){check_up++;}
+  }
+
+  return check_up;
 }
