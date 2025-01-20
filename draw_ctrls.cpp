@@ -52,9 +52,9 @@ int main(int argc, char* argv[]){
   tree   ->SetBranchAddress("event"       , &event       );
   treeraw->SetBranchAddress("lumi"        , &lumi        );
   treeraw->SetBranchAddress("pshape"      , &pshape      );
-  tree   ->SetBranchAddress("charge"     , &charge      );
-  tree   ->SetBranchAddress("ctrl_double", &ctrl_double );
-  tree   ->SetBranchAddress("ctrl_width" , &ctrl_width  );
+  tree   ->SetBranchAddress("charge"      , &charge      );
+  tree   ->SetBranchAddress("ctrl_double" , &ctrl_double );
+  tree   ->SetBranchAddress("ctrl_width"  , &ctrl_width  );
 
   
   //preparazione grafica histo
@@ -62,15 +62,17 @@ int main(int argc, char* argv[]){
   c1->cd();
 
   gStyle->SetOptStat(0);
- 
+  int counter = 0;
+  
   for(unsigned iEntry=0; iEntry<nentries; iEntry++){
  
     tree->GetEntry(iEntry);
    
       //seleziono solo le forme d'onda che falliscono i controlli di sicurezza
     if ((doubles  == 1 && ctrl_double > 1) ||
-        (width    == 1 && (ctrl_width < 80 || ctrl_width>220))) {
-      
+        (width    == 1 && (ctrl_width < 60 || ctrl_width>280))) {
+
+      counter++;
       treeraw->GetEntry(iEntry);
       
       TH1D* h1 = new TH1D("h1", "", 2500, 0., 2500.);
@@ -86,9 +88,10 @@ int main(int argc, char* argv[]){
 
       std::cout << "event:" << event << "  lumi:" << lumi
 		<< "  waves:" << ctrl_double
-	        << "  width:" << ctrl_width << std::endl;
+	        << "  width:" << ctrl_width
+		<< "  charge:" << charge*1E+6 << std::endl;
       
-      h1->GetYaxis()->SetRangeUser(-1,0.2);
+      h1->GetYaxis()->SetRangeUser(-0.4,0.5);
       h1->SetLineColor(kBlue+2);
       h1_smooth->SetLineColor(kBlue-9);
       h1->SetLineWidth(3);
@@ -110,8 +113,18 @@ int main(int argc, char* argv[]){
   
   
   delete(c1);
-	    
+
+  std::cout << "eventi triggeranti: " << counter << std::endl;
   return 0;
 }
  
-  
+
+//intervalli di confidenza a occhio
+//CD204 B60_post_cond3_moku
+//96-99 --> 60-250
+//100-108 --> 60-260
+//109 --> 60-270
+//110 --> 60-280
+
+//CD188 conteggi
+//95 

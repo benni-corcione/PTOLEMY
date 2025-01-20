@@ -14,7 +14,6 @@
 //prendo deltaY 
 //ciclare sul rawtree e disegnare eventi triggeranti
 
-int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold);
 //servono sia evento sia lumi!
 int main(int argc, char* argv[]){
 
@@ -68,7 +67,7 @@ int main(int argc, char* argv[]){
      
     //////////////////////////////////
     //if pe studiare la singola pshape
-    // if (ev==80 && lum==149){
+     if (ev==31 && lum==21){
     
     TH1D* wave = new TH1D("wave", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* delta_histo = new TH1D("delta_histo", "", 2499,0.,2499*sampling*1.E+6);
@@ -144,11 +143,11 @@ int main(int argc, char* argv[]){
       }
     }//ho finito di leggere il vettore delta
 
-    int check_up = Check_Up(pshape, dyn_delta, threshold);
+    int check_up = Check_Up(pshape, dyn_delta, threshold, CD_number);
     if(check_up>0){check=0;}
     
     //ho incontrato una doppia almeno
-    if(check > 1 ){
+    if(check > 0 ){
       //std::cout << (base+(5*base_err)) << std::endl;
       float base     = GetBaseline(pshape);
       float base_err = GetBaselineError(pshape, base);
@@ -208,7 +207,7 @@ int main(int argc, char* argv[]){
 
     ////////////////////
     //termine dell'if per singola pshape
-    //}
+    }
     
   } //prossima entry del tree
 
@@ -220,25 +219,5 @@ int main(int argc, char* argv[]){
   return 0;
 }
 
-int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold){
-  int check_up   =  0;
-  float base     = GetBaseline(pshape);
-  float base_err = GetBaselineError(pshape, base);
 
-  for(int i=0; i<2499; i++){
 
-    //controllo su bumpetti
-    if(i>25 && i<2474){
-      if(   pshape[i]>(pshape[i-25]+(4*base_err))
-	 && pshape[i]>(pshape[i+25]+(4*base_err))
-	 && pshape[i]>(base-4*base_err))         {
-	if(dyn_delta[i]>threshold){check_up++;}
-      }
-    }
-
-    //controllo su errore baseline
-    if(base_err>0.006){check_up++;}
-  }
-
-  return check_up;
-}

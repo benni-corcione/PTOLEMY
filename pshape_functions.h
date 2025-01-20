@@ -130,6 +130,30 @@ int Check_Double(float threshold, float dyn_delta[2499]){
     return check;
 }
 
+//check sui bump in positivo delle pshape
+int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold, int CD_number){
+  int check_up   =  0;
+  float base     = GetBaseline(pshape);
+  float base_err = GetBaselineError(pshape, base);
+
+  for(int i=0; i<2499; i++){
+
+    //controllo su bumpetti
+    if(i>25 && i<2474){
+      if(   pshape[i]>(pshape[i-25]+(4*base_err))
+	 && pshape[i]>(pshape[i+25]+(4*base_err))
+	 && pshape[i]>(base-4*base_err))         {
+	if(dyn_delta[i]>threshold){check_up++;}
+      }
+    }
+
+    //controllo su errore baseline
+    //scarto dalle doppie le doppie che non hanno triggerato eh
+    if(CD_number==204 && base_err>0.006){check_up++;}
+  }
+
+  return check_up;
+}
 
 //CLASS OF CONTROLS OVER PSHAPE
 class Controls{
@@ -157,7 +181,7 @@ class Controls{
 
 
 //CONTROL OVER PSHAPE 
-Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baseline){
+Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baseline, int CD_number){
   Controls ctrl;
   int ctrl_trigger = 0;
   int ctrl_width   = 0;
@@ -230,6 +254,10 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
     ctrl_width = index_2 - index_1;
   }
 
+  if(index_1!=0 && index_2==0){
+    ctrl_width = 2500-index_1;
+  }
+
   //std::cout << ctrl_width << std::endl;
   //media dinamica sulla delta per renderla più liscia
   int dyn_sum = 8;
@@ -237,7 +265,10 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
   DynamicMean(delta,dyn_delta,dyn_sum);
 
   int ctrl_double = Check_Double(thresh_double, dyn_delta);
+  int check_up = Check_Up(pshape, dyn_delta, thresh_double, CD_number);
 
+  if(check_up>0){ctrl_double=0;}
+  
   //std::cout << ctrl_width << " "  << std::endl;
   ctrl.set_ctrl_double(ctrl_double);
   ctrl.set_ctrl_width(ctrl_width);
