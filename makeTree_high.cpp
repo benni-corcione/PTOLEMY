@@ -12,11 +12,6 @@
 #include "TMath.h"
 #include "pshape_functions.h"
 
-float Get_width_min(int CD_number,int voltage);
-float Get_width_max(int CD_number,int voltage);
-float Get_charge_min(int CD_number,int voltage);
-float Get_base_err_max(int CD_number,int voltage);
-
 int main(int argc, char* argv[]){
 
   //parametri da input
@@ -95,10 +90,10 @@ int main(int argc, char* argv[]){
     cosmic_rays = 0;
     electronics = 0;
     
-    float width_min = Get_width_min(CD_number,voltage);
-    float width_max = Get_width_max(CD_number,voltage);
-    float charge_min = Get_charge_min(CD_number,voltage);
-    float base_err_max = Get_base_err_max(CD_number,voltage);
+    float width_min = Get_width_min(CD_number,voltage,meas);
+    float width_max = Get_width_max(CD_number,voltage,meas);
+    float charge_min = Get_charge_min(CD_number,voltage,meas);
+    float base_err_max = Get_base_err_max(CD_number,voltage,meas);
     
    if( (ctrl_width<width_min && charge<charge_min) ||     //condizione 1
 	((baseline_error>base_err_max) &&                  //condizione 2 
@@ -126,69 +121,4 @@ int main(int argc, char* argv[]){
   return(0);
 }
 	       	       
-
-
-float Get_width_min(int CD_number,int voltage){
-  float width_min;
-
-  if(CD_number==188){
-    if(voltage>94  && voltage<102){ width_min = 80; }
-    if(voltage>101 && voltage<105){ width_min = 100;}
-    if(voltage==105)              { width_min = 120;}
-  }
-
-  if(CD_number==204){ width_min = 60; }
-  
-  return width_min;
-}
-
-float Get_width_max(int CD_number,int voltage){
-  float width_max;
-
- if(CD_number==188){
-    if(voltage>94   && voltage<98 ){ width_max = 200;}
-    if(voltage==98 || voltage==100){ width_max = 210;}
-    if(voltage==99 || voltage==101){ width_max = 220;}
-    if(voltage==102|| voltage==103){ width_max = 240;}
-    if(voltage==104)               { width_max = 250;}
-    if(voltage==105)               { width_max = 320;}
- }
-
- if(CD_number==204){
-    if(voltage==96)               { width_max = 300;}
-    if(voltage==97)               { width_max = 250;}
-    if(voltage>97  && voltage<101){ width_max = 260;}
-    if(voltage==104)              { width_max = 260;}
-    if(voltage>100 && voltage<104){ width_max = 270;}
-    if(voltage==105)              { width_max = 270;}
-    if(voltage>105 && voltage<110){ width_max = 280;}
-    if(voltage==110)              { width_max = 320;}
-  }
- 
-  return width_max;
-}
-
-float Get_charge_min(int CD_number,int voltage){
-  float charge_min;
-
-  if(CD_number==188){ charge_min = 1.0*1E-6; }
-  if(CD_number==204){ charge_min = 0.2*1E-6; }
-  return charge_min;
-}
-
-float Get_base_err_max(int CD_number,int voltage){
-  float base_err_max;
-
-  if(CD_number==188){
-    if(voltage==95 || voltage==96 || voltage==102){
-     base_err_max = 0.011; }
-    if(voltage==99 || voltage>102){
-      base_err_max = 0.012; }
-    else{ base_err_max = 0.0125; }
-  }
-
-  if(CD_number==204){ base_err_max = 0.007; }
-  
-  return base_err_max;
-}
 

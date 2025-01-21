@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <sstream>
+#include <filesystem>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -29,6 +31,13 @@ int main(int argc, char* argv[]){
   
   std::string fileName = "CD"+ std::to_string(CD_number)
                        + "_" + std::to_string(voltage) + "V_treeraw.root";
+
+   std::stringstream stream;
+   stream << "rm -r plots/CD" << std::to_string(CD_number)
+	  << "/" << std::string(meas)
+	  << "/" << std::to_string(voltage)
+	  << "V/check" << std::endl;
+  system(stream.str().c_str());
 
   //preparazione lettura del tree
   TFile* file = TFile::Open(Form("data/root/CD%d/%s/%dV/%s",CD_number, meas, voltage, fileName.c_str())); 
@@ -59,16 +68,16 @@ int main(int argc, char* argv[]){
   for(unsigned iEntry=0; iEntry<nentries; iEntry++){
    
     //array in cui sommo deltay di punti a coppia, tipo (y1-y2)+(y1-y3)+(y1-y4)+...+(y1-y_nsum)
-    float delta[2499] = {0};
-    float dyn_delta[2499] = {0};
+    float delta[2502] = {0};
+    float dyn_delta[2502] = {0};
     
     
     tree->GetEntry(iEntry);
-     
+    
     //////////////////////////////////
     //if pe studiare la singola pshape
-    //if (ev==767 && lum==17){
-    
+    //if (ev==74 && lum==169){
+      
     TH1D* wave = new TH1D("wave", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* delta_histo = new TH1D("delta_histo", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* dyn_histo = new TH1D("dyn_histo", "", 2499,0.,2499*sampling*1.E+6);
@@ -76,9 +85,7 @@ int main(int argc, char* argv[]){
     //ciclo sulla pshape
     for(int i=0; i<2499; ++i ){
       wave->SetBinContent(i+1,pshape[i]);
-
      
-      
       //if(pshape[i]>(base+(4*base_err)) && pshape[i+70]<){check_up++;}
       //riempimento array delta
       //attenzione alle condizioni al contorno
@@ -98,7 +105,7 @@ int main(int argc, char* argv[]){
     int check = 0;
     int dyn_sum = 8;
     std::vector<int> index;
-    float smooth_shape[2500];
+    float smooth_shape[2502];
     DynamicMean(delta,dyn_delta,dyn_sum);
     DynamicMean(pshape,smooth_shape,10);
     
@@ -148,7 +155,7 @@ int main(int argc, char* argv[]){
      float base     = GetBaseline(pshape);
      float base_err = GetBaselineError(pshape, base);
       
-    int check_up = Check_Up(smooth_shape, dyn_delta, threshold, CD_number, meas, base, base_err);
+    int check_up = Check_Up(pshape, dyn_delta, threshold, CD_number, meas, base, base_err);
     if(check_up>0){check=1;}
    
    

@@ -98,12 +98,14 @@ int main(int argc, char* argv[] ) {
 	previous_s = trigtime_s;
 	previous_m = trigtime_m;
       }
+
+      check=0;
       
       //prendo le nuove lumi e trigtime_s
       treeraw->GetEntry(iEntry);
       tree   ->GetEntry(iEntry);
 
-      if(cosmic_rays==0 && electronics==0){ //pshape acettata
+      if(cosmic_rays==0 && electronics==0 && ctrl_double>0){ //pshape acettata
 
 	check=1; //aggiorno variabile di check
   	
@@ -114,14 +116,15 @@ int main(int argc, char* argv[] ) {
 	
 	if(previous_lumi!=lumi &&
 	   (trigtime_s!=previous_s ||
-	    trigtime_m!=previous_m) ){ //sono in file lumi diversi e deltaT validi
+	    trigtime_m!=previous_m )){
+	  //sono in file lumi diversi e deltaT validi e ho davvero evento
 	  //non ho ancora aggiornato i conteggi nCounts per non prendere quelli del file lumi dopo...
 	  
 	  //calcolo rate
 	  double delta_t = (trigtime_s - previous_s) + (trigtime_m - previous_m);
 	  double rate    = nCounts/delta_t;
 	  double rate_PU = nCounts_PU/delta_t;
-	  
+
 	  h1_rate->Fill(rate);
 	  h1_rate_PU->Fill(rate_PU);
 
@@ -199,6 +202,11 @@ int main(int argc, char* argv[] ) {
   if(CD_number==188){
     ymin    = -2   ; ymax    = 80 ;
     ymin_PU = -0.05; ymax_PU = 1.25;
+  }
+
+  if(CD_number==204){
+    ymin    = -2   ; ymax    = 290 ;
+    ymin_PU = -0.5; ymax_PU = 19.2;
   }
     
   TH2D *h2_axes_g = new TH2D( "axes_g", "", 10, xmin, xmax, 10, ymin, ymax);

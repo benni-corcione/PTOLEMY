@@ -12,7 +12,6 @@
 #include "TMath.h"
 #include "pshape_functions.h"
 
-void search_and_remove(const std::filesystem::path& directory, const std::filesystem::path& file_name);
 
 int main(int argc, char* argv[]){
 
@@ -84,7 +83,7 @@ int main(int argc, char* argv[]){
   tree_raw->SetBranchAddress("event"         , &event_raw    );
   tree_raw->SetBranchAddress("lumi"          , &lumi_raw     );
   tree_raw->SetBranchAddress("sampling_time" , &sampling_raw );
-  tree_raw->SetBranchAddress("pshape"        ,  pshape       );
+  tree_raw->SetBranchAddress("pshape"        , &pshape       );
 
   
   //creazione variabili del nuovo tree
@@ -153,28 +152,9 @@ int main(int argc, char* argv[]){
   std::cout << "tree entries: " << tree->GetEntries() << std::endl;
   std::cout << "tree saved in " << outfile_name << std::endl;
   outfile->Close();
-   
+  run.Close();
     
   return(0);
 }
 	       	       
   
-
-void search_and_remove(const std::filesystem::path& directory, const std::filesystem::path& file_name){
-     std::stringstream stream;  
-     auto d = std::filesystem::directory_iterator(directory);
-
-    auto found = std::find_if(d, end(d), [&file_name](const auto& dir_entry)
-    {
-        return dir_entry.path().filename() == file_name;
-    });
-
-    if (found != end(d))
-    {
-        //elimino tutti i tree singoli inutili
-      stream << "cd " << directory.c_str() << std::endl;
-      stream << "rm -f " << file_name.c_str() << std::endl;
-      system(stream.str().c_str());
-      
-    }
-}  

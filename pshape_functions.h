@@ -58,7 +58,7 @@ float GetAmp(float pshape[2502], float baseline){
 
 
 
-void DynamicMean(float delta[2499], float dyn_mean[2499], int j_max){
+void DynamicMean(float delta[2502], float dyn_mean[2502], int j_max){
   //preparazione array media dinamica
   //se qualcuno non si fida, provi l'algoritmo a parte
   //spiegarlo è un macello :')
@@ -91,7 +91,7 @@ void DynamicMean(float delta[2499], float dyn_mean[2499], int j_max){
     }
 }
 
-int Check_Double(float threshold, float dyn_delta[2499]){
+int Check_Double(float threshold, float dyn_delta[2502]){
   int check=0;
   
    //leggo vettore dei delta
@@ -131,7 +131,7 @@ int Check_Double(float threshold, float dyn_delta[2499]){
 }
 
 //check sui bump in positivo delle pshape
-int Check_Up(float pshape[2502], float dyn_delta[2499], float threshold, int CD_number, char* meas, float base, float base_err){
+int Check_Up(float pshape[2502], float dyn_delta[2502], float threshold, int CD_number, char* meas, float base, float base_err){
   int check_up   =  0;
   
   //std::cout << "soglia " << base-(4*base_err) << std::endl;
@@ -143,8 +143,8 @@ int Check_Up(float pshape[2502], float dyn_delta[2499], float threshold, int CD_
 	    && pshape[i]>(pshape[i+35]+(4*base_err))){
 	if(dyn_delta[i]>threshold && pshape[i]>(base-(4*base_err)))
 	{ check_up++;}
-	if(dyn_delta[i]>threshold && abs(pshape[i]-pshape[i-10])>3*base_err)
-	{ check_up++;}
+	if(dyn_delta[i]>threshold && abs(pshape[i]-pshape[i-10])>8*base_err)
+	  { check_up++;}
       }
     }
   }
@@ -200,10 +200,10 @@ Controls Ctrl_pshape(float pshape[2502], float amp, float trigger, float baselin
   int n_sum = 45;
   
   //array in cui sommo deltay di punti a coppia, tipo (y1-y2)+(y1-y3)+(y1-y4)+...+(y1-y_nsum)
-  float delta[2499] = {0};
-  float dyn_delta[2499] = {0};
+  float delta[2502] = {0};
+  float dyn_delta[2502] = {0};
   
-  float smooth_shape[2500] = {0};
+  float smooth_shape[2502] = {0};
   DynamicMean(pshape,smooth_shape,10);
   //leggo tutta la pshape
   for(int i=0; i<2499; i++){ //leggo la pshape i+1
@@ -276,6 +276,102 @@ Controls Ctrl_pshape(float pshape[2502], float amp, float trigger, float baselin
   ctrl.set_ctrl_trigger(ctrl_trigger);
  
   return(ctrl);
+}
+
+
+void search_and_remove(const std::filesystem::path& directory, const std::filesystem::path& file_name){
+     std::stringstream stream;  
+     auto d = std::filesystem::directory_iterator(directory);
+
+    auto found = std::find_if(d, end(d), [&file_name](const auto& dir_entry)
+    {
+        return dir_entry.path().filename() == file_name;
+    });
+
+    if (found != end(d))
+    {
+        //elimino tutti i tree singoli inutili
+      stream << "cd " << directory.c_str() << std::endl;
+      stream << "rm -f " << file_name.c_str() << std::endl;
+      system(stream.str().c_str());
+      
+    }
+}  
+
+
+float Get_width_min(int CD_number,int voltage, char* meas){
+  float width_min;
+
+  if(CD_number==188){
+    if(voltage>94  && voltage<102){ width_min = 80; }
+    if(voltage>101 && voltage<105){ width_min = 100;}
+    if(voltage==105)              { width_min = 120;}
+  }
+
+  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ width_min = 60; }
+
+  if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ width_min = 40; }
+  
+  return width_min;
+}
+
+float Get_width_max(int CD_number,int voltage, char* meas){
+  float width_max;
+
+ if(CD_number==188){
+    if(voltage>94   && voltage<98 ){ width_max = 200;}
+    if(voltage==98 || voltage==100){ width_max = 210;}
+    if(voltage==99 || voltage==101){ width_max = 220;}
+    if(voltage==102|| voltage==103){ width_max = 240;}
+    if(voltage==104)               { width_max = 250;}
+    if(voltage==105)               { width_max = 320;}
+ }
+
+ if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){
+    if(voltage==96)               { width_max = 300;}
+    if(voltage==97)               { width_max = 250;}
+    if(voltage>97  && voltage<101){ width_max = 260;}
+    if(voltage==104)              { width_max = 260;}
+    if(voltage>100 && voltage<104){ width_max = 270;}
+    if(voltage==105)              { width_max = 270;}
+    if(voltage>105 && voltage<110){ width_max = 280;}
+    if(voltage==110)              { width_max = 320;}
+  }
+
+ 
+ if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){
+    if(voltage==97)                 { width_max = 340;}
+    if(voltage==99  || voltage==101){ width_max = 280;}
+    if(voltage==103 || voltage==106){ width_max = 290;}
+ }
+ 
+  return width_max;
+}
+
+float Get_charge_min(int CD_number,int voltage, char* meas){
+  float charge_min;
+
+  if(CD_number==188){ charge_min = 1.0*1E-6; }
+  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ charge_min = 0.2*1E-6; }
+  if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ charge_min = 0; }
+  return charge_min;
+}
+
+float Get_base_err_max(int CD_number,int voltage, char* meas){
+  float base_err_max;
+
+  if(CD_number==188){
+    if(voltage==95 || voltage==96 || voltage==102){
+     base_err_max = 0.011; }
+    if(voltage==99 || voltage>102){
+      base_err_max = 0.012; }
+    else{ base_err_max = 0.0125; }
+  }
+
+  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ base_err_max = 0.007; }
+  if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ base_err_max = 0.007; }
+  
+  return base_err_max;
 }
 
 
