@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
      
     //////////////////////////////////
     //if pe studiare la singola pshape
-     if (ev==31 && lum==21){
+    //if (ev==767 && lum==17){
     
     TH1D* wave = new TH1D("wave", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* delta_histo = new TH1D("delta_histo", "", 2499,0.,2499*sampling*1.E+6);
@@ -98,8 +98,10 @@ int main(int argc, char* argv[]){
     int check = 0;
     int dyn_sum = 8;
     std::vector<int> index;
+    float smooth_shape[2500];
     DynamicMean(delta,dyn_delta,dyn_sum);
-
+    DynamicMean(pshape,smooth_shape,10);
+    
     //per disegnare la media dinamica della delta
     for(int i=0; i<2499; ++i ){
       dyn_histo->SetBinContent(i+1,dyn_delta[i]);
@@ -143,15 +145,17 @@ int main(int argc, char* argv[]){
       }
     }//ho finito di leggere il vettore delta
 
-    int check_up = Check_Up(pshape, dyn_delta, threshold, CD_number);
-    if(check_up>0){check=0;}
-    
+     float base     = GetBaseline(pshape);
+     float base_err = GetBaselineError(pshape, base);
+      
+    int check_up = Check_Up(smooth_shape, dyn_delta, threshold, CD_number, meas, base, base_err);
+    if(check_up>0){check=1;}
+   
+   
     //ho incontrato una doppia almeno
-    if(check > 0 ){
-      //std::cout << (base+(5*base_err)) << std::endl;
-      float base     = GetBaseline(pshape);
-      float base_err = GetBaselineError(pshape, base);
-      std::cout << "baseline error: " << base_err << std::endl;
+    if(check > 1 ){
+     
+      
       conteggio++;
       gStyle->SetOptStat(0);
       wave->SetLineColor(kBlack);
@@ -207,11 +211,11 @@ int main(int argc, char* argv[]){
 
     ////////////////////
     //termine dell'if per singola pshape
-    }
+    //}
     
   } //prossima entry del tree
 
-  std::cout << "numero di eventi: " << conteggio << std::endl;
+  //std::cout << "numero di eventi: " << conteggio << std::endl;
   file->Close();
   delete(c1);
   //ho finito di leggere tutte le pshape

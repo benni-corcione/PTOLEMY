@@ -103,7 +103,7 @@ int main(int argc, char* argv[]){
    if( (ctrl_width<width_min && charge<charge_min) ||     //condizione 1
 	((baseline_error>base_err_max) &&                  //condizione 2 
 	 (ctrl_width<width_min && ctrl_width>width_max) && 
-	 (ctrl_width>3))){
+	 (ctrl_double>3))){
      electronics = 1; }
 
 
@@ -146,19 +146,23 @@ float Get_width_max(int CD_number,int voltage){
   float width_max;
 
  if(CD_number==188){
-    if(voltage>94  && voltage<98 ){ width_max = 200;}
-    if(voltage>97  && voltage<102){ width_max = 210;}
-    if(voltage==102)              { width_max = 220;}
-    if(voltage==103)              { width_max = 230;}
-    if(voltage==104)              { width_max = 250;}
-    if(voltage==105)              { width_max = 300;}
+    if(voltage>94   && voltage<98 ){ width_max = 200;}
+    if(voltage==98 || voltage==100){ width_max = 210;}
+    if(voltage==99 || voltage==101){ width_max = 220;}
+    if(voltage==102|| voltage==103){ width_max = 240;}
+    if(voltage==104)               { width_max = 250;}
+    if(voltage==105)               { width_max = 320;}
  }
 
  if(CD_number==204){
-    if(voltage>95  && voltage<100){ width_max = 250; }
-    if(voltage>99  && voltage<109){ width_max = 260;}
-    if(voltage==109)              { width_max = 270;}
-    if(voltage==110)              { width_max = 280;}
+    if(voltage==96)               { width_max = 300;}
+    if(voltage==97)               { width_max = 250;}
+    if(voltage>97  && voltage<101){ width_max = 260;}
+    if(voltage==104)              { width_max = 260;}
+    if(voltage>100 && voltage<104){ width_max = 270;}
+    if(voltage==105)              { width_max = 270;}
+    if(voltage>105 && voltage<110){ width_max = 280;}
+    if(voltage==110)              { width_max = 320;}
   }
  
   return width_max;
@@ -168,7 +172,7 @@ float Get_charge_min(int CD_number,int voltage){
   float charge_min;
 
   if(CD_number==188){ charge_min = 1.0*1E-6; }
-  if(CD_number==204){ charge_min = 0.2*1E+6; }
+  if(CD_number==204){ charge_min = 0.2*1E-6; }
   return charge_min;
 }
 

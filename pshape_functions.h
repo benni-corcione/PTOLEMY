@@ -1,7 +1,7 @@
 //libreria di funzioni che ricavano info leggendo le pshapes
 
 //BASELINE
-float GetBaseline(float pshape[2500]){
+float GetBaseline(float pshape[2502]){
   float baseline = 0;
   int   i_min    = 0;
   int   i_max    = 450; 		     
@@ -15,7 +15,7 @@ float GetBaseline(float pshape[2500]){
 
 
 //STD_DEV BASELINE
-float GetBaselineError(float pshape[2500], float baseline){
+float GetBaselineError(float pshape[2502], float baseline){
   float baseline_error = 0;
   int   i_min          = 0;
   int   i_max          = 450;	
@@ -29,7 +29,7 @@ float GetBaselineError(float pshape[2500], float baseline){
 
 
 //CHARGE
-float GetCharge(float pshape[2500], float dt, float baseline){
+float GetCharge(float pshape[2502], float dt, float baseline){
   float charge = 0;
   
   for(int i=0; i<2500; i++){
@@ -42,7 +42,7 @@ float GetCharge(float pshape[2500], float dt, float baseline){
 
 
 //AMPLITUDE
-float GetAmp(float pshape[2500], float baseline){
+float GetAmp(float pshape[2502], float baseline){
   float amp = 0;
   float min = 100;
   
@@ -131,28 +131,29 @@ int Check_Double(float threshold, float dyn_delta[2499]){
 }
 
 //check sui bump in positivo delle pshape
-int Check_Up(float pshape[2500], float dyn_delta[2499], float threshold, int CD_number){
+int Check_Up(float pshape[2502], float dyn_delta[2499], float threshold, int CD_number, char* meas, float base, float base_err){
   int check_up   =  0;
-  float base     = GetBaseline(pshape);
-  float base_err = GetBaselineError(pshape, base);
-
+  
+  //std::cout << "soglia " << base-(4*base_err) << std::endl;
   for(int i=0; i<2499; i++){
-
-    //controllo su bumpetti
-    if(i>25 && i<2474){
-      if(   pshape[i]>(pshape[i-25]+(4*base_err))
-	 && pshape[i]>(pshape[i+25]+(4*base_err))
-	 && pshape[i]>(base-4*base_err))         {
-	if(dyn_delta[i]>threshold){check_up++;}
+   
+     //controllo su bumpetti
+    if(i>35 && i<2464){
+      if(   pshape[i]>(pshape[i-35]+(4*base_err))
+	    && pshape[i]>(pshape[i+35]+(4*base_err))){
+	if(dyn_delta[i]>threshold && pshape[i]>(base-(4*base_err)))
+	{ check_up++;}
+	if(dyn_delta[i]>threshold && abs(pshape[i]-pshape[i-10])>3*base_err)
+	{ check_up++;}
       }
     }
-
-    //controllo su errore baseline
-    //scarto dalle doppie le doppie che non hanno triggerato eh
-    if(CD_number==204 && base_err>0.006){check_up++;}
   }
-
+  //controllo su errore baseline
+  //scarto dalle doppie le doppie che non hanno triggerato eh
+  if(CD_number==204 && base_err>0.006){check_up++;}
+  
   return check_up;
+
 }
 
 //CLASS OF CONTROLS OVER PSHAPE
@@ -181,7 +182,7 @@ class Controls{
 
 
 //CONTROL OVER PSHAPE 
-Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baseline, int CD_number){
+Controls Ctrl_pshape(float pshape[2502], float amp, float trigger, float baseline, float base_error, int CD_number, char* meas){
   Controls ctrl;
   int ctrl_trigger = 0;
   int ctrl_width   = 0;
@@ -265,9 +266,9 @@ Controls Ctrl_pshape(float pshape[2500], float amp, float trigger, float baselin
   DynamicMean(delta,dyn_delta,dyn_sum);
 
   int ctrl_double = Check_Double(thresh_double, dyn_delta);
-  int check_up = Check_Up(pshape, dyn_delta, thresh_double, CD_number);
+  int check_up = Check_Up(pshape, dyn_delta, thresh_double, CD_number, meas, baseline, base_error);
 
-  if(check_up>0){ctrl_double=0;}
+  if(check_up>0){ctrl_double=1;}
   
   //std::cout << ctrl_width << " "  << std::endl;
   ctrl.set_ctrl_double(ctrl_double);

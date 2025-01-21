@@ -137,7 +137,7 @@ int main(int argc, char* argv[]){
     charge          = GetCharge(pshape, sampling_raw, baseline);
     amp             = GetAmp(pshape, baseline);
      
-    ctrl         = Ctrl_pshape(pshape, amp, trigger, baseline);
+    ctrl         = Ctrl_pshape(pshape, amp, trigger, baseline, baseline_error, CD_number,meas);
     ctrl_double  = ctrl.get_ctrl_double();
     ctrl_trigger = ctrl.get_ctrl_trigger();
     ctrl_width   = ctrl.get_ctrl_width();
