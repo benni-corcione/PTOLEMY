@@ -13,33 +13,35 @@ std::vector<std::string> get_filenames( std::filesystem::path path );
 int main(int argc, char* argv[]){
   
   //parametri da input
-  if( argc!= 3 ) {
-    std::cout << "USAGE: ./ReadData [folder_name] [output_name]" << std::endl;
-    std::cout << "EXAMPLE: ./ReadData [rimbalzi] [rimbalzi0]" << std::endl;
+  if( argc!= 6 ) {
+    std::cout << "USAGE: ./ReadData [folder_name] [output_name] [cnt_radius] [voltage] [distance]" << std::endl;
+    std::cout << "cnt_radius in mm, voltage in V, distance in um" << std::endl;
+    std::cout << "EXAMPLE: ./ReadData rimbalzi test 0.5 -100 1000" << std::endl;
     exit(1);
   }
 
-  char* folder = argv[1]; 
-  char* name   = argv[2];
+  char* folder     =      argv[1] ; 
+  char* subfolder  =      argv[2] ;
+  float cnt_radius = atof(argv[3]);
+  float distance   = atof(argv[5]);
+  int voltage      = atoi(argv[4]);
   
-  std::string path = "data/" + std::string(folder);
-  
+  std::string path = "data/" + std::string(folder) + "/" + std::string(subfolder);
+  //std::cout << path << std::endl;
   std::vector<std::string> filenames = get_filenames(path);
 
   std::stringstream stream;
 
   std::string save_fold(Form("root/%s",folder));
+  std::string save_subfold(Form("root/%s/%s",folder,subfolder));
   system( Form("mkdir -p %s", save_fold.c_str()) );
+  system( Form("mkdir -p %s", save_subfold.c_str()));
   
   stream << "cd " << path << std::endl;
   stream << "rm -f .DS_*" << std::endl;
   system(stream.str().c_str());
   
   for(int i=0; i<filenames.size(); i++){  
-
-    std::string output_name = path + "/" + std::string(name) + "-" + std::to_string(i+1) + ".txt";
-    
-    if(filenames[i]==std::string(output_name)){
 
       //lettura del file di dati
       std::ifstream input_file;
@@ -63,12 +65,15 @@ int main(int argc, char* argv[]){
       int event;
       int sim_number = i+1;
      
-      std::string outfile_name = Form("%s_sim%d.root",name,i+1);
-      TFile* outfile = TFile::Open(Form("root/%s/%s",folder,outfile_name.c_str()),"recreate");
+      std::string outfile_name = Form("%s_sim%d.root",subfolder,i+1);
+      TFile* outfile = TFile::Open(Form("root/%s/%s/%s",folder,subfolder,outfile_name.c_str()),"recreate");
       TTree* tree = new TTree("tree","tree");
 
       tree->Branch("event", &event, "event/I");
       tree->Branch("sim_number", &sim_number, "sim_number/I");
+      tree->Branch("cnt_radius", &cnt_radius, "cnt_radius/F");
+      tree->Branch("distance", &distance, "distance/F");
+      tree->Branch("voltage", &voltage, "voltage/I");
       tree->Branch("x_i", &x_i, "x_i/F");
       tree->Branch("y_i", &y_i, "y_i/F");
       tree->Branch("z_i", &z_i, "z_i/F");
@@ -126,7 +131,7 @@ int main(int argc, char* argv[]){
     outfile->Close();
 
     input_file.close();
-    }//if sul file di simulazione
+   
   }//for sul file di simulazione
   
   return 0;
