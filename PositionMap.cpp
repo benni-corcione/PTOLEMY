@@ -1,5 +1,10 @@
 #include "TTree.h"
 #include "TFile.h"
+#include "TCanvas.h"
+#include "TH2D.h"
+#include "TStyle.h"
+#include "TLine.h"
+#include "TColor.h"
 
 #include <fstream>
 #include <string>
@@ -9,8 +14,6 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>
-
-void FillVectors(int x_max, int y_max, int n_events, float x_f[n_events], float y_f[n_events], int N, float x[N], float y[N], int counts[N]);
 
 int main(int argc, char* argv[]){
   
@@ -32,92 +35,70 @@ int main(int argc, char* argv[]){
   
   //preparazione per la lettura del tree_raw
   int   event;
-  float pos_x;
-  float pos_y;
-  float pos_z;
-  float pos_x_array[nentries];
-  float pos_y_array[nentries];
-  float pos_z_array[nentries];
+  float pos_x, pos_y, pos_z;
+  float cnt_radius, distance;
+  int   voltage;
 
   tree->SetBranchAddress("event", &event);
   tree->SetBranchAddress("x_f"  , &pos_x);
   tree->SetBranchAddress("y_f"  , &pos_y);
   tree->SetBranchAddress("z_f"  , &pos_z);
-
-  //step di 10um
-  int x_max=500;
-  int y_max=500;
-
-  float fractPart, intPart;
+  tree->SetBranchAddress("cnt_radius", &cnt_radius);
+  tree->SetBranchAddress("distance", &distance);
+  tree->SetBranchAddress("voltage", &voltage);
+ 
+  TCanvas* c1 = new TCanvas("c1","",1000,1000);
+  c1->cd();
+  
+  int z_max = 3000; //um
+  int y_max = 3000; //um
+  int unit = 10; //1step in 10 um
+  int tes_side = 60; // um
+  int pixel_side = 30;
+  int nbins = z_max/pixel_side;
+  
+  TH2F *map = new TH2F("map","",nbins,-y_max,y_max,nbins,-z_max,z_max);
+  TLine* line1 =new TLine(-tes_side, -tes_side, -tes_side,  tes_side);
+  TLine* line2 =new TLine(-tes_side,  tes_side,  tes_side,  tes_side);
+  TLine* line3 =new TLine( tes_side,  tes_side,  tes_side, -tes_side);
+  TLine* line4 =new TLine( tes_side, -tes_side, -tes_side, -tes_side);
+  line1->SetLineWidth(2); line1->SetLineColor(kRed);
+  line2->SetLineWidth(2); line2->SetLineColor(kRed);
+  line3->SetLineWidth(2); line3->SetLineColor(kRed);
+  line4->SetLineWidth(2); line4->SetLineColor(kRed);
   
   for(int iEntry=0; iEntry<nentries; iEntry++){
     tree->GetEntry(iEntry);
+    //quantità in micron
+    pos_x*=unit;  pos_y*=unit;  pos_z*=unit;
     
-    //quantizzazione risultati
-    fractPart = modf(pos_y, &intPart);
-    if(fractPart>0.49){pos_y=intPart+1;}
-    if(fractPart<0.50){pos_y=intPart  ;}
-    fractPart = modf(pos_z, &intPart);
-    if(fractPart>0.49){pos_z=intPart+1;}
-    if(fractPart<0.50){pos_z=intPart  ;}
-
-    pos_x_array[iEntry]=pos_x;
-    pos_y_array[iEntry]=pos_y;
-    pos_z_array[iEntry]=pos_z;
+    if(pos_x==200){
+      map->Fill(pos_y,pos_z);}
   }//for sulle entries
+   
+  gStyle->SetPalette(kBird);
+  TColor::InvertPalette();
+   
+  gStyle->SetOptStat(0);
 
- 
-  int N = x_max*y_max;
-  float z[N], y[N];
-  int counts[N];
-
-  /*
-  for(int n=0; n<10; n++){
-  std::cout << pos_y_array[n] << " " << pos_z_array[n] << " " << std::endl;
-  }
-  */
-  FillVectors(x_max,y_max,nentries,pos_y_array,pos_z_array,N,y,z,counts);
-  //Print(N,x,y,pos_z,counts);
-  run.Close();
-
+  map->GetXaxis()->SetTitle("y axis (um)");
+  map->GetYaxis()->SetTitle("z axis (um)");
+  map->SetTitle("Arrival point of electrons");
+  map->Draw("COLZ");
+  c1->SetLeftMargin(0.15);
+  c1->SetRightMargin(0.12);
+  c1->SetBottomMargin(0.12);
+  line1->Draw("same");
+  line2->Draw("same");
+  line3->Draw("same");
+  line4->Draw("same");
   
-  //scrittura su file per python
-  std::string filename = "data/" + std::string(folder)
-    + "/" + std::string(subfolder)
-    + "/" + std::string(subfolder)
-    + "_py.txt";
-  std::ofstream ofs(filename);
+  c1->SaveAs(Form("plots/%s/%s/%s_sim%d_map.png",folder,subfolder,subfolder,number));
 
-  //prime righe del file
-  //ofs << "CNT voltage: " << cnt_voltage      << std::endl;
-  for(int n=0; n<N; n++){
-  ofs << y[n] << " " << z[n] << " " << counts[n] << std::endl;
-  }
-  ofs.close();
-
-  std::cout << "output saved in " << filename << std::endl;
+  delete(c1);
+  delete(map);
+  run.Close();
   return(0);
 }
 
-void FillVectors(int x_max, int y_max, int n_events, float x_f[n_events], float y_f[n_events], int N, float x[N], float y[N], int counts[N]){
-  
-  int index=0;
-  
-  for(int i=0; i<x_max; i++){
-    for(int j=0; j<y_max; j++){
-      x[index]=(i+1)-(x_max/2); y[index]=(j+1)-(x_max/2);
-      index++;
-    }
-  }
-
-  for(int n=0; n<N; n++){
-    counts[n]=0;
-    for(int m=0; m<n_events; m++){
-      if(x_f[m]==x[n] && y_f[m]==y[n]){
-	counts[n]++;
-      }
-    }
-  }
-	
-}
 
