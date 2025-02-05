@@ -28,6 +28,11 @@ int main(int argc, char* argv[]){
   char* subfolder =      argv[2];
   int   number    = atoi(argv[3]);   
 
+  std::string save_fold(Form("plots/%s",folder));
+  std::string save_subfold(Form("plots/%s/%s",folder,subfolder));
+  system( Form("mkdir -p %s", save_fold.c_str()) );
+  system( Form("mkdir -p %s", save_subfold.c_str()));
+  
   //apertura file con il tree
   TFile run(Form("root/%s/%s/%s_sim%d.root",folder,subfolder,subfolder, number));
   TTree *tree = (TTree*)run.Get(Form("tree"));
@@ -72,8 +77,9 @@ int main(int argc, char* argv[]){
     //quantità in micron
     pos_x*=unit;  pos_y*=unit;  pos_z*=unit;
     
-    if(pos_x==200){
-      map->Fill(pos_y,pos_z);}
+    //if(pos_x==1690){
+      map->Fill(pos_y,pos_z);
+      //}
   }//for sulle entries
    
   gStyle->SetPalette(kBird);
