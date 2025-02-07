@@ -48,75 +48,69 @@ int main(int argc, char* argv[]){
     for(int s=0; s<sim.size(); s++){
       for(int r=0; r<cnt_radius.size(); r++){
 	for(int v=0; v<volts.size(); v++){
-	    for(int e=0; e<energy.size(); e++){
+	  for(int e=0; e<energy.size(); e++){
+	    
+	    //rimb_d600um_cnt15um_V30_E10-1
+	    std::string name = std::string(prefix)+ "_d"
+	      + std::to_string(distance[d]) + "um_cnt"
+	      + std::to_string(cnt_radius[r]) + "um_V"
+	      + std::to_string(volts[v]) + "_E"
+	      + std::to_string(energy[e]) + "-"
+	      + std::to_string(sim[s]);
+	    
+	    //apertura file con il tree
+	    TFile run(Form("root/%s/%s/%s.root",folder,subfolder,name.c_str()));
+	    if (!run.IsOpen()) {;}
+	    else{
 	      
-	      //rimb_d600um_cnt15um_V30_E10-1
-	      std::string name = std::string(prefix)+ "_d"
-		               + std::to_string(distance[d]) + "um_cnt"
-	                       + std::to_string(cnt_radius[r]) + "um_V"
-	 	               + std::to_string(volts[v]) + "_E"
-		               + std::to_string(energy[e]) + "-"
-		               + std::to_string(sim[s]);
-
-	      //apertura file con il tree
-	      TFile run(Form("root/%s/%s/%s.root",folder,subfolder,name.c_str()));
-	      if (!run.IsOpen()) {;}
-	      else{
+	      TTree *tree = (TTree*)run.Get(Form("tree"));
+	      Long64_t nentries = tree->GetEntries();
+	      float x_pos, y_pos, z_pos;
+	      
+	      tree->SetBranchAddress("x_f", &x_pos);
+	      tree->SetBranchAddress("y_f", &y_pos);
+	      tree->SetBranchAddress("z_f", &z_pos);
+	      
+	      TH1F* hits = new TH1F("hits","",20,-5,dist_max);
+	      
+	      for(int iEntry=0; iEntry<nentries; iEntry++){
+		tree->GetEntry(iEntry);
+		x_pos *= unit;
+		y_pos *= unit;
+		z_pos *= unit;
 		
-		TTree *tree = (TTree*)run.Get(Form("tree"));
-		Long64_t nentries = tree->GetEntries();
-		float x_pos, y_pos, z_pos;
-		
-		tree->SetBranchAddress("x_f", &x_pos);
-		tree->SetBranchAddress("y_f", &y_pos);
-		tree->SetBranchAddress("z_f", &z_pos);
-		
-		TH1F* hits = new TH1F("hits","",20,-5,dist_max);
-		
-		for(int iEntry=0; iEntry<nentries; iEntry++){
-		  tree->GetEntry(iEntry);
-		  x_pos *= unit;
-		  y_pos *= unit;
-		  z_pos *= unit;
-
-		  //canestro
-		  if(x_pos == x_tes &&
-		     y_pos<tes_side && y_pos>-tes_side &&
-		     z_pos<tes_side && z_pos>-tes_side){
-
-		    //calcolo distanza
-		    float distance = sqrt(y_pos*y_pos+z_pos*z_pos);
-		    hits->Fill(distance);
-		  } //canestro
-		}//for sul tree
-		
-		gStyle->SetOptStat(0);
-		hits->SetLineWidth(3);
-		hits->SetLineColor(kAzure+7);
-		hits->GetYaxis()->SetTitle("Strikes");
-		hits->GetXaxis()->SetTitle("Distance from TES [um]");
-		hits->SetTitle("Strikes vs distance");
-		hits->Draw();
-		
-		std::string outdir( Form("plots/%s/%s",folder,subfolder));
-		system( Form("mkdir -p %s", outdir.c_str()) );
-		//-p crea anche le parent se prima non esistono
-		
-		//c1->SaveAs(Form("%s/%s_hitsdist.png",outdir.c_str(),name.c_str()));
-		c1->Clear();
-		delete(hits);
-
-		//fare grafico numero di canestri vs altre quantità
-		
-	      } //else sull'esistenza del file
-	    }//for energia
+		//canestro
+		if(x_pos == x_tes &&
+		   y_pos<tes_side*0.5 && y_pos>-tes_side*0.5 &&
+		   z_pos<tes_side*0.5 && z_pos>-tes_side*0.5){
+		  
+		  //calcolo distanza
+		  float distance = sqrt(y_pos*y_pos+z_pos*z_pos);
+		  hits->Fill(distance);
+		} //canestro
+	      }//for sul tree
+	      
+	      gStyle->SetOptStat(0);
+	      hits->SetLineWidth(3);
+	      hits->SetLineColor(kAzure+7);
+	      hits->GetYaxis()->SetTitle("Strikes");
+	      hits->GetXaxis()->SetTitle("Distance from TES [um]");
+	      hits->SetTitle("Strikes vs distance");
+	      hits->Draw();
+	      
+	      std::string outdir( Form("plots/%s/%s",folder,subfolder));
+	      system( Form("mkdir -p %s", outdir.c_str()) );
+	      //-p crea anche le parent se prima non esistono
+	      
+	      c1->SaveAs(Form("%s/histo_hitstrike/%s_hitsdist.png",outdir.c_str(),name.c_str()));
+	      c1->Clear();
+	      delete(hits);
+	      
+	      //fare grafico numero di canestri vs altre quantità
+	      
+	    } //else sull'esistenza del file
+	  }//for energia
 	}//for voltaggio					
-
-
-
-
-
-
       }//for cnts_radius
     }//for sim
   }//for distanze
