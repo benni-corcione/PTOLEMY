@@ -4,7 +4,9 @@
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TStyle.h"
+#include "TPad.h"
 #include "TLegend.h"
+#include "TH2F.h"
 
 #include <fstream>
 #include <string>
@@ -32,13 +34,22 @@ int main(int argc, char* argv[]){
   TLegend *legend = new TLegend(0.75,0.84,0.9,0.89);
   legend->SetBorderSize(0);
   
-  TCanvas* c1 = new TCanvas("c","",1000,1000);
+  TCanvas* c1 = new TCanvas("c","",1500,1500);
   c1->cd();
-  c1->SetLeftMargin(0.15);
+  
   //apertura file con il tree
   TFile run(Form("root/%s/%s/%s.root",folder,subfolder,name));
   TTree *tree = (TTree*)run.Get(Form("tree"));
   Long64_t nentries = tree->GetEntries();
+
+  //angoli
+  TH2F *mapi = new TH2F("map","",38,-190,+190,20,-100,100);
+  TH2F *mapf = new TH2F("map","",38,-190,+190,20,-100,100);
+
+  TPad *pad1 = new TPad("pad1","up pad",0,0.51,1,1);
+  pad1->Draw();
+  TPad *pad2 = new TPad("pad2","down pad",0,0,1,0.52);
+  pad2->Draw();
   
   //preparazione per la lettura del tree_raw
   float theta1_i, theta2_i;
@@ -59,8 +70,11 @@ int main(int argc, char* argv[]){
     theta2_hist->Fill(theta2_i);
     theta1f_hist->Fill(theta1_f);
     theta2f_hist->Fill(theta2_f);
+    mapi->Fill(theta1_i,theta2_i);
+    mapf->Fill(theta1_f,theta2_f);
   }
 
+  /*
   gStyle->SetOptStat(0);
   theta1_hist->SetLineWidth(3);
   theta2_hist->SetLineWidth(3);
@@ -102,9 +116,33 @@ int main(int argc, char* argv[]){
   theta1f_hist->Draw("same");
   legend->Draw("same");
   c1->SaveAs(Form("%s/%s_theta_check_f.png",outdir.c_str(),name));
+  c1->Clear();
+  */
+  std::string outdir( Form("plots/%s/%s",folder,subfolder));
+  system( Form("mkdir -p %s", outdir.c_str()) );
+  //-p crea anche le parent se prima non esistono
 
+  gStyle->SetOptStat(0);
+  c1->SetRightMargin(0.18);
+  c1->SetLeftMargin(0.18);
+
+  gStyle->SetPalette(kBird);
+  pad1->cd();
+  mapi->Draw("axis");
+  mapi->GetXaxis()->SetTitle("althazimutale");
+  mapi->GetYaxis()->SetTitle("elevazione");
+  mapi->Draw("COLZsame");
+  pad2->cd();
+  mapf->Draw("axis");
+  mapf->GetXaxis()->SetTitle("althazimutale");
+  mapf->GetYaxis()->SetTitle("elevazione");
+  mapf->Draw("COLZsame");
+  c1->SaveAs(Form("%s/%s_theta_check_map.png",outdir.c_str(),name));
+  
   delete(c1);
   delete(theta1_hist);
   delete(theta2_hist);
+  delete(mapi);
+  delete(mapf);
   return(0);
 }
