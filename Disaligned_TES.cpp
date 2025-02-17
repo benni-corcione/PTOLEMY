@@ -25,7 +25,7 @@
 void DrawPad(TH2F* map,int range, int tes_side, int cnt_radius, int segmento);
 int GetDepartureRange(int cnt_radius);
 int GetArrivalRange(int cnt_radius);
-void bubbleSort(std::vector<double>& v_e, std::vector<int>& cnts, std::vector<double>& hits);
+void bubbleSort(std::vector<double>& v_e, std::vector<int>& cnts, std::vector<double>& hits, std::vector<int>& sub_vec);
 std::vector<int> GetColors(void);
 
 int main(int argc, char* argv[]){
@@ -55,9 +55,11 @@ int main(int argc, char* argv[]){
   std::vector<int> energy     = GetEnergy   (folder,subfolder);
   std::vector<int> cnt_radius = GetCNTs     (folder,subfolder);
   std::vector<int> distance   = Getdistance (folder,subfolder);
+  std::vector<int> substrate  = GetSubstrate(folder,subfolder);
 
   //quantità per futuri grafici comparativi
   std::vector<int> cnt_vec;
+  std::vector<int> sub_vec;
   std::vector<double> canestro;
   std::vector<double> VsuE_vec;
 
@@ -84,142 +86,148 @@ int main(int argc, char* argv[]){
   
   for(int d=0; d<distance.size(); d++){
     for(int s=0; s<sim.size(); s++){
-      for(int r=0; r<cnt_radius.size(); r++){
-	for(int v=0; v<volts.size(); v++){
-	  for(int e=0; e<energy.size(); e++){
-	    if(volts[v]>=energy[e]){
-	      int hits = 0;
-	      int range = 600; //GetDepartureRange(cnt_radius[r]);
-	      
-	      
-	      //rimb_d600um_cnt15um_V30_E10-1
-	      std::string name = std::string(prefix)+ "_d"
-		+ std::to_string(distance[d]) + "um_cnt"
-		+ std::to_string(cnt_radius[r]) + "um_V"
-		+ std::to_string(volts[v]) + "_E"
-		+ std::to_string(energy[e]) + "-"
-		+ std::to_string(sim[s]);
-	      
-	      //apertura file con il tree
-	      TFile run(Form("root/%s/%s/%s.root",folder,subfolder,name.c_str()));
-	      if (!run.IsOpen()) {;}
-	      else{
+      for(int b=0; b<substrate.size(); b++){
+	for(int r=0; r<cnt_radius.size(); r++){
+	  for(int v=0; v<volts.size(); v++){
+	    for(int e=0; e<energy.size(); e++){
+	      if(volts[v]>=energy[e]){
+		int hits = 0;
+		int range = 600; //GetDepartureRange(cnt_radius[r]);
 		
-	
 		
-		TTree *tree = (TTree*)run.Get(Form("tree"));
-		Long64_t nentries = tree->GetEntries();
-		tree->SetBranchAddress("x_f", &pos_x);
-		tree->SetBranchAddress("y_f", &pos_y);
-		tree->SetBranchAddress("z_f", &pos_z);
-		tree->SetBranchAddress("x_i", &pos_xi);
-		tree->SetBranchAddress("y_i", &pos_yi);
-		tree->SetBranchAddress("z_i", &pos_zi);
+		//rimb_d600um_cnt15um_sub1000um_V30_E10-1
+		std::string name = std::string(prefix)+ "_d"
+		  + std::to_string(distance[d]) + "um_cnt"
+		  + std::to_string(cnt_radius[r]) + "um_sub"
+		  + std::to_string(substrate[b]) + "um_V"
+		  + std::to_string(volts[v]) + "_E"
+		  + std::to_string(energy[e]) + "-"
+		  + std::to_string(sim[s]);
+		
+		//apertura file con il tree
+		TFile run(Form("root/%s/%s/%s.root",folder,subfolder,name.c_str()));
+		if (!run.IsOpen()) {;}
+		else{
+		  
+		  TTree *tree = (TTree*)run.Get(Form("tree"));
+		  Long64_t nentries = tree->GetEntries();
+		  tree->SetBranchAddress("x_f", &pos_x);
+		  tree->SetBranchAddress("y_f", &pos_y);
+		  tree->SetBranchAddress("z_f", &pos_z);
+		  tree->SetBranchAddress("x_i", &pos_xi);
+		  tree->SetBranchAddress("y_i", &pos_yi);
+		  tree->SetBranchAddress("z_i", &pos_zi);
 		
 		//mappa partenze canestri
-		TH2F *map = new TH2F("map","",nbins,-y_max,y_max,nbins,-z_max,z_max);
-		
-		for(int iEntry=0; iEntry<nentries; iEntry++){
-		  tree->GetEntry(iEntry);
+		  TH2F *map = new TH2F("map","",nbins,-y_max,y_max,nbins,-z_max,z_max);
 		  
-		  //quantità in micron
-		  pos_x*=unit ;  pos_y*=unit ;  pos_z*=unit;
-		  pos_xi*=unit;  pos_yi*=unit;  pos_zi*=unit;
+		  for(int iEntry=0; iEntry<nentries; iEntry++){
+		    tree->GetEntry(iEntry);
+		    
+		    //quantità in micron
+		    pos_x*=unit ;  pos_y*=unit ;  pos_z*=unit;
+		    pos_xi*=unit;  pos_yi*=unit;  pos_zi*=unit;
+		    
+		    //canestro nell'altro tes
+		    if(pos_x == x_tes &&
+		       pos_y<tes2_ymax && pos_y>tes2_ymin &&
+		       pos_z<tes2_zmax && pos_z>tes2_zmin){
+		      hits++;
+		      map->Fill(pos_yi,pos_zi);
+		      //map->Fill(pos_y,pos_z);
+		    } //canestro
+		    
+		    
+		  }//for sulle entries
 		  
-		  //canestro nell'altro tes
-		  if(pos_x == x_tes &&
-		     pos_y<tes2_ymax && pos_y>tes2_ymin &&
-		     pos_z<tes2_zmax && pos_z>tes2_zmin){
-		    hits++;
-		    map->Fill(pos_yi,pos_zi);
-		    //map->Fill(pos_y,pos_z);
-		  } //canestro
-	      
+		  gStyle->SetPalette(kBird);
+		  map->Draw("axis"); 
+		  map->SetTitle(Form("%d canestri in H60 - cnt: %d um, d: %d um, sub = %d um, V=%d V, E=%d eV",hits, cnt_radius[r], distance[d], substrate[b], volts[v], energy[e]));
+		  DrawPad(map,range,tes_side,cnt_radius[r],segmento);
 		  
-		}//for sulle entries
-		
-		gStyle->SetPalette(kBird);
-		map->Draw("axis"); 
-		map->SetTitle(Form("%d canestri in H60 - cnt: %d um, d: %d um, V=%d V, E=%d eV",hits, cnt_radius[r], distance[d], volts[v], energy[e]));
-		DrawPad(map,range,tes_side,cnt_radius[r],segmento);
-		
-		c1->SaveAs(Form("plots/%s/%s/maps/%s_H60.png",folder,subfolder,name.c_str()));
-		
-		delete(map);
+		  //c1->SaveAs(Form("plots/%s/%s/maps/%s_H60.png",folder,subfolder,name.c_str()));
+		  
+		  delete(map);
+		  
+		  canestro.push_back(hits);
+		  cnt_vec.push_back(cnt_radius[r]);
+		  VsuE_vec.push_back(1.*volts[v]/energy[e]);
+		  sub_vec.push_back(substrate[b]);
+		  
+		}//else sul file
+	      }//condizione energia
+	    }//for energia
+	  }//for volts
+	}//for raggio
+      }//for substrato
+    }//for sim
+  }//for distance
 
-		canestro.push_back(hits);
-		cnt_vec.push_back(cnt_radius[r]);
-		VsuE_vec.push_back(1.*volts[v]/energy[e]);
-		
-	      }//else sul file
-	    }//condizione energia
-	  }//for distanza
-	}//for sim
-      }//for raggio
-    }//for volts
-  }//for energy
 
+  //PREPARAZIONE ARRAY PER GRAFICI:
+  bubbleSort(VsuE_vec, cnt_vec, canestro, sub_vec);
   
-//PREPARAZIONE ARRAY PER GRAFICI:
-  bubbleSort(VsuE_vec, cnt_vec, canestro);
-
   int Npoints = canestro.size();
-  TMultiGraph *mg = new TMultiGraph(); //più plot insieme
-
-  int colour[4]= {kRed-7,kOrange,kGreen-6,kAzure+7};
-  TLegend* legend = new TLegend(0.7,0.12,0.9,0.26);
+  
+  int colour[7]= {kRed-7,94,91,kGreen-6,66,63, kViolet-9};
+  TLegend* legend = new TLegend(0.13,0.74,0.35,0.88);
   legend->SetBorderSize(0);
+  
+  //1: hits vs V/E con cnt_radius fissato al variare del substrato
+  
+  for(int b=0; b<substrate.size(); b++){
+    TMultiGraph *mg = new TMultiGraph(); //più plot insieme
 
-  //1: hits vs V/E con cnt_radius fissato
-  for(int r=0; r<cnt_radius.size(); r++){
-    
-    //ciclo sui singoli punti acquisiti a parità di cnt_radius
-    std::vector<double> x, y; 
-    int points=0;
-
+    for(int r=0; r<cnt_radius.size(); r++){
+      //ciclo sui singoli punti acquisiti a parità di cnt_radius
+      std::vector<double> x, y; 
+      int points=0;
+      
     //riempio vettori
-    for(int i=0; i<Npoints; i++){ 
-      if(cnt_radius[r]==cnt_vec[i]){
-	points++;
-	x.push_back(VsuE_vec[i]);
-	y.push_back(canestro[i]);
-      }//if sul cnt_radius giusto
-    }//for sugli Npoints da scorrere
-
-    //converto vettori in array per grafico
-    double x_[points], y_[points];
-    for(int i=0; i<points;i++){
-      x_[i]=x[i]; y_[i]=y[i];
-    }
+      for(int i=0; i<Npoints; i++){ 
+	if(cnt_radius[r]==cnt_vec[i] && substrate[b]==sub_vec[i]){
+	  points++;
+	  x.push_back(VsuE_vec[i]);
+	  y.push_back(canestro[i]);
+	}//if sul cnt_radius giusto
+      }//for sugli Npoints da scorrere
+      
+      //converto vettori in array per grafico
+      double x_[points], y_[points];
+      for(int i=0; i<points;i++){
+	x_[i]=x[i]; y_[i]=y[i];
+      }
+      
+      TGraph* hitsVsuE = new TGraph(points,x_,y_);
+      hitsVsuE->GetYaxis()->SetRangeUser(1,1E+5);
+      hitsVsuE->SetMarkerColor(colour[r]);
+      hitsVsuE->SetMarkerStyle(8);
+      hitsVsuE->SetMarkerSize(2);
+      legend->AddEntry(hitsVsuE,Form("cnt_radius = %d um", cnt_radius[r]),"p");
+      mg->Add(hitsVsuE,"p");
+      
+    }//for sul raggio
     
-    TGraph* hitsVsuE = new TGraph(points,x_,y_);
-    hitsVsuE->GetYaxis()->SetRangeUser(1,1E+5);
-    hitsVsuE->SetMarkerColor(colour[r]);
-    hitsVsuE->SetMarkerStyle(8);
-    hitsVsuE->SetMarkerSize(2);
-    legend->AddEntry(hitsVsuE,Form("cnt_radius = %d um", cnt_radius[r]),"p");
-    mg->Add(hitsVsuE,"p");
-    
-  }
+    c1->SetLogy();
+    c1->SetLeftMargin(0.11);
+    mg->GetYaxis()->SetRangeUser(0.9,30);
+    mg->GetXaxis()->SetRangeUser(0,4.7);
+    mg->GetXaxis()->SetTitle("V/E");
+    mg->GetYaxis()->SetTitle("Canestri");
+    mg->GetHistogram()->SetTitle(Form("Canestri vs V/E, substrate = %d um",substrate[b]));
+    mg->Draw("a");
+    legend->Draw("same");
+    c1->SaveAs(Form("plots/%s/%s/canestri/HitsvsVE_H60_sub%dum.png",folder,subfolder,substrate[b]));
+    c1->Clear();
+    legend->Clear();
 
-  c1->SetLogy();
-  c1->SetLeftMargin(0.11);
-  mg->GetYaxis()->SetRangeUser(1,200);
-  mg->GetXaxis()->SetRangeUser(0,4.7);
-  mg->GetXaxis()->SetTitle("V/E");
-  mg->GetYaxis()->SetTitle("Canestri");
-  mg->GetHistogram()->SetTitle("Canestri vs V/E");
-  mg->Draw("a");
-  legend->Draw("same");
-  c1->SaveAs(Form("plots/%s/%s/canestri/HitsvsVE_H60.png",folder,subfolder));
-  c1->Clear();
-    
-  delete(mg);
-
-  //2: hits vs cnt_radius con V/E fissato
+  }//for sul substrato
+  
+  //2: hits vs cnt_radius con V/E fissato variando substrato
   //inizializzazione di un vettore che ha dentro i numeri di V/E presenti
   std::vector<double> VsuE_list;
   VsuE_list.push_back(VsuE_vec[0]);
+
   
   for(int i=1; i<Npoints; i++){
     if(VsuE_vec[i-1]!=VsuE_vec[i]){
@@ -227,57 +235,61 @@ int main(int argc, char* argv[]){
     }
   }
  
-  TMultiGraph *mg2 = new TMultiGraph(); //più plot insieme
-  TLegend* legend2 = new TLegend(0.85,0.12,1,0.76);
+  
+  TLegend* legend2 = new TLegend(0.85,0.12,1,0.36);
   legend2->SetBorderSize(0);
-  std::vector<int> colori = GetColors();
-  for(int r=0; r<VsuE_list.size(); r++){
-    
-    //ciclo sui singoli punti acquisiti a parità di cnt_radius
-    std::vector<double> x, y; 
-    int points=0;
-
-    //riempio vettori
-    for(int i=0; i<Npoints; i++){ 
-      if(VsuE_list[r]==VsuE_vec[i]){
-	points++;
-	x.push_back(cnt_vec[i]);
-	y.push_back(canestro[i]);
-      }//if sul VsuE giusto
-    }//for sugli Npoints da scorrere
-    
-    //converto vettori in array per grafico
-    double x_[points], y_[points];
-    for(int i=0; i<points;i++){
-      x_[i]=x[i]; y_[i]=y[i];
-    }
-    
-    TGraph* hitscnts = new TGraph(points,x_,y_);
-    hitscnts->GetYaxis()->SetRangeUser(1,1E+5);
-    hitscnts->SetMarkerColor(colori[r]);
-    hitscnts->SetLineColor(colori[r]);
-    hitscnts->SetMarkerStyle(8);
-    hitscnts->SetLineWidth(2);
-    hitscnts->SetMarkerSize(2);
-    legend2->AddEntry(hitscnts,Form("V/E = %.2f", VsuE_list[r]),"p");
-    mg2->Add(hitscnts,"p");
-    
-    }
   
-  c1->SetLogy();
-  c1->SetLeftMargin(0.11);
-  c1->SetRightMargin(0.16);
+  for(int b=0; b<substrate.size(); b++){
+    TMultiGraph *mg2 = new TMultiGraph(); //più plot insieme
+    for(int r=0; r<VsuE_list.size(); r++){
+      
+      //ciclo sui singoli punti acquisiti a parità di cnt_radius
+      std::vector<double> x, y; 
+      int points=0;
+      
+      //riempio vettori
+      for(int i=0; i<Npoints; i++){ 
+	if(VsuE_list[r]==VsuE_vec[i] && substrate[b]==sub_vec[i]){
+	  points++;
+	  x.push_back(cnt_vec[i]);
+	  y.push_back(canestro[i]);
+	}//if sul VsuE giusto
+      }//for sugli Npoints da scorrere
+      
+      //converto vettori in array per grafico
+      double x_[points], y_[points];
+      for(int i=0; i<points;i++){
+	x_[i]=x[i]; y_[i]=y[i];
+      }
+      
+      TGraph* hitscnts = new TGraph(points,x_,y_);
+      hitscnts->GetYaxis()->SetRangeUser(1,1E+5);
+      hitscnts->SetMarkerColor(colour[r]);
+      hitscnts->SetLineColor(colour[r]);
+      hitscnts->SetMarkerStyle(8);
+      hitscnts->SetLineWidth(2);
+      hitscnts->SetMarkerSize(2);
+      legend2->AddEntry(hitscnts,Form("V/E = %.2f", VsuE_list[r]),"p");
+      mg2->Add(hitscnts,"p");
+      
+    }//for raggio
+    
+    c1->SetLogy();
+    c1->SetLeftMargin(0.11);
+    c1->SetRightMargin(0.16);
+    
+    mg2->GetYaxis()->SetRangeUser(0.9,30);
+    mg2->GetXaxis()->SetTitle("cnt radius [um]");
+    mg2->GetYaxis()->SetTitle("Canestri");
+    mg2->GetHistogram()->SetTitle(Form("Canestri vs cnt_radius, substrate = %d um",substrate[b]));
+    mg2->Draw("a");
+    legend2->Draw("same");
+    c1->SaveAs(Form("plots/%s/%s/canestri/Hitsvscnts_H60_sub%dum.png",folder,subfolder,substrate[b]));
+    c1->Clear();
+    legend2->Clear();
+  }//for substrato
 
-  mg2->GetYaxis()->SetRangeUser(1,200);
-  mg2->GetXaxis()->SetTitle("cnt radius [um]");
-  mg2->GetYaxis()->SetTitle("Canestri");
-  mg2->GetHistogram()->SetTitle("Canestri vs cnt_radius");
-  mg2->Draw("a");
-  legend2->Draw("same");
-  c1->SaveAs(Form("plots/%s/%s/canestri/Hitsvscnts_H60.png",folder,subfolder));
-  c1->Clear();
-
-  
+ 
   delete(c1);
   return(0);
 }
@@ -355,7 +367,7 @@ int GetArrivalRange(int cnt_radius){
 
 
 
-void bubbleSort(std::vector<double>& v_e, std::vector<int>& cnts, std::vector<double>& hits){
+void bubbleSort(std::vector<double>& v_e, std::vector<int>& cnts, std::vector<double>& hits, std::vector<int>& sub_vec){
   int n = v_e.size();
   
   // Outer loop that corresponds to the number of
@@ -367,6 +379,7 @@ void bubbleSort(std::vector<double>& v_e, std::vector<int>& cnts, std::vector<do
 	std::swap(v_e[j], v_e[j+1]);
 	std::swap(cnts[j], cnts[j+1]);
 	std::swap(hits[j], hits[j+1]);
+	std::swap(sub_vec[j], sub_vec[j+1]);
 	swapped=true;
       }
     }
