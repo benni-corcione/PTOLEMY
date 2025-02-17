@@ -40,15 +40,17 @@ int main(int argc, char* argv[]){
   
   for(int i=0; i<filenames.size(); i++){  
 
-    //nome tipico name_d600um_cnt15um_V100_E10-1
-    std::string   d_str = AndCommon::splitString(filenames[i],"_d"  )[1].c_str(); //600um_cnt15um_V100_E10-1
-    std::string cnt_str = AndCommon::splitString(filenames[i],"_cnt")[1].c_str(); //15um_V100_E10-1
+    //nome tipico name_d600um_cnt15um_sub5000um_V100_E10-1
+    std::string   d_str = AndCommon::splitString(filenames[i],"_d"  )[1].c_str(); //600um_cnt15um_sub5000um_V100_E10-1
+    std::string cnt_str = AndCommon::splitString(filenames[i],"_cnt")[1].c_str(); //15um_sub5000um_V100_E10-1
+    std::string sub_str = AndCommon::splitString(filenames[i],"_sub")[1].c_str(); //5000um_100_E10-1
     std::string   V_str = AndCommon::splitString(filenames[i],"_V"  )[1].c_str(); //100_E10-1
     std::string   E_str = AndCommon::splitString(filenames[i],"_E"  )[1].c_str(); //10-1
     std::string   name  = AndCommon::splitString(filenames[i],"/"   )[3].c_str(); //10-1
 
-    float distance   = atof(AndCommon::splitString(d_str  ,"um")[0].c_str());
+    float distance   = atof(AndCommon::splitString(  d_str,"um")[0].c_str());
     float cnt_radius = atof(AndCommon::splitString(cnt_str,"um")[0].c_str());
+    int   sub_radius = atoi(AndCommon::splitString(sub_str,"um")[0].c_str());
     int   voltage    = atoi(AndCommon::splitString(  V_str,"_" )[0].c_str());
     int   energy     = atoi(AndCommon::splitString(  E_str,"-" )[0].c_str());
     int   sim_number = atoi(AndCommon::splitString(  E_str,"-" )[1].c_str());
@@ -93,6 +95,7 @@ int main(int argc, char* argv[]){
     tree->Branch("sim_number", &sim_number, "sim_number/I");
     tree->Branch("cnt_radius", &cnt_radius, "cnt_radius/F");
     tree->Branch("distance"  , &distance  ,   "distance/F");
+    tree->Branch("substrate" , &sub_radius,  "substrate/I");
     tree->Branch("voltage"   , &voltage   ,    "voltage/I");
     tree->Branch("x_i"       , &x_i       ,        "x_i/F");
     tree->Branch("y_i"       , &y_i       ,        "y_i/F");
