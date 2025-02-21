@@ -43,98 +43,53 @@ int main(int argc, char* argv[]){
   Long64_t nentries = tree->GetEntries();
 
   //angoli
-  TH2F *mapi = new TH2F("map","",38,-190,+190,20,-100,100);
-  TH2F *mapf = new TH2F("map","",38,-190,+190,20,-100,100);
-  TPad *pad1 = new TPad("pad1","up pad",0,0.51,1,1);
-  pad1->Draw();
-  TPad *pad2 = new TPad("pad2","down pad",0,0,1,0.52);
-  pad2->Draw();
-  
+  TH2F mapi("map","",200,-200,200,100,-100,100);
+  TH2F mapf("map","",200,-200,200,100,-100,100);
+ 
   //preparazione per la lettura del tree_raw
-  float vx, vy, vz;
-  tree->SetBranchAddress("vx_i", &vx);
-  tree->SetBranchAddress("vy_i", &vy);
-  tree->SetBranchAddress("vz_i", &vz);
+  float azim_i, azim_f, elev_i, elev_f;
+  tree->SetBranchAddress("azim_i", &azim_i);
+  tree->SetBranchAddress("azim_f", &azim_f);
+  tree->SetBranchAddress("elev_i", &elev_i);
+  tree->SetBranchAddress("elev_f", &elev_f);
   
-  //TH1F* sen_el = new TH1F("sen_el","",100,-1.1,1.1);
   TH1F* sen_el = new TH1F("sen_el","",50,-0.5,+1.5);
-  //TH1F* sen_el = new TH1F("sen_el","",100,-360,360);
-  //TH1F* theta2_hist = new TH1F("theta2_hist","",100,-200,200);
-  TH1F* theta1_hist = new TH1F("theta1_hist","",100,-200,200);
-  TH1F* theta2_hist = new TH1F("theta2_hist","",100,-200,200);
-  TH1F* theta1_mio = new TH1F("theta1_mio","",50,-3,+3);
-  TH1F* theta2_mio = new TH1F("theta2_mio","",50,-4,+4);
+  TH1F* hazim_i = new TH1F("hazim_i","",50,-3,+3);
+  TH1F* helev_i = new TH1F("helev_i","",50,-4,+4);
  
   for(int iEntry=0; iEntry<nentries; iEntry++){
     tree->GetEntry(iEntry);
  
-    
-    theta1_mio->Fill(atan2(-vy,vz)); //azim
-    theta2_mio->Fill(atan2(vx,sqrt(vz*vz+vy*vy))); //elev
-    //sen_el->Fill(sin(theta2_i*M_PI/180));
-
-    sen_el->Fill(sin(atan2(vx,sqrt(vz*vz+vy*vy))));
-    //sen_el->Fill(theta1_i);
-    //mapi->Fill(theta1_i,theta2_i);
-    //mapf->Fill(theta1_f,theta2_f);
+    hazim_i->Fill(azim_i); //azim
+    helev_i->Fill(elev_i); //elev
+    sen_el->Fill(sin(elev_i));
+    mapi.Fill(azim_i*180/M_PI,elev_i*180/M_PI);
+    mapf.Fill(azim_f*180/M_PI,elev_f*180/M_PI);
   }
 
-  
-  
   gStyle->SetOptStat(0);
-  theta1_hist->SetLineWidth(3);
-  theta2_hist->SetLineWidth(3);
-  theta1_mio->SetLineWidth(4);
-  theta2_mio->SetLineWidth(4);
   
-  theta1_hist->SetLineColor(kAzure+7);
-  theta2_hist->SetLineColor(kPink);
-  theta1_mio->SetLineColor(kAzure+7);
-  theta2_mio->SetLineColor(kPink);
+  hazim_i->SetLineWidth(4);
+  helev_i->SetLineWidth(4);
+  hazim_i->SetLineColor(kAzure+7);
+  helev_i->SetLineColor(kPink);
+  helev_i->GetYaxis()->SetTitle("Counts");
+  helev_i->GetXaxis()->SetTitle("Angles");
+  helev_i->SetTitle("Check of uniformity -> initial angles");
   
-  theta2_mio->GetYaxis()->SetTitle("Counts");
-  theta2_mio->GetXaxis()->SetTitle("Angles");
-  theta2_hist->SetTitle("Check of uniformity -> initial angles");
-  //theta2_hist->Draw();
-  //theta1_hist->Draw("same");
-
-  legend->AddEntry(theta1_hist,"althazimutale i", "l");
-  legend->AddEntry(theta2_hist,"elevazione i", "l");
+  legend->AddEntry(hazim_i,"althazimutale i", "l");
+  legend->AddEntry(helev_i,"elevazione i", "l");
   
+  helev_i->Draw();
+  hazim_i->Draw("same");
   legend->Draw("same");
   
   std::string outdir( Form("plots/%s/%s",folder,subfolder));
   system( Form("mkdir -p %s", outdir.c_str()) );
   //-p crea anche le parent se prima non esistono
-  //c1->SaveAs(Form("%s/%s_theta_check_i.png",outdir.c_str(),name));
+  c1->SaveAs(Form("%s/%s_theta_check_i.png",outdir.c_str(),name));
   c1->Clear();
   legend->Clear();
-  
-  theta2_mio->Draw();
-  theta1_mio->Draw("same");
-  legend->AddEntry(theta1_mio,"althazimutale i", "l");
-  legend->AddEntry(theta2_mio,"elevazione i", "l");
-  
-  legend->Draw("same");
-  c1->SaveAs(Form("%s/%s_theta_check_mio2.png",outdir.c_str(),name));
-  c1->Clear();
-  
-  /*
-  legend->Clear();
-  
-  legend->AddEntry(theta1f_hist,"althazimutale f", "l");
-  legend->AddEntry(theta2f_hist,"elevazione f", "l");
-
-  theta2f_hist->GetYaxis()->SetTitle("Counts");
-  theta2f_hist->GetXaxis()->SetTitle("Angles");
-  theta2f_hist->SetTitle("Check of uniformity -> final angles");
-  theta2f_hist->Draw();
-  theta1f_hist->Draw("same");
-  legend->Draw("same");
-  c1->SaveAs(Form("%s/%s_theta_check_f.png",outdir.c_str(),name));
-  c1->Clear();
-  */
-  
   
   gStyle->SetOptStat(0);
   sen_el->SetLineWidth(3);
@@ -142,30 +97,37 @@ int main(int argc, char* argv[]){
   sen_el->GetXaxis()->SetTitle("sin(theta)");
   sen_el->SetTitle("Check of uniformity -> initial angles");
   sen_el->Draw();
-  c1->SaveAs(Form("%s/%s_sen_el2.png",outdir.c_str(),name));
+  c1->SaveAs(Form("%s/%s_senel.png",outdir.c_str(),name));
   c1->Clear();
+  legend->Clear();
 
-  /*
   c1->SetRightMargin(0.18);
   c1->SetLeftMargin(0.18);
 
   gStyle->SetPalette(kBird);
-  pad1->cd();
-  mapi->Draw("axis");
-  mapi->GetXaxis()->SetTitle("althazimutale");
-  mapi->GetYaxis()->SetTitle("elevazione");
-  mapi->Draw("COLZsame");
-  pad2->cd();
-  mapf->Draw("axis");
-  mapf->GetXaxis()->SetTitle("althazimutale");
-  mapf->GetYaxis()->SetTitle("elevazione");
-  mapf->Draw("COLZsame");
-  c1->SaveAs(Form("%s/%s_theta_check_map.png",outdir.c_str(),name));
-  */
-  delete(c1);
-  delete(sen_el);
+
+  c1->cd();
+  TPad pad1("pad1","up pad",0,0.51,1,1);
+  pad1.Draw();
+  TPad pad2("pad2","down pad",0,0,1,0.52);
+  pad2.Draw();
   
-  delete(mapi);
-  delete(mapf);
+  pad1.cd();
+  
+  mapi.Draw("axis");
+  mapi.GetXaxis()->SetTitle("azimuth_i");
+  mapi.GetYaxis()->SetTitle("elevation_i");
+  mapi.Draw("COLZsame");
+ 
+  pad2.cd();
+  mapf.Draw("axis");
+  mapf.GetXaxis()->SetTitle("azimuth_f");
+  mapf.GetYaxis()->SetTitle("elevation_f");
+  mapf.Draw("COLZsame");
+  
+  c1->SaveAs(Form("%s/%s_theta_check_map.png",outdir.c_str(),name));
+   
+  //delete(c1);
+  delete(sen_el);
   return(0);
 }
