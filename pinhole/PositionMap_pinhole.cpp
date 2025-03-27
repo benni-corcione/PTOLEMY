@@ -52,17 +52,20 @@ int main(int argc, char* argv[]){
   std::vector<int> cnt_radius = GetCNTs(folder);
   std::vector<int> pin_radius = GetPin (folder);
 
-  
   TCanvas* c1 = new TCanvas("c1","",1000,1000);
   TCanvas* c2 = new TCanvas("c2","",1000,1000);
   c1->cd();
 
+  //_f: fuoco _r:range _a:arrivi
   TLegend* legend_f = new TLegend(0.6,0.70,0.9,0.90);
-  TLegend* legend_r = new TLegend(0.12,0.12,0.42,0.32);
+  TLegend* legend_r = new TLegend(0.12,0.7,0.42,0.9);
+  TLegend* legend_a = new TLegend(0.12,0.7,0.42,0.9);
   legend_f->SetBorderSize(0);
   legend_f->SetFillStyle(0);
   legend_r->SetBorderSize(0);
   legend_r->SetFillStyle(0);
+  legend_a->SetBorderSize(0);
+  legend_a->SetFillStyle(0);
   std::vector<int> colours = {99,95,92,8,66,62};
   
   int z_max      = 8000; //um
@@ -81,6 +84,7 @@ int main(int argc, char* argv[]){
   for(int r=0; r<cnt_radius.size(); r++){
     TMultiGraph* mg_f = new TMultiGraph();
     TMultiGraph* mg_r = new TMultiGraph();
+    TMultiGraph* mg_a = new TMultiGraph();
 
     if(cnt_radius[r]==500){d_wo_pin = 800;}
     if(cnt_radius[r]==100){d_wo_pin = 380;}
@@ -89,6 +93,7 @@ int main(int argc, char* argv[]){
     for(int v=0; v<volts_cnt.size(); v++){
       TGraph* gr_f = new TGraph(); //focalizzazione
       TGraph* gr_r = new TGraph(); //riduzione
+      TGraph* gr_a = new TGraph(); //arrivi in percentuale
        
       for(int p=0; p<pin_radius.size();  p++){
 	
@@ -137,20 +142,8 @@ int main(int argc, char* argv[]){
 
 	  
 	    //mappa arrivi e partenze
-	    //TH2F* map_pin = new TH2F("map_pin","",nbins,yBins,nbins,zBins);
 	    TH2F* map_mic = new TH2F("map_mic","",nbins,yBins,nbins,zBins);
 
-	    /*
-	      TPad* pad1 = new TPad("pad1","left pad",0,0,0.49,1);
-	      pad1->Draw("same");
-	      TPad* pad2 = new TPad("pad2","right pad",0.51,0,1,1);
-	      pad2->Draw("same");
-	      pad1->SetLeftMargin (0.15);
-	      pad1->SetRightMargin (0.12);
-	      pad1->SetBottomMargin (0.12);
-	      pad2->SetRightMargin(0.15);
-	      pad2->SetLeftMargin(0.12);
-	    */
 	    for(int iEntry=0; iEntry<nentries; iEntry++){
 	      tree->GetEntry(iEntry);
 
@@ -185,30 +178,6 @@ int main(int argc, char* argv[]){
 	    gStyle->SetPalette(kBird);
 
 	  
-	    //disegna a dx
-	    //pad1->cd();
-	    //map_pin->Draw("axis");
-	    //map_pin->SetTitle(Form("cnt: %d um, pin: %d um, V_cnt=-%d V", cnt_radius[r],pin_radius[p], volts_cnt[v]));
-	    //DrawPad(map_pin,range_pin,tes_side,cnt_radius[r],pin_radius[p]);
-	     
-	    //disegno a sx
-	    //pad2->cd();
-	    /*
-	      c1->SetLeftMargin(0.13);
-	      c1->SetRightMargin(0.13);
-	      map_mic->Draw("axis");
-	      map_mic->SetTitle(Form("%.2f%% tes strikes wrt mic  strikes",canestri*100./hit_mic));
-	      DrawPad(map_mic,range_pin,tes_side,cnt_radius[r],pin_radius[p]);
-	    
-	      std::string save_fold(Form("plots/%s",folder));
-	      std::string save_subfold(Form("plots/%s/maps",folder));
-	      system( Form("mkdir -p %s", save_fold.c_str()) );
-	      system( Form("mkdir -p %s", save_subfold.c_str()));
-	   
-	      c1->SaveAs(Form("plots/%s/maps/%s_map.png",folder,name.c_str()));
-	      c1->Clear();
-	    */
-	  
 	    gr_f->SetPoint(p,pin_radius[p],canestri*100./hit_mic);
 	    gr_f->SetMarkerSize(2);
 	    gr_f->SetLineWidth(2);
@@ -216,14 +185,20 @@ int main(int argc, char* argv[]){
 	    gr_f->SetMarkerColor(colours[v]);
 	    gr_f->SetLineColor(colours[v]);
 
-	    gr_r->SetPoint(p,pin_radius[p],d_max*1./pin_radius[p]);
+	    gr_r->SetPoint(p,pin_radius[p],d_max);
 	    gr_r->SetMarkerSize(2);
 	    gr_r->SetLineWidth(2);
 	    gr_r->SetMarkerStyle(8);
 	    gr_r->SetMarkerColor(colours[v]);
 	    gr_r->SetLineColor(colours[v]);
 
-          
+	    gr_a->SetPoint(p,pin_radius[p],canestri*100./nentries);
+	    gr_a->SetMarkerSize(2);
+	    gr_a->SetLineWidth(2);
+	    gr_a->SetMarkerStyle(8);
+	    gr_a->SetMarkerColor(colours[v]);
+	    gr_a->SetLineColor(colours[v]);
+	    std::cout << volts_cnt[v] << " " << pin_radius[p] << " " << canestri*100./nentries << std::endl;
 
 	  
 	  }//else sul file
@@ -232,16 +207,24 @@ int main(int argc, char* argv[]){
       }//for raggio pin
       legend_f->AddEntry(gr_f,Form("V_cnt = - %d V", volts_cnt[v]),"pl");
       legend_r->AddEntry(gr_r,Form("V_cnt = - %d V", volts_cnt[v]),"pl");
+      legend_a->AddEntry(gr_a,Form("V_cnt = - %d V", volts_cnt[v]),"pl");
       //gr_tes->SetPoint(pin_radius.size(),0,-100);
       mg_f->Add(gr_f,"pl");
       mg_r->Add(gr_r,"pl");
+      mg_a->Add(gr_a,"pl");
     }//for volts cnt
-     
-     
-  
+
+    
+    TGraph* gr_test = new TGraph(); 
+    gr_test->SetPoint(0,-5,-5);
+    gr_test->SetPoint(1,115,240);
+    mg_f->Add(gr_test,"p");
+    mg_r->Add(gr_test,"p");
+    mg_a->Add(gr_test,"p");
+    
     c2->cd();
     mg_f->GetYaxis()->SetRangeUser(0,105);
-    //mg_f->GetXaxis()->SetRangeUser(0,110);
+    mg_f->GetXaxis()->SetRangeUser(0,110);
     mg_f->GetXaxis()->SetTitle("pinhole radius [um]");
     mg_f->GetYaxis()->SetTitle("strikes on TES/strikes on MiC");
     mg_f->GetHistogram()->SetTitle(Form("%% of strikes vs pinhole radius, cnt_radius = %d um",cnt_radius[r]));
@@ -252,14 +235,25 @@ int main(int argc, char* argv[]){
     legend_f->Clear();
 
 
-    mg_r->GetYaxis()->SetRangeUser(0,3.5);
-    //mg_r->GetXaxis()->SetRangeUser(0,110);
+    mg_r->GetXaxis()->SetRangeUser(0,110);
+    mg_r->GetYaxis()->SetRangeUser(0,240);
     mg_r->GetXaxis()->SetTitle("pinhole radius [um]");
-    mg_r->GetYaxis()->SetTitle("% of coverage wrt pinhole_radius");
-    mg_r->GetHistogram()->SetTitle(Form("%% of coverage wrt pinhole vs pinhole radius, cnt_radius = %d um",cnt_radius[r]));
+    mg_r->GetYaxis()->SetTitle("maximum distance reached");
+    mg_r->GetHistogram()->SetTitle(Form("maximum coverage vs pinhole radius, cnt_radius = %d um",cnt_radius[r]));
     mg_r->Draw("a");
     legend_r->Draw("same");
     c2->SaveAs(Form("plots/%s/canestri/cnt_radius%d_r.png",folder,cnt_radius[r]));
+    c2->Clear();
+    legend_r->Clear();
+
+    mg_a->GetXaxis()->SetRangeUser(0,110);
+    mg_a->GetYaxis()->SetRangeUser(-0.1,2.5);
+    mg_a->GetXaxis()->SetTitle("pinhole radius [um]");
+    mg_a->GetYaxis()->SetTitle("% of strikes on tes");
+    mg_a->GetHistogram()->SetTitle(Form("%% strikes vs pinhole radius, cnt_radius = %d um",cnt_radius[r]));
+    mg_a->Draw("a");
+    legend_r->Draw("same");
+    c2->SaveAs(Form("plots/%s/canestri/cnt_radius%d_a.png",folder,cnt_radius[r]));
     c2->Clear();
     legend_r->Clear();
     
