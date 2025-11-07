@@ -32,13 +32,13 @@ int main(int argc, char* argv[]){
   int rescale     = (atoi(argv[4])); 
  
   //apertura file con il tree
-  TFile run_tes1(Form("data/root/CD%d/H60_mid_cond1/%dV/CD%d_%dV_tree.root",CD_number,voltage,CD_number,voltage));
-  //TFile run_tes1(Form("data/root/CD204/H60_post_cond3_moku/101V/CD204_101V_tree.root"));
+  TFile run_tes1("data/root/CD204/B60_post_cond3_moku/100V/CD204_100V_tree.root");
+ 
   TTree *tree_tes1 = (TTree*)run_tes1.Get("tree");
   Long64_t nentries_tes1 = tree_tes1->GetEntries();
 
   //apertura file con il tree
-  TFile run_tes2(Form("data/root/CD%d/B60_mid_cond1/%dV/CD%d_%dV_tree.root",CD_number,voltage,CD_number,voltage));
+  TFile run_tes2("data/root/CD222/F60_squidfilter_ER_031025_tr50/125V/CD222_125V_tree.root");
   //TFile run_tes2(Form("data/root/CD204/B60_post_cond3_moku/101V/CD204_101V_tree.root"));
   TTree *tree_tes2 = (TTree*)run_tes2.Get("tree");
   Long64_t nentries_tes2 = tree_tes2->GetEntries();
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
   float var_min    = 0; //bin minimo histo
   float var_max    = 0; //bin maximo histo
   if      (strcmp(choice,"amp"   )==0){ magnifying=1e+0; offset=0.05; var_min=0 ; var_max=2;}
-  else if (strcmp(choice,"charge")==0){ magnifying=1e+6; offset=5   ; var_min=0; var_max=20;}
+  else if (strcmp(choice,"charge")==0){ magnifying=1e+6; offset=5   ; var_min=-10; var_max=20;}
 
   //fattore di scala tarato sul trigger
   float scale;
@@ -65,7 +65,8 @@ int main(int argc, char* argv[]){
   tree_tes1->GetEntry(0); tree_tes2->GetEntry(0);
   if     (rescale == 0){ scale = 1.;}
   else if(rescale == 1){ scale = trigger_tes2/trigger_tes1; }
-  //else if(rescale == 1){ scale = trigger_tes1/trigger_tes2; }
+  scale = 0.2675/0.6175;
+  //if(rescale == 1){ scale = 1.825; }
 
   //float off = trigger_tes2-trigger_tes1;
   //float off=0.35-0.035;
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]){
 
   std::cout << "Rescale of a factor " << scale << std::endl;
   //variabili per l'istogramma
-  int nbins = 1000;
+  int nbins = 1500;
   Settings settings;
   float binsize = settings.Binsize((var_max-var_min)/nbins);
   const char* x_name; //x axis label
@@ -104,7 +105,9 @@ int main(int argc, char* argv[]){
     histo1->Fill(variable*magnifying*scale); //ampiezza riscalata
 
     tree_tes2->GetEntry(iEntry);
+    for(int i=0; i<3; i++){
     histo2->Fill((variable-off)*magnifying);
+    }
   }
   
   //tela
@@ -119,14 +122,14 @@ int main(int argc, char* argv[]){
   float range_max  = 0;
 
   if       (strcmp(choice,"amp"  )==0){
-    if(rescale==0){ range1_min = 0;}
-    if(rescale==1){ range1_min = 0;}
-    range2_min =0; range_max = 1.1; }
+    if(rescale==0){ range1_min = 0.;}
+    if(rescale==1){ range1_min = 0.;}
+    range2_min =0.05; range_max = 0.3; }
 
   else if (strcmp(choice,"charge")==0){
-    if(rescale==0){ range1_min = 0.1;}
-    if(rescale==1){ range1_min = 0.1;}
-    range2_min = 0.1; range_max = 13; }
+    if(rescale==0){ range1_min = -1;}
+    if(rescale==1){ range1_min = -1;}
+    range2_min = -1; range_max = 8; }
   
    
   //disegno dell'histo con funzione definita in graphics.h
@@ -135,38 +138,39 @@ int main(int argc, char* argv[]){
   settings.general_style();
   //gStyle->SetOptFit(0011);
 
-  TLegend* legend = new TLegend(0.70, 0.9, 1.00, 0.82);
+  TLegend* legend = new TLegend(0.40, 0.9, 0.70, 0.82);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
   
   histo1->SetMarkerSize(2);
   histo1->SetLineWidth(3);
-  histo1->SetLineColor(kPink+1);
+  histo1->SetLineColor(46);
   histo1->SetFillStyle(3004);
-  histo1->SetFillColor(kPink+1);
-  legend->AddEntry(histo1,"H60-disallineato","l");
+  histo1->SetFillColor(46);
+  legend->AddEntry(histo1,"trigger 12 mV","l");
  
   histo2->SetMarkerSize(2);
   histo2->SetLineWidth(3);
-  histo2->SetLineColor(kAzure+5);
+  histo2->SetLineColor(38);
   histo2->SetFillStyle(3004);
-  histo2->SetFillColor(kAzure+5);
-  legend->AddEntry(histo2,"B60-allineato","l");
-  histo1->GetYaxis()->SetRangeUser(0,2000);
+  histo2->SetFillColor(38);
+  legend->AddEntry(histo2,"trigger 25 mV","l");
+  //histo2->GetYaxis()->SetRangeUser(0,500);
   //histo2->GetXaxis()->SetRangeUser(0.5,1.05);
   
-  histo2->Draw();
-  histo1->Draw("same");
+  histo1->Draw();
+  histo2->Draw("same");
   legend->Draw("same");
-  
-  std::string outdir(Form("plots/CD204/H60_mid_cond1/132V/"));
-  system( Form("mkdir -p %s", outdir.c_str()) );
 
+  
+  std::string outdir(Form("plots/CD222/F60_squidfilter_ER_031025_tr50/125V",CD_number,voltage));
+  system( Form("mkdir -p %s", outdir.c_str()) );
+  
   std::string attach;
   if(rescale==0){attach="raw";}
   if(rescale==1){attach="rescaled";}
-  c->SaveAs(Form("%s/%s_B60&H60_%s.png",outdir.c_str(),choice,attach.c_str()));
- 
+  c->SaveAs(Form("%s/cfr_fisarmonica.png",outdir.c_str(),choice,voltage,attach.c_str()));
+  
 
   delete(histo1);
   delete(histo2);
