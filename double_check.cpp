@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <filesystem>
+#include <vector>
+#include <cstdlib>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -16,6 +18,8 @@
 //prendo deltaY 
 //ciclare sul rawtree e disegnare eventi triggeranti
 
+void DrawHistoDeltaYSmooth(int CD_number, char* meas, int voltage, int n_sum, float threshold, TH1F* histo, int start_index);
+  
 //servono sia evento sia lumi!
 int main(int argc, char* argv[]){
 
@@ -43,14 +47,15 @@ int main(int argc, char* argv[]){
   TFile* file = TFile::Open(Form("data/root/CD%d/%s/%dV/%s",CD_number, meas, voltage, fileName.c_str())); 
   TTree* tree = (TTree*)file->Get("treeraw");
   int nentries = tree->GetEntries();
-  
+
+  std::vector<float*> dyn_vec;
 
   //settings tree 
   float pshape[2502];
   int   ev;
   int   lum;
   float sampling;
-
+  
   tree->SetBranchAddress( "event" ,         &ev       );
   tree->SetBranchAddress( "lumi"  ,         &lum      );
   tree->SetBranchAddress( "pshape",         &pshape   );
@@ -60,10 +65,20 @@ int main(int argc, char* argv[]){
   TCanvas* c1 = new TCanvas("c1", "c1", 1800, 850); //1800 850
   c1->cd();
 
-  int conteggio = 0;
-  //questi sembrano i parametri ottimali
-  int n_sum = 45;
   
+  int n_sum = 45;
+
+  //parametri histo sulla deltay_smooth
+  //+++++++++++++++++++++++++++++++++++++++++//
+  int nbins_delta = 500;
+  int start_index = 1000;
+  float deltamin  = -4;
+  float deltamax  = +10;
+  float thresh    = 1.0;
+  TH1F* histo = new TH1F("histo","",nbins_delta,deltamin,deltamax);
+  //++++++++++++++++++++++++++++++++++++++++//
+
+   
   //FOR SU netries
   for(unsigned iEntry=0; iEntry<nentries; iEntry++){
    
@@ -71,12 +86,11 @@ int main(int argc, char* argv[]){
     float delta[2502] = {0};
     float dyn_delta[2502] = {0};
     
-    
     tree->GetEntry(iEntry);
     
     //////////////////////////////////
     //if pe studiare la singola pshape
-    //if (ev==74 && lum==169){
+    //if (ev==640 && lum==13){
       
     TH1D* wave = new TH1D("wave", "", 2499,0.,2499*sampling*1.E+6);
     TH1D* delta_histo = new TH1D("delta_histo", "", 2499,0.,2499*sampling*1.E+6);
@@ -147,23 +161,21 @@ int main(int argc, char* argv[]){
 	    dyn_delta[i-2]>threshold &&
 	    dyn_delta[i-1]>threshold &&
 	    dyn_delta[i]>threshold  )
-	  { check++; index.push_back(i);}
+	  { check++; index.push_back(i); }
 	else{;}
       }
     }//ho finito di leggere il vettore delta
 
+    
      float base     = GetBaseline(pshape);
      float base_err = GetBaselineError(pshape, base);
       
     int check_up = Check_Up(pshape, dyn_delta, threshold, CD_number, meas, base, base_err);
     if(check_up>0){check=1;}
-   
-   
+
     //ho incontrato una doppia almeno
     if(check > 1 ){
-     
-      
-      conteggio++;
+
       gStyle->SetOptStat(0);
       wave->SetLineColor(kBlack);
       wave->SetLineWidth(5);
@@ -197,8 +209,8 @@ int main(int argc, char* argv[]){
       line->SetLineColor(kPink-5);
       line->SetLineStyle(9);
       line->Draw("same");
-       wave->Draw("l same");
-  
+      wave->Draw("l same");
+      
        std::string outdir( Form("plots/CD%d/%s/%dV/check/double_sum%d_thresh%.1f", CD_number, meas, voltage,n_sum,threshold));
       system( Form("mkdir -p %s", outdir.c_str()) );
       //-p crea anche le parent se prima non esistono
@@ -206,29 +218,69 @@ int main(int argc, char* argv[]){
       c1->SaveAs(Form("%s/event%dlumi%d.png",outdir.c_str(),ev,lum));
       std::cout << std::endl;
       c1->Clear();
-          delete(line);
-   
+      delete(line);
+
+      //histo sulla deltay_smooth
+      //+++++++++++++++++++++++++++++++++++//
+      for(int l=start_index; l<2500; l++){
+      histo->Fill(dyn_delta[l]);
+      
+      }
+      //+++++++++++++++++++++++++++++++++++//
     }
     
     delete(wave);
     delete(delta_histo);
     delete(dyn_histo);
    
-    //per scriverlo nel tree assegno check_double (1,2,3 ecc) alla forma d'onda
-
     ////////////////////
     //termine dell'if per singola pshape
     //}
     
   } //prossima entry del tree
-
-  //std::cout << "numero di eventi: " << conteggio << std::endl;
-  file->Close();
+  
+  
   delete(c1);
   //ho finito di leggere tutte le pshape
+
+ 
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+  //parte aggiuntiva di histo totale su deltay_smooth
+  DrawHistoDeltaYSmooth(CD_number, meas, voltage, n_sum, thresh, histo, start_index);
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
   
+  delete(histo);
+  file->Close();
   return 0;
+
 }
 
+//funzione per fare histo totale su deltay_smooth
+void DrawHistoDeltaYSmooth(int CD_number, char* meas, int voltage, int n_sum, float threshold, TH1F* histo, int start_index){
+  
+  TCanvas* c = new TCanvas("c","",1000,700);
+  c->cd();
+  c->SetLeftMargin(0.12);
+  histo->SetLineWidth(3);
+  histo->SetLineColor(kPink+8);
+  histo->GetXaxis()->SetTitle("DeltaY smooth values");
+  histo->GetYaxis()->SetTitle("Counts");
+  histo->SetTitle(Form("V = %d V, start_index = %d, ",voltage, start_index));
+  histo->Draw();
 
+  c->SaveAs(Form("plots/CD%d/%s/deltaysmooth/%dV_nsum%d_thr%.1f_start%d.png", CD_number, meas, voltage, n_sum,threshold,start_index));
+  c->Clear();
+
+  //zoom on graph
+  histo->GetYaxis()->SetRangeUser(0,100);
+  histo->GetXaxis()->SetRangeUser(0.8,4);
+  histo->Draw();
+
+  c->SaveAs(Form("plots/CD%d/%s/deltaysmooth/zoom%dV_nsum%d_thr%.1f_start%d.png", CD_number, meas, voltage, n_sum,threshold,start_index));
+  
+  delete(c);
+ 
+
+  
+}
 
