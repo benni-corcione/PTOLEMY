@@ -54,6 +54,7 @@ std::vector<int> Settings::colour(void) {
   colour.push_back(871); //kViolet-9
   colour.push_back(612); //kMagenta-4
   colour.push_back(625); //kRed-7
+  colour.push_back(46); 
   return colour;
 }
 

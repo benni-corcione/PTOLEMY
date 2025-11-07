@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   c->SetLeftMargin(0.155);
   c->cd();
 
-  int nbins = 500;
+  int nbins = 800;
   TH1D* h_var = new TH1D("h_var","",nbins,0,1);
   float binsize = settings.Binsize(1./nbins);
   std::string x_name("Amplitude [V]");
@@ -72,8 +72,10 @@ int main(int argc, char* argv[]) {
     float range_min = 0.05;
     float range_max = 0.15;
 
-    if(volts[i]==105 ||volts[i]==107 || volts[i]==110){nbins=400;}
-    if(volts[i]==104 || volts[i]==109){nbins=360;}
+    
+    //if(volts[i]==105 ||volts[i]==107 || volts[i]==110){nbins=400;}
+    //if(volts[i]==104 || volts[i]==109){nbins=360;}
+    if(volts[i]>108 ){nbins=600;}
     //creo un histo per ogni tree
     std::string histname(Form("%d", volts[i]));
     TH1F* histo = new TH1F( histname.c_str(), "", nbins, hist_min, hist_max);
@@ -91,20 +93,17 @@ int main(int argc, char* argv[]) {
     float fit_min = GetFitMin(volts[i]);
     float fit_max = GetFitMax(volts[i]);
 
-    TF1 *cruijff  = new TF1(Form("cru_%d", volts[i]), Cruijff, fit_min, fit_max, 5);
+    TF1 *cruijff  = new TF1(Form("cru_%d", volts[i]), Cruijff, fit_min, fit_max, 3);
     
     //parametri del fit
-    cruijff->SetParNames("#mu","#sigma_{L}", "#sigma_{R}", "#alpha", "A");
+    cruijff->SetParNames("#mu","#sigma_{L}", "A");
     cruijff->SetParLimits(0, 0.1, 0.12);
     cruijff->SetParLimits(1, 0.002, 0.05); 
-    cruijff->SetParLimits(2, 0.002, 0.05); 
-    cruijff->SetParLimits(3, 0   ,   1);
-    cruijff->SetParLimits(4, 10,    10000);
+    cruijff->SetParLimits(2, 10,    10000);
 
     //gaussiana asimmetrica e non cruijff
-    cruijff->FixParameter(3,0); //alfa value
     cruijff->SetNpx(1000);
-    cruijff->SetParameters(0.1, 0.1, 0.1, 0, 10); //parametri iniziali
+    cruijff->SetParameters(0.1, 0.1, 10); //parametri iniziali
 
     //PARTE GRAFICA
     settings.graphic_histo(histo,range_min,range_max,x_name.c_str(),y_name.c_str(),volts[i]);
@@ -122,21 +121,17 @@ int main(int argc, char* argv[]) {
     cruijff->SetLineWidth(4);
     cruijff->Draw("same");
     
-    std::string outdir( Form("plots/CD%d/%s/%dV", CD_number, misura, volts[i]));
-    system( Form("mkdir -p %s", outdir.c_str()) );
-    c->SaveAs(Form("plots/CD%d/%s/%dV/fit_lowamp.png",CD_number,misura,volts[i]));
-
-
-    
-    
+    //std::string outdir( Form("plots/CD%d/%s/", CD_number, misura, volts[i]));
+    //system( Form("mkdir -p %s", outdir.c_str()) );
+    c->SaveAs(Form("plots/CD%d/%s/%dlowamp.png",CD_number,misura,volts[i]));
     //estrazione parametri dal fit
     float mu       = cruijff->GetParameter(0);
     float muerr    = cruijff->GetParError(0);
-    
+    muerr = sqrt(muerr*muerr+mu*0.005*mu*0.005);
     //grafico media vs voltaggio
     gr_mu->SetPoint( i, volts[i], mu );
-    gr_mu->SetPointError( i, 0., muerr );
-   
+    gr_mu->SetPointError( i, 0.,muerr);
+    
   } //for sui voltaggi vari
 
   c->Clear();
@@ -197,12 +192,12 @@ int main(int argc, char* argv[]) {
   gr_mu->SetLineColor(46);
   gStyle->SetTitleFontSize(0.07);
   gr_mu->Draw("APE");
-  c->SaveAs(Form("plots/CD%d/%s/low_amp_peak.png",CD_number,misura));
+  c->SaveAs(Form("plots/CD%d/%s/low_amp_peak_new.png",CD_number,misura));
   c->Clear();
 
   gr_mu->GetYaxis()->SetRangeUser(0,(gr_mu->GetHistogram()->GetMaximum())+0.01);
   gr_mu->Draw("APE");
-  c->SaveAs(Form("plots/CD%d/%s/low_amp_peak_fp.png",CD_number,misura));
+  c->SaveAs(Form("plots/CD%d/%s/low_amp_peak_fp_new.png",CD_number,misura));
   c->Clear();
 
   
@@ -213,36 +208,50 @@ int main(int argc, char* argv[]) {
 //++++++++++++++FUNZIONI UTILI+++++++++++++++//
 //+++++++++++++++++++++++++++++++++++++++++++//
 
-float GetFitMax(int v){
-  float fit_max;
-
-  if(v==96 ){fit_max = 0.115;} if(v==97 ){fit_max = 0.114;}
-  if(v==98 ){fit_max = 0.115;} if(v==99){fit_max = 0.116;}
-  if(v==100){fit_max = 0.119;} if(v==101){fit_max = 0.115;}
-  if(v==102){fit_max = 0.119;} if(v==103){fit_max = 0.119;}
-  if(v==104){fit_max = 0.122;} if(v==105){fit_max = 0.122;}
-  if(v==106){fit_max = 0.122;} if(v==107){fit_max = 0.12;}
-  if(v==108){fit_max = 0.121;} if(v==109){fit_max = 0.128;}
-  if(v==110){fit_max = 0.124;}
-
-  return fit_max;
-}
 
 float GetFitMin(int v){
   float fit_min;
 
-  if(v==96 ){fit_min = 0.1;} if(v==97 ){fit_min = 0.1025;}
-  if(v==98 ){fit_min = 0.104;} if(v==99 ){fit_min = 0.102;}
-  if(v==100){fit_min = 0.105;} if(v==101){fit_min = 0.105;}
-  if(v==102){fit_min = 0.105;} if(v==103){fit_min = 0.108;}
-  if(v==104){fit_min = 0.105;} if(v==105){fit_min = 0.103;}
-  if(v==106){fit_min = 0.107;} if(v==107){fit_min = 0.1085;}
-  if(v==108){fit_min = 0.108;} if(v==109){fit_min = 0.104;}
-  if(v==110){fit_min = 0.107;}
+  if(v==96 ){fit_min = 0.100;}
+  if(v==97 ){fit_min = 0.103;}
+  if(v==98 ){fit_min = 0.106;}
+  if(v==99 ){fit_min = 0.104;}
+  if(v==100){fit_min = 0.106;}
+  if(v==101){fit_min = 0.105;}
+  if(v==102){fit_min = 0.104;}
+  if(v==103){fit_min = 0.105;}
+  if(v==104){fit_min = 0.105;}
+  if(v==105){fit_min = 0.106;}
+  if(v==106){fit_min = 0.107;}
+  if(v==107){fit_min = 0.104;}
+  if(v==108){fit_min = 0.109;}
+  if(v==109){fit_min = 0.105;}
+  if(v==110){fit_min = 0.110;}
 
   return fit_min;
 }
   
+float GetFitMax(int v){
+  float fit_max;
+
+  if(v==96 ){fit_max = 0.112; }
+  if(v==97 ){fit_max = 0.111;}
+  if(v==98 ){fit_max = 0.1125;}
+  if(v==99 ){fit_max = 0.115;}
+  if(v==100){fit_max = 0.116;}
+  if(v==101){fit_max = 0.1145;}
+  if(v==102){fit_max = 0.116;}
+  if(v==103){fit_max = 0.117;}
+  if(v==104){fit_max = 0.121;}
+  if(v==105){fit_max = 0.123;}
+  if(v==106){fit_max = 0.121;}
+  if(v==107){fit_max = 0.12;}
+  if(v==108){fit_max = 0.120;}
+  if(v==109){fit_max = 0.122;}
+  if(v==110){fit_max = 0.122;}
+
+  return fit_max;
+}
 
 
 //cruiff (che può diventare una gaussiana) da fittare
@@ -254,13 +263,9 @@ Double_t Cruijff(Double_t *x, Double_t *par){
   Double_t arg_R  = 0;
   Double_t num    = pow((x[0]-par[0]),2);
   Double_t denL   = 2*par[1]*par[1];
-  Double_t denR   = 2*par[2]*par[2];
-  Double_t asym   = par[3]*num;
-  if ( denL + asym != 0 ){ arg_L = -num/(denL+asym); }
-  if ( par[2]      != 0 ){ arg_R = -num/ denR      ; }
-
-  if       ( x[0] < par[0] ){ fitval = par[4] * exp(arg_L); } //LEFT
-  else if  ( x[0] > par[0] ){ fitval = par[4] * exp(arg_R); } //RIGHT
+  if ( denL != 0 ){ arg_L = -num/(denL); }
+ 
+  fitval = par[2] * exp(arg_L);
 
   return(fitval);
 }
