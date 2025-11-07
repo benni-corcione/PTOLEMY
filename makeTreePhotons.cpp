@@ -10,10 +10,10 @@
 #include "TMath.h"
 #include "pshape_functions.h"
 
-float Baseline(float pshape[2500]);
-float BaselineError(float pshape[2500], float baseline);
-float Charge(float pshape[2500], float dt, float baseline);
-float Amp(float pshape[2500], float baseline);
+float Baseline(float pshape[2502]);
+float BaselineError(float pshape[2502], float baseline);
+float Charge(float pshape[2502], float dt, float baseline);
+float Amp(float pshape[2502], float baseline);
 std::string RoundNumber(float result);
 
 int main(int argc, char* argv[]){
@@ -37,7 +37,27 @@ int main(int argc, char* argv[]){
     if(pw_char[i]=='.'){pw_char[i]='p';} }
   
   //unificazioni vari tree già esistenti
-  std::stringstream stream;  
+  std::stringstream stream;
+
+  stream << "rm -f DS_*" << std::endl;
+  system(stream.str().c_str());
+
+  std::string directory  = "data/root/CD" + std::to_string(CD_number)
+                    + "/" + std::string(meas)
+                    + "/" + std::string(pw_char)
+                    + "mW/";
+
+  std::string file1  = "CD" + std::to_string(CD_number)
+                    + "_" + std::string(pw_char)
+                    + "mW_treeraw.root";
+
+   std::string file2  = "CD" + std::to_string(CD_number)
+                    + "_" + std::string(pw_char)
+                    + "mW_tree.root";
+
+   search_and_remove(directory, file1);
+   search_and_remove(directory, file2);
+   
   stream << "cd data/root/CD" << std::to_string(CD_number)
 	 << "/" << std::string(meas) 
 	 << "/" << std::string(pw_char)  << "mW" << std::endl;
@@ -83,13 +103,6 @@ int main(int argc, char* argv[]){
   float charge;
   float amp;
   float sampling;
-
-  Controls ctrl; //classe definita in pshape_functions.h
-  int ctrl_double;
-  int ctrl_trigger;
-  int ctrl_width;
-
-  
   
   //nuovo tree
   std::string outfile_name = Form("CD%d_%smWtree.root",CD_number,pw_char);
@@ -106,10 +119,6 @@ int main(int argc, char* argv[]){
   tree->Branch("charge"           , &charge           ,            "charge/F");
   tree->Branch("amp"              , &amp              ,               "amp/F");
   tree->Branch("sampling"         , &sampling         ,          "sampling/F");
-  tree->Branch("ctrl_double"      , &ctrl_double      ,       "ctrl_double/I");
-  tree->Branch("ctrl_width"       , &ctrl_width       ,        "ctrl_width/I");
-  tree->Branch("ctrl_trigger"     , &ctrl_trigger     ,      "ctrl_trigger/I");
- 
 
   //riempimento del tree
   for(unsigned iEntry=0; iEntry<nentries; iEntry++){
@@ -121,22 +130,18 @@ int main(int argc, char* argv[]){
     lumi            = lumi_raw;
     sampling        = sampling_raw;
 
-    // baseline        = Baseline(pshape);
-    //baseline_error  = BaselineError(pshape, baseline);
-    //charge          = Charge(pshape, sampling_raw, baseline);
-    //amp             = Amp(pshape, baseline);
+    //segnale da B60_bolometric
+    baseline        = Baseline(pshape);
+    baseline_error  = BaselineError(pshape, baseline);
+    charge          = Charge(pshape, sampling_raw, baseline);
+    amp             = Amp(pshape, baseline);
     
     //usare questi se segnale non viene da B60_bolometric magari
-    baseline        = GetBaseline(pshape);
-    baseline_error  = GetBaselineError(pshape, baseline);
-    charge          = GetCharge(pshape, sampling_raw, baseline);
-    amp             = GetAmp(pshape, baseline);
+    //baseline        = GetBaseline(pshape);
+    //baseline_error  = GetBaselineError(pshape, baseline);
+    //charge          = GetCharge(pshape, sampling_raw, baseline);
+    //amp             = GetAmp(pshape, baseline);
 
-    ctrl         = Ctrl_pshape(pshape, amp, trigger, baseline);
-    ctrl_double  = ctrl.get_ctrl_double();
-    ctrl_trigger = ctrl.get_ctrl_trigger();
-    ctrl_width   = ctrl.get_ctrl_width();
-    
     tree->Fill();
     
   } //for on tree entries
@@ -161,4 +166,60 @@ std::string RoundNumber(float result){
     return RoundResult;
 }
   
+
+float Baseline(float pshape[2502]){
+  float baseline = 0;
+  int   i_min    = 0;
+  int   i_max    = 150; 		     
+
+  for(int i=i_min; i<i_max; i++){
+    baseline += pshape[i];
+  }
+  baseline /= (i_max-i_min);
+  return baseline;
+}
+
+
+//STD_DEV BASELINE
+float BaselineError(float pshape[2502], float baseline){
+  float baseline_error = 0;
+  int   i_min          = 0;
+  int   i_max          = 150;	
+
+  for(int i=i_min; i<i_max; i++){
+    baseline_error += pow((pshape[i]-baseline),2);
+  }
+  baseline_error /= (i_max-i_min-1);
+  return sqrt(baseline_error);
+}
+
+
+//CHARGE
+float Charge(float pshape[2502], float dt, float baseline){
+  float charge = 0;
+  
+  for(int i=0; i<2500; i++){
+    charge += (pshape[i]-baseline);
+  }
+  
+  charge *= dt;
+  return (charge*(-1)); //lavoro con carica>0
+}
+
+
+//AMPLITUDE
+float Amp(float pshape[2502], float baseline){
+  float amp = 0;
+  float min = 100;
+  
+  //sto lavorando sempre con segnali ingiù
+  for(int i=0; i<2500; i++){
+    if (pshape[i]<min){
+      min = pshape[i];
+    }
+  }
+  amp = baseline - min; //ampiezza>0
+  return (amp);
+}
+
 

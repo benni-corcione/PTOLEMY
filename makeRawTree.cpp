@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "lecroyparser.h"
-//#include "lec.h"
 #include "AndCommon.h"
 
 #include "TFile.h"
@@ -33,6 +32,7 @@ int main( int argc, char* argv[] ) {
   std::string dir_trc(Form("data/trc/CD%d/%s/%dV", cd, meas, v));
   std::string fileName_trc(dirs[dirs.size()-1]);
 
+  //std::cout << dir_trc << std::endl;
   std::string fileName = AndCommon::splitString( fileName_trc, "." )[0];
 
   //numero del file? tipo --00057? sì

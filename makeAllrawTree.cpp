@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
   
   for(int i=0; i<filenames.size(); i++){  
   
-    stream << "./makerawTree " << filenames[i] <<  std::endl;
+    stream << "./makeRawTree " << filenames[i] <<  std::endl;
     
     //senza if riesegue per ogni ciclo anche tutti i programmi prima dell'i-esimo
     if(i==filenames.size()-1){

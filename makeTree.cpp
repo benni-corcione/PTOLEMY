@@ -22,6 +22,7 @@ int main(int argc, char* argv[]){
     std::cout << "EXAMPLE: ./makeTree 188 conteggi 101 0.166" << std::endl;
     exit(1);
   }
+  
 
   int   CD_number = (atoi(argv[1])); //cooldown number
   int   voltage   = (atoi(argv[3]));
