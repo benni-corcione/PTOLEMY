@@ -1,0 +1,36 @@
+# local var = _G.var or {}
+# local x_shift = tonumber(var.x_shift) or 0
+
+# local pa_nx = 950
+# local pa_ny = 2100
+
+# local base_x1 = 325
+# local base_x2 = 330
+# local base_x3 = 430
+
+# local x1 = base_x1 + x_shift
+# local x2 = base_x2 + x_shift
+# local x3 = base_x3 + x_shift
+
+# if x1 < 10 then x1 = 10 end
+# if x2 < x1+2 then x2 = x1+2 end
+# if x3 < x2+2 then x3 = x2+2 end
+# if x3 > pa_nx-10 then x3 = pa_nx-10 end
+
+pa_define(950,2100,1,cylindrical,y_mirror,E)
+
+e(1) { fill{within{box(10,0,230,100)}} }
+e(2) { fill{within{box(10,100,210,300)}} }
+e(3) { fill{within{box(10,300,210,800)}} }
+e(4) { fill{within{box(10,800,110,2000)}} }
+
+e(5) { fill{within{box($(x1),20,$(x2),300)}} }
+e(6) { fill{within{box($(x2),200,$(x3),2000)}} }
+
+e(7) { fill{within{box(630,0,730,2000)}} }
+e(8) {
+  fill{
+    within{box(0,0,950,2100)}
+    notin{box(2,0,947,2097)}
+  }
+}

@@ -1,0 +1,23 @@
+particles {
+  coordinates = 0,
+  standard_beam {
+    n = 100,
+    tob = 0,
+    mass = 0.00054857990946,
+    charge = -1,
+    ke = 0.1,
+    cwf = 1,
+    color = 0,
+    direction = cone_direction_distribution {
+      axis = vector(1, 0, 0),
+      half_angle = 90,
+      fill = true
+    },
+    position = circle_distribution {
+      center = vector(230, 0, 0),
+      normal = vector(1, 0, 0),
+      radius = 100,
+      fill = true
+    }
+  }
+}
