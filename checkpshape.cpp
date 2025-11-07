@@ -70,7 +70,7 @@ int main( int argc, char* argv[] ) {
       }
       gStyle->SetOptStat(0);
       h1->SetLineColor(kViolet+5);
-      h1->SetLineWidth(2);
+      h1->SetLineWidth(3);
       h1->GetXaxis()->SetTitle("Time (#mus)");
       h1->GetYaxis()->SetTitle("Amplitude (V)");
       h1->GetXaxis()->SetTitleSize(.07); //0.06 su singola, //0.08 su mini
@@ -80,7 +80,8 @@ int main( int argc, char* argv[] ) {
       h1->GetYaxis()->SetTitleOffset(+0.95);
       h1->GetXaxis()->SetTitleOffset(+0.9);
       //h1->GetXaxis()->SetRangeUser(23.1,27);
-      h1->GetYaxis()->SetRangeUser(-0.5,0.5);
+      h1->GetYaxis()->SetRangeUser(-0.25,0.05);
+      //h1->GetYaxis()->SetRangeUser(-0.5,0.5);
       //h1->GetYaxis()->SetRangeUser(-03,0.05); //dark counts
       //h1->GetXaxis()->SetNdivisions(406);
       //h1->SetMarkerStyle(20);

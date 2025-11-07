@@ -55,12 +55,14 @@ int main(int argc, char* argv[]){
   int     lumiB,   lumiH;
   float chargeB, chargeH;
   float    ampB,    ampH;
+  float sampling;
   float pshapeB[2502];
   float pshapeH[2502];
   double trigtime_sB, trigtime_mB, trigtime_hB;
   double trigtime_sH, trigtime_mH, trigtime_hH;
   
   treeB->SetBranchAddress( "event" , &eventB  );
+  treeB->SetBranchAddress("sampling", &sampling);
   treeB->SetBranchAddress( "lumi"  , &lumiB   );
   treeB->SetBranchAddress( "charge", &chargeB );
   treeB->SetBranchAddress( "amp"   , &ampB    );
@@ -128,8 +130,8 @@ int main(int argc, char* argv[]){
 
       */
       
-      TH1D* Bshape = new TH1D("Bshape", "", 2500, 0., 2500.);
-      TH1D* Hshape = new TH1D("Hshape", "", 2500, 0., 2500.);
+      TH1D* Bshape = new TH1D("Bshape", "", 2500, 0., 2500.*sampling*1E+06);
+      TH1D* Hshape = new TH1D("Hshape", "", 2500, 0., 2500.*sampling*1E+06);
 
       for(int i=0; i<2500; ++i ){
 	Bshape->SetBinContent(i+1, pshapeB[i]);
@@ -138,6 +140,8 @@ int main(int argc, char* argv[]){
       }
       
       Bshape->GetYaxis()->SetRangeUser(-0.9,0.2);
+      Bshape->GetYaxis()->SetTitle("Voltage (V)");
+      Bshape->GetXaxis()->SetTitle("Time (us)");
       Bshape->SetLineColor(kAzure+1);
       Bshape->SetLineWidth(4);
       Hshape->SetLineColor(kPink+6);

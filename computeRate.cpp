@@ -1,11 +1,13 @@
 #include <iostream>
-#include <fstream>
 #include <stdlib.h>
-
+#include <string>
+#include <sstream>
+#include <filesystem>
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
+#include "TH1F.h"
 #include "TPad.h"
 #include "TLine.h"
 
@@ -36,7 +38,7 @@ int main(int argc, char* argv[] ) {
   float rates_err   [volts.size()];
   float rates_PU    [volts.size()];
   float rates_err_PU[volts.size()];
-  
+
   //for che scorre tutti i voltaggi
   for(int i=0; i<volts.size(); i++){
 
@@ -55,6 +57,7 @@ int main(int argc, char* argv[] ) {
     int electronics;
     double trigtime_m;
     double trigtime_s;
+    double trigtime_h;
     
     tree->SetBranchAddress("ctrl_double", &ctrl_double);
     tree->SetBranchAddress("cosmic_rays", &cosmic_rays);
@@ -64,6 +67,7 @@ int main(int argc, char* argv[] ) {
     treeraw->SetBranchAddress("event"      , &event      );
     treeraw->SetBranchAddress("trigtime_m" , &trigtime_m );
     treeraw->SetBranchAddress("trigtime_s" , &trigtime_s );
+    treeraw->SetBranchAddress("trigtime_h" , &trigtime_h );
     
     int nEntries = tree->GetEntries();
 
@@ -71,14 +75,17 @@ int main(int argc, char* argv[] ) {
     //inizializzazione parametri per il ciclo
     float previous_s    = -1.;
     float previous_m    = -1.;
+    float previous_h    = -1.;
     int   previous_lumi = -1;
     int   nCounts       = 0; //forme singole
     int   nCounts_PU    = 0; //forme con doppie o triple ecc
     int check           = 0; //controllo su scarto di forma d'onda
  
     //histogrammi per calcolare rate 
-    TH1D* h1_rate    = new TH1D( "rate"   , "", 100, 0., 500.);
-    TH1D* h1_rate_PU = new TH1D( "rate_PU", "", 100, 0., 500.);
+    TH1D* h1_rate    = new TH1D( "rate"     , "", 100, 0., 500.);
+    TH1D* h1_rate_PU = new TH1D( "rate_PU"  , "", 100, 0., 500.);
+    TH1D* delta_tot  = new TH1D( "delta_tot", "", 1  , 0., 1000000.);
+    double time_tot = 0;
     
       
     for( int iEntry = 0; iEntry < nEntries; ++iEntry ) {
@@ -97,6 +104,7 @@ int main(int argc, char* argv[] ) {
 	previous_lumi = lumi;
 	previous_s = trigtime_s;
 	previous_m = trigtime_m;
+	previous_h = trigtime_h;
       }
 
       check=0;
@@ -116,25 +124,31 @@ int main(int argc, char* argv[] ) {
 	
 	if(previous_lumi!=lumi &&
 	   (trigtime_s!=previous_s ||
-	    trigtime_m!=previous_m )){
+	    trigtime_m!=previous_m ||
+	    trigtime_h!=previous_h 
+	    )){
 	  //sono in file lumi diversi e deltaT validi e ho davvero evento
 	  //non ho ancora aggiornato i conteggi nCounts per non prendere quelli del file lumi dopo...
-	  
+	 
 	  //calcolo rate
-	  double delta_t = (trigtime_s - previous_s) + (trigtime_m - previous_m);
+	  double delta_t = (trigtime_s - previous_s) + (trigtime_m - previous_m) + (trigtime_h - previous_h);
 	  double rate    = nCounts/delta_t;
 	  double rate_PU = nCounts_PU/delta_t;
-
+	  time_tot+=delta_t;
+	  
 	  h1_rate->Fill(rate);
 	  h1_rate_PU->Fill(rate_PU);
 
 	  //aggiorno per la nuova lumi dopo aver riempito histo
 	  nCounts = ctrl_double; 
 	  nCounts_PU = (ctrl_double-1);
+	  
 	}
       }//if su pshape accettata
     } // for entries    
 
+    delta_tot->Fill(time_tot);
+    
     
     std::cout << "------------------------" << std::endl;
     std::cout << "   V = " << volts[i] << " V" << std::endl;
@@ -146,10 +160,13 @@ int main(int argc, char* argv[] ) {
 	      << " +/- " << h1_rate_PU->GetMeanError()
 	      << " Hz (x" << h1_rate_PU->GetMean()/h1_rate->GetMean() << " more)" << std::endl;
 
-    TFile* file_rate = TFile::Open( Form("rate_%dV.root", volts[i]), "recreate" );
+    std::cout << "total time: " << time_tot << std::endl;
+    
+    TFile* file_rate = TFile::Open( Form("data/root/CD%d/%s/%dV/rate_%dV.root", CD_number,meas,volts[i],volts[i]), "recreate" );
     file_rate->cd();
     h1_rate->Write();
     h1_rate_PU->Write();
+    delta_tot->Write();
     file_rate->Close();
     
     std::cout << " -> Saved rate in: " << file_rate->GetName() << std::endl;
@@ -204,9 +221,14 @@ int main(int argc, char* argv[] ) {
     ymin_PU = -0.05; ymax_PU = 1.25;
   }
 
-  if(CD_number==204){
+  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){
     ymin    = -2   ; ymax    = 290 ;
-    ymin_PU = -0.5; ymax_PU = 19.2;
+    ymin_PU = -0.5; ymax_PU = 20;
+  }
+
+   if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){
+    ymin    = -2   ; ymax    = 150 ;
+    ymin_PU = -0.1; ymax_PU = 2.7;
   }
     
   TH2D *h2_axes_g = new TH2D( "axes_g", "", 10, xmin, xmax, 10, ymin, ymax);

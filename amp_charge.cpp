@@ -69,7 +69,9 @@ int main(int argc, char* argv[]){
   //g->GetFunction("pol1")->SetLineWidth(3);
   g->GetYaxis()->SetTitle("Amplitude [V]");
   g->GetXaxis()->SetTitle("Charge [uC]");
-  g->GetXaxis()->SetLimits(-2,12);
+  g->GetXaxis()->SetLimits(-2,15);
+  g->SetMinimum(0);
+  g->SetMaximum(0.15);
   g->SetTitle(Form("%d V",voltage));
   g->SetMarkerSize(1.5);
   g->SetMarkerStyle(20);
