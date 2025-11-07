@@ -54,14 +54,14 @@ int main(int argc, char* argv[]) {
   style->SetPadLeftMargin(0.17);
   style->SetPadRightMargin(0.04);
   style->SetPadTopMargin(0.04);
-  style->SetPadBottomMargin(0.15);
+  style->SetPadBottomMargin(0.1);
 
   std::vector<int> colors; 
 
   std::vector<int> volts;
-  if(CD_number==188){volts.push_back(105); volts.push_back(103); volts.push_back(101); volts.push_back(97); measure = "conteggi"; colors.push_back(kAzure+7); colors.push_back(kGreen-6); colors.push_back(kOrange-3); colors.push_back(kRed-3); }
-  if(CD_number==204){volts.push_back(105); volts.push_back(97); measure = "B60_post_cond3_moku"; colors.push_back(kAzure+7); colors.push_back(kGreen-6);}
-  if(CD_number==222){volts.push_back(123);  volts.push_back(128); measure = "E100_squidfilter_ER_031025_tr12"; colors.push_back(kOrange-3); colors.push_back(kRed-3);}
+  if(CD_number==188){volts.push_back(105); volts.push_back(103); volts.push_back(101); volts.push_back(97); measure = "conteggi"; colors.push_back(1); colors.push_back(46); colors.push_back(38); colors.push_back(30); }
+  if(CD_number==204){volts.push_back(105); volts.push_back(97); measure = "B60_post_cond3_moku"; colors.push_back(1); colors.push_back(30);}
+  if(CD_number==222){volts.push_back(123);  volts.push_back(128); measure = "E100_squidfilter_ER_031025_tr12"; colors.push_back(46); colors.push_back(38);}
 
   // carbon WF:
   float phi = 4.5;
@@ -131,7 +131,6 @@ int main(int argc, char* argv[]) {
     float fit_min    = f_var.get_fit_min();
     float fit_max    = f_var.get_fit_max();
    
-    
    TF1 *cruijff  = new TF1(Form("cru_%d", volts[i]), Cruijff, fit_min, fit_max, 5);
 
     //parametri del fit
@@ -155,15 +154,15 @@ int main(int argc, char* argv[]) {
     cruijff->SetLineWidth(3); //8 single (metà per multipli insieme)
     h1_amp->SetLineWidth(4); //4 single
     h1_amp->Fit(cruijff, "RX");
-    h1_amp->SetXTitle("Amplitude (V)");
+    h1_amp->SetXTitle("arbitrary units");
     h1_amp->SetYTitle(Form("Counts / (%.3f V)", (double)(h1_amp->GetXaxis()->GetBinWidth(13))) );
-    h1_amp->GetXaxis()->SetTitleSize(.07);
-    h1_amp->GetYaxis()->SetTitleSize(.07);
+    h1_amp->GetXaxis()->SetTitleSize(0.04);
+    h1_amp->GetYaxis()->SetTitleSize(0.07);
     h1_amp->GetXaxis()->SetLabelSize(0.065);
     h1_amp->GetYaxis()->SetLabelSize(0.065);
     h1_amp->GetYaxis()->SetTitleOffset(+1.2);
-    h1_amp->GetXaxis()->SetTitleOffset(+1.0);
-   
+    h1_amp->GetXaxis()->SetTitleOffset(0.6);
+    
     c1->Clear();
     TLatex* latex = new TLatex();
     latex->SetTextSize(0.065);
@@ -171,7 +170,7 @@ int main(int argc, char* argv[]) {
     
     h1_amp->Draw();
     cruijff->Draw("Lsame");
-    latex->DrawLatex( 0.3, h1_amp->GetMaximum()-0.05*(h1_amp->GetMaximum()), Form("V_{cnt} = %s V", h1_amp->GetName()));
+    latex->DrawLatex( 0.3, h1_amp->GetMaximum()-0.05*(h1_amp->GetMaximum()), Form("V_{CNT} = %s V", h1_amp->GetName()));
    
       
     histos.push_back(h1_amp);
@@ -183,21 +182,28 @@ int main(int argc, char* argv[]) {
   if(CD_number==204){ymax = 280;}
   if(CD_number==222){ymax = 210;}
   TH2D* h2_axes = new TH2D( "axes", "", 10, xmin, xmax, 10, 0., ymax );
-  h2_axes->SetXTitle( "Amplitude (V)" );
+  h2_axes->SetXTitle( "arbitrary units" );
+  h2_axes->GetXaxis()->SetLabelSize(0);  
+  h2_axes->GetXaxis()->SetTickLength(0);  
+  h2_axes->GetXaxis()->SetTitleSize(0.04);
+  h2_axes->GetXaxis()->SetTitleOffset(0.6);
+
   //h2_axes->GetXaxis()->SetNdivisions(505);
   h2_axes->GetYaxis()->SetTitleOffset(1.5);
   h2_axes->SetYTitle( Form("Counts / (%.3f V)", (double)(histos[0]->GetXaxis()->GetBinWidth(13))) );
-
+  if(CD_number==204){h2_axes->SetTitle("T-60, CNTs: 1 mm^{2}");}
+  if(CD_number==222){h2_axes->SetTitle("T-100-b, CNTs: 1 mm^{2}");}
   h2_axes->Draw();
   
   TLatex* latex = new TLatex();
   latex->SetTextSize(0.035);
-
+  //style->SetOptTitle(1);
+  
   for( unsigned i=0; i<histos.size(); ++i ) {
 
     histos[i]->SetLineWidth(2);
     histos[i]->SetLineColor(colors[i]);
-    histos[i]->GetXaxis()->SetNdivisions(505);
+    //histos[i]->GetXaxis()->SetNdivisions(0);
     TF1* f = histos[i]->GetFunction(Form("cru_%s", histos[i]->GetName()));
     f->SetLineColor(colors[i]);
     histos[i]->Draw("same");
@@ -206,15 +212,19 @@ int main(int argc, char* argv[]) {
     float fzero = f->Eval(xmin);
     float nsigma = (volts[i]==105.) ? 4.8 : 3.;
     if(CD_number==188){
-    latex->DrawLatex( 0.74, fzero + nsigma*sqrt(fzero), Form("#it{V}_{cnt} = %s V", histos[i]->GetName()) );
+    latex->DrawLatex( 0.74, fzero + nsigma*sqrt(fzero), Form("#it{V}_{CNT} = %s V", histos[i]->GetName()) );
     }
-    if(CD_number==204){ if(i==0){ latex->DrawLatex( 0.627, 220, Form("#it{V}_{cnt} = %s V", histos[i]->GetName()));}
-      if(i==1){ latex->DrawLatex( 0.582, 250, Form("#it{V}_{cnt} = %s V", histos[i]->GetName()) );}}
+    if(CD_number==204){
+      
+      if(i==0){ latex->DrawLatex( 0.627, 220, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()));}
+      if(i==1){ latex->DrawLatex( 0.582, 250, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()) );}}
     
   
   
-  if(CD_number==222){ if(i==0){ latex->DrawLatex( 0.102, 180, Form("#it{V}_{cnt} = %s V", histos[i]->GetName()));}
-    if(i==1){ latex->DrawLatex( 0.118, 160, Form("#it{V}_{cnt} = %s V", histos[i]->GetName()) );}}
+  if(CD_number==222){
+    histos[i]->SetTitle("T-100-b, CNTs: 1 mm^{2}");
+    if(i==0){ latex->DrawLatex( 0.102, 180, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()));}
+    if(i==1){ latex->DrawLatex( 0.118, 160, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()) );}}
   
 
   }
