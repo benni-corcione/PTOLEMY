@@ -40,8 +40,8 @@ int main(int argc, char* argv[]){
   //preparazione per la lettura del tree in amp o charge
   float amp;
   float charge;
-  int nbins_amp = 700;
-  int nbins_cha = 500;
+  int nbins_amp = 200;
+  int nbins_cha = 400;
   tree->SetBranchAddress("amp"   , &amp   );
   tree->SetBranchAddress("charge", &charge);
   
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
   Settings settings;
   //funzione che tiene solo una cifra significativa per passare a stringa
   float binsize_amp = settings.Binsize(1./nbins_amp);
-  float binsize_cha = settings.Binsize(20./nbins_cha); 
+  float binsize_cha = settings.Binsize(30./nbins_cha); 
 
   //x and y labels
   const char* x_amp = "Amplitude [V]";
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
   
   //creazione istogramma e lettura del tree
   TH1F* h_amp= new TH1F("h_amp", "Amplitude", nbins_amp, 0, 1 );
-  TH1F* h_cha= new TH1F("h_cha", "Charge"   , nbins_cha, 0, 20);
+  TH1F* h_cha= new TH1F("h_cha", "Charge"   , nbins_cha, 0, 30);
  
   for(int iEntry=0; iEntry<nentries; iEntry++){
     tree->GetEntry(iEntry);
@@ -77,13 +77,24 @@ int main(int argc, char* argv[]){
   c->cd();
 
   //disegno dell'histo con funzione definita in graphics.h
-  settings.graphic_histo(h_amp,0.37,0.65,x_amp,y_amp.c_str(),voltage);
-  settings.graphic_histo(h_cha,0,10,x_cha,y_cha.c_str(),voltage);
+  settings.graphic_histo(h_amp,0,0.7,x_amp,y_amp.c_str(),voltage);
+  settings.graphic_histo(h_cha,0,9,x_cha,y_cha.c_str(),voltage);
   settings.general_style();
   //gStyle->SetOptFit(0011);
 
+  h_amp->SetTitle("106 eV");
+  float x0 = 0.26;
+  int bin = h_amp->FindBin(x0);
+  
+  for(int i = 0; i<40; i++){
+    int content = h_amp->GetBinContent(bin);
+    float x_correspondent = h_amp->GetXaxis()->GetBinCenter(bin);
+    bin++;
+    //std::cout << "x: " << x_correspondent << ", content: " << content << std::endl; 
+  }
+  
   h_amp->SetMarkerSize(2);
-  h_amp->SetLineWidth(3);
+  h_amp->SetLineWidth(4);
   h_amp->Draw(); //"pe" per avere points+errors
 
   std::string outdir( Form("plots/CD%d/%s/%dV/", CD_number, meas, voltage));
@@ -92,7 +103,7 @@ int main(int argc, char* argv[]){
   c->SaveAs(Form("plots/CD%d/%s/%dV/amp_%dbins.png",CD_number,meas,voltage,nbins_amp));
 
   h_cha->SetMarkerSize(2);
-  h_cha->SetLineWidth(3);
+  h_cha->SetLineWidth(4);
   h_cha->Draw(); //"pe" per avere points+errors
 
   c->SaveAs(Form("plots/CD%d/%s/%dV/charge_%dbins.png",CD_number,meas,voltage,nbins_cha));
