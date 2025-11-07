@@ -1,5 +1,5 @@
 //libreria di funzioni che ricavano info leggendo le pshapes
-
+#include <sstream>
 //BASELINE
 float GetBaseline(float pshape[2502]){
   float baseline = 0;
@@ -308,9 +308,15 @@ float Get_width_min(int CD_number,int voltage, char* meas){
     if(voltage==105)              { width_min = 120;}
   }
 
-  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ width_min = 60; }
-
+  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){
+    if(voltage==0){ width_min = 50;}
+    else          { width_min = 60;}
+  }
   if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ width_min = 40; }
+
+  if(strcmp(meas,"H60_pre_cond")==0){ width_min = 200; }
+  if(strcmp(meas,"B60_pre_cond")==0){ width_min = 160; }
+  if(strcmp(meas,"H60_post_cond3_moku")==0){ width_min = 40; }
   
   return width_min;
 }
@@ -328,6 +334,7 @@ float Get_width_max(int CD_number,int voltage, char* meas){
  }
 
  if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){
+    if(voltage==0 )               { width_max = 200;}
     if(voltage==96)               { width_max = 300;}
     if(voltage==97)               { width_max = 250;}
     if(voltage>97  && voltage<101){ width_max = 260;}
@@ -340,11 +347,15 @@ float Get_width_max(int CD_number,int voltage, char* meas){
 
  
  if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){
+    if(voltage==0)                  { width_max = 160;}
     if(voltage==97)                 { width_max = 340;}
     if(voltage==99  || voltage==101){ width_max = 280;}
     if(voltage==103 || voltage==106){ width_max = 290;}
  }
- 
+
+  if(strcmp(meas,"H60_pre_cond")==0){ width_max = 600; }
+  if(strcmp(meas,"B60_pre_cond")==0){ width_max = 640; }
+  if(strcmp(meas,"H60_post_cond3_moku")==0){ width_max = 240; }
   return width_max;
 }
 
@@ -354,6 +365,9 @@ float Get_charge_min(int CD_number,int voltage, char* meas){
   if(CD_number==188){ charge_min = 1.0*1E-6; }
   if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ charge_min = 0.2*1E-6; }
   if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ charge_min = 0; }
+  if(CD_number==204 && strcmp(meas,"H60_pre_cond")==0){ charge_min = 0; }
+  if(CD_number==204 && strcmp(meas,"B60_pre_cond")==0){ charge_min = 0; }
+  if(CD_number==204 && strcmp(meas,"H60_post_cond3_moku")==0){ charge_min = 0; }
   return charge_min;
 }
 
@@ -370,6 +384,9 @@ float Get_base_err_max(int CD_number,int voltage, char* meas){
 
   if(CD_number==204 && strcmp(meas,"B60_post_cond3_moku")==0){ base_err_max = 0.007; }
   if(CD_number==204 && strcmp(meas,"B60_preamp_post_cond1")==0){ base_err_max = 0.007; }
+  if(CD_number==204 && strcmp(meas,"H60_pre_cond")==0){ base_err_max = 0.007; }
+  if(CD_number==204 && strcmp(meas,"B60_pre_cond")==0){ base_err_max = 0.01; }
+  if(CD_number==204 && strcmp(meas,"H60_post_cond3_moku")==0){ base_err_max = 0.007; }
   
   return base_err_max;
 }

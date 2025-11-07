@@ -104,14 +104,16 @@ int main(int argc, char* argv[]){
 
        for(int i=0; i<2500; ++i ){ h1->SetBinContent(i+1, pshape[i] ); }
 
-       //h1->GetYaxis()->SetRangeUser(-0.5,0.5);
-       h1->GetYaxis()->SetRangeUser(-0.9,0.1);
+       if(strcmp(meas,"B60_post_cond3_moku")==0){
+       h1->GetYaxis()->SetRangeUser(-0.5,0.5);
+       }else{
+	 h1->GetYaxis()->SetRangeUser(-0.9,0.1);}
        h1->SetLineColor(kAzure-4);
        h1->SetLineWidth(3);
        gStyle->SetOptStat(0);
        
        h1->Draw("l");
-
+       
        /*
        std::cout << "b: " << baseline_error << std::endl;
        std::cout << "c: " << charge*1E+6 << std::endl;
@@ -133,8 +135,10 @@ int main(int argc, char* argv[]){
 
        for(int i=0; i<2500; ++i ){ h1->SetBinContent(i+1, pshape[i] ); }
        
-       //h1->GetYaxis()->SetRangeUser(-0.5,0.5);
-       h1->GetYaxis()->SetRangeUser(-0.9,0.1);
+       if(strcmp(meas,"B60_post_cond3_moku")==0){
+       h1->GetYaxis()->SetRangeUser(-0.5,0.5);
+       }else{
+	 h1->GetYaxis()->SetRangeUser(-0.9,0.1);}
        h1->SetLineColor(kPink-4);
        h1->SetLineWidth(3);
        gStyle->SetOptStat(0);
@@ -151,13 +155,15 @@ int main(int argc, char* argv[]){
 
     if ( ctrl_double==0 ){
       //std::cout << "COSMIC RAY - event " << event << "  lumi " << lumi << std::endl;
-      
+       std::cout << ctrl_width << std::endl;
       for(int i=0; i<2500; ++i ){
 	h1->SetBinContent(i+1, pshape[i] );
       }
       
-      //h1->GetYaxis()->SetRangeUser(-0.5,0.5);
-      h1->GetYaxis()->SetRangeUser(-0.9,0.1);
+      if(strcmp(meas,"B60_post_cond3_moku")==0){
+       h1->GetYaxis()->SetRangeUser(-0.5,0.5);
+      }else{
+	h1->GetYaxis()->SetRangeUser(-0.9,0.1);}
       h1->SetLineColor(kBlack);
       h1->SetLineWidth(3);
       gStyle->SetOptStat(0);

@@ -27,8 +27,8 @@ int main(int argc, char* argv[]){
 
   
   //tree settings
-  TFile run(Form("data/root/CD%d/%s/%smW/CD%d_%smWtree.root",CD_number,meas,ch_char,CD_number,ch_char));
-  TTree *tree = (TTree*)run.Get("tree");
+  TFile run(Form("data/root/CD%d/%s/%smW/CD%d_%smWtree_mod.root",CD_number,meas,ch_char,CD_number,ch_char));
+  TTree *tree = (TTree*)run.Get("tree_mod");
   Long64_t nentries = tree->GetEntries();
   Long64_t n_bins = 500;
 

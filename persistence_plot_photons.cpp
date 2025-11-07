@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <filesystem>
+#include <sstream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -55,7 +57,7 @@ int main( int argc, char* argv[] ) {
   tree->GetEntry(1);
   std::vector<TH1D*> histos;
 
-  for(unsigned iEntry=40999; iEntry<41999; iEntry++){
+  for(unsigned iEntry=0; iEntry<999; iEntry++){
     tree->GetEntry(iEntry);
     
     std::string histname(Form("%dentry", iEntry));
