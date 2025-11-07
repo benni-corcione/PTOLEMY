@@ -16,22 +16,24 @@
 int main(int argc, char* argv[]){
 
   //parametri da input
-  if (argc!=6){
-    std::cout << "USAGE: ./data_fit_selected [CD_number] [misura] [voltage] [ctrls listed below]" << std::endl;
-    std::cout << "[double] [width]" << std::endl;
+  if (argc!=7){
+    std::cout << "USAGE: ./draw_ctrls [CD_number] [misura] [voltage] [ctrls listed below]" << std::endl;
+    std::cout << "[double] [width] [charge]" << std::endl;
     std::cout << "0: ctrl spento    1: ctrl acceso" << std::endl;
     exit(1);
   }
 
-  int CD_number = (atoi(argv[1]));
-  char* meas    =       argv[2]  ;
-  int voltage   = (atoi(argv[3]));
-  int doubles   = (atoi(argv[4]));
-  int width     = (atoi(argv[5]));
+  int CD_number   = (atoi(argv[1]));
+  char* meas      =       argv[2]  ;
+  int voltage     = (atoi(argv[3]));
+  int doubles     = (atoi(argv[4]));
+  int width       = (atoi(argv[5]));
+  int ctrl_charge = (atoi(argv[6]));
 
   std::string which;
-  if(doubles==1){which = "double";}
-  if(width==1){which = "width";}
+  if(doubles    ==1){which = "double";}
+  if(width      ==1){which = "width" ;}
+  if(ctrl_charge==1){which = "charge";}
   //apertura file con il tree
   TFile run(Form("data/root/CD%d/%s/%dV/CD%d_%dV_tree.root",CD_number,meas,voltage,CD_number,voltage));
   TTree *tree = (TTree*)run.Get("tree");
@@ -69,8 +71,9 @@ int main(int argc, char* argv[]){
     tree->GetEntry(iEntry);
    
       //seleziono solo le forme d'onda che falliscono i controlli di sicurezza
-    if ((doubles  == 1 && ctrl_double > 1) ||
-        (width    == 1 && (ctrl_width < 60 || ctrl_width>280))) {
+    if ((doubles     == 1 && ctrl_double > 1) ||
+        (width       == 1 && (ctrl_width < 60 || ctrl_width>280)) ||
+	(ctrl_charge == 1 && charge>8E-06)) {
 
       counter++;
       treeraw->GetEntry(iEntry);
@@ -91,10 +94,10 @@ int main(int argc, char* argv[]){
 	        << "  width:" << ctrl_width
 		<< "  charge:" << charge*1E+6 << std::endl;
       
-      h1->GetYaxis()->SetRangeUser(-0.4,0.5);
+      h1->GetYaxis()->SetRangeUser(-0.05,0.005);
       h1->SetLineColor(kBlue+2);
       h1_smooth->SetLineColor(kBlue-9);
-      h1->SetLineWidth(3);
+      h1->SetLineWidth(5);
       h1_smooth->SetLineWidth(3);
       
       h1->Draw("l");
@@ -102,7 +105,7 @@ int main(int argc, char* argv[]){
       
       std::string outdir( Form("plots/CD%d/%s/%dV/ctrls", CD_number, meas, voltage));
       system( Form("mkdir -p %s", outdir.c_str()) );
-      c1->SaveAs(Form("%s/%s_event%d_lumi%d.png",outdir.c_str(),which.c_str(),event,lumi));
+      c1->SaveAs(Form("%s/%d_%s_event%d_lumi%d.png",outdir.c_str(),ctrl_double,which.c_str(),event,lumi));
       delete(h1);
       
      }//if event

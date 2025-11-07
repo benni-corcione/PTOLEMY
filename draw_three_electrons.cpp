@@ -83,12 +83,12 @@ int main( int argc, char* argv[] ) {
   //stile histo
   gStyle->SetOptStat(0);
   
-  h1->SetLineColor(kOrange+8);
-  h1->SetLineWidth(8);
-  h2->SetLineColor(kBlue-7);
-  h2->SetLineWidth(8);
-  h3->SetLineColor(kPink+6);
-  h3->SetLineWidth(8);
+  h1->SetLineColor(30);
+  h1->SetLineWidth(4);
+  h2->SetLineColor(216);
+  h2->SetLineWidth(4);
+  h3->SetLineColor(38);
+  h3->SetLineWidth(4);
     
   h3->GetXaxis()->SetTitle("Time (#mus)");
   h3->GetYaxis()->SetTitle("Amplitude (V)");
@@ -98,42 +98,50 @@ int main( int argc, char* argv[] ) {
   h3->GetYaxis()->SetLabelSize(0.07);
   h3->GetYaxis()->SetTitleOffset(+0.9);
   h3->GetXaxis()->SetTitleOffset(+1);
-  h3->GetYaxis()->SetRangeUser(-1.0,0.1);
+  h3->GetYaxis()->SetRangeUser(-0.79,0.1);
   //h1->SetMarkerStyle(20);
   //h1->SetMarkerSize(1);
   //h1->SetMarkerColor(kBlue-6);
   c1->SetBottomMargin(0.2);
-  c1->SetLeftMargin(0.12);
+  c1->SetLeftMargin(0.15);
   c1->SetRightMargin(0.05);
-  gStyle->SetFrameLineWidth(0.5);
+  //gStyle->SetFrameLineWidth(0.5);
   h3->Draw("l");
   h2->Draw("l same");
   h1->Draw("l same");
   c1->SaveAs(Form("plots/CD%d/%s/%dV/ev%dlumi%d_ev%dlumi%d_ev%dlumi%d.png",CD_number,meas,voltage,event1,lumi1,event2,lumi2,event3,lumi3));
 
-  /*  
+    
   //fit sulla pulse shape
   //inizializzazione parametri
   double A0    = -2.2E-4;
   double n     = -0.033 ;
-  double A     = -0.87  ;
-  double x0    =  23.1  ;
-  double tau_R =  0.1   ;
-  double tau_F =  10.4   ;
+  double A     =  0.76  ;
+  double x0    =  23.6  ;
+  double tau_R =  0.2   ;
+  double tau_F =  9   ;
 
-  TF1 *shape = new TF1("fit_fcn", PShape, 0, 100, 6);
+  TF1 *shape = new TF1("fit_fcn", PShape, 0, 40, 6);
   shape->SetParNames("A0", "n", "A", "x0", "#tau_rise", "#tau_fall");
+  //A0: par0   n: par1   A: par2   x0: par3   tau_rise: par4   tau_fall : par5
   shape->SetParameters(A0 , n, A, x0, tau_R, tau_F);
   //shape->SetParLimits(2,0.55,0.6);
-  shape->SetParLimits(4,0.01,0.5);
-  shape->SetParLimits(3,20,24.5);
-  shape->SetParLimits(5,5,14.5);
+
+  
+  shape->SetParLimits(3,18,24.5);
+  shape->SetParLimits(4,0.001,1.5);
+  shape->SetParLimits(5,1,18);
+  //shape->FixParameter(2, 0.76 );
+  //shape->FixParameter(5, 10.0 );
   //shape->SetParLimits(2,0.7,0.81);
   shape->SetLineColor(kRed);
   shape->SetLineWidth(6);
-
-  //c1->SaveAs(Form("plots/CD%d/%s/%dV/ev%dlumi%d_ev%dlumi%d_ev%dlumi%d.png",CD_number,meas,voltage,event1,lumi1,event2,lumi2,event3,lumi3));
-  */
+  shape->SetNpx(1000);
+  //h2->Fit("fit_fcn","RxM");
+  //h1->Fit("fit_fcn","RxM+");
+  //h3->Fit("fit_fcn","RxM+");
+  c1->SaveAs(Form("plots/CD%d/%s/%dV/ev%dlumi%d_ev%dlumi%d_ev%dlumi%d.png",CD_number,meas,voltage,event1,lumi1,event2,lumi2,event3,lumi3));
+  
   delete(h1);
   delete(h2);
   delete(h3);

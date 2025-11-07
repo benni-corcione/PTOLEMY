@@ -200,15 +200,15 @@ int main(int argc, char* argv[]) {
   if(CD_number1==188 && CD_number2==222){ xmax_reso= energy_max + 2;}
   float ymax_reso = 0;
   float ymax_fwhm = 0;
-  if(CD_number1==188 && CD_number2==204){ ymax_reso = 2.3; ymax_fwhm = 40; }
-  if(CD_number1==188 && CD_number2==222){ ymax_reso = 2.3; ymax_fwhm = 40; }
+  if(CD_number1==188 && CD_number2==204){ ymax_reso = 2.3; ymax_fwhm = 44; }
+  if(CD_number1==188 && CD_number2==222){ ymax_reso = 2.3; ymax_fwhm = 44; }
 
   gPad->SetGrid(1, 1);
   gStyle->SetGridColor(kGray+1);   // grigio chiaro
   gStyle->SetGridStyle(3);         // tratteggiata (default=3, continua=1)
   gStyle->SetGridWidth(1);
  
-  TLegend* legend = new TLegend(0.45,0.83,0.95,0.9);
+  TLegend* legend = new TLegend(0.35,0.83,0.95,0.9);
   legend->SetTextSize(0.03);
   legend->SetMargin(0.1);
   legend->SetBorderSize(0);
@@ -242,8 +242,8 @@ int main(int argc, char* argv[]) {
   gr_reso_1->Draw("PESame");
   gr_reso_2->Draw("PESame");
   if(CD_number1==188 && CD_number2==204){
-  legend->AddEntry(gr_reso_1, "TES side: 100um, CNT side: 3 mm", "pe");
-  legend->AddEntry(gr_reso_2, "TES side:   60um, CNT side: 1 mm", "pe");
+ legend->AddEntry(gr_reso_1, "TES: (100 x 100) #mum^{2}, CNTs: (3 x 3) mm^{2}", "pe");
+  legend->AddEntry(gr_reso_2, "TES: (60 x 60) #mum^{2}, CNTs: (1 x 1) mm^{2}", "pe");
   }
   if(CD_number1==188 && CD_number2==222){
   legend->AddEntry(gr_reso_1, "TES side: 100um, CNT side: 3 mm", "pe");
@@ -283,8 +283,8 @@ int main(int argc, char* argv[]) {
   gr_reso_fwhm_1->Draw("PESame");
   gr_reso_fwhm_2->Draw("PESame");
   if(CD_number1==188 && CD_number2==204){
-  legend->AddEntry(gr_reso_fwhm_1, "TES side: 100um, CNT side: 3 mm", "pe");
-  legend->AddEntry(gr_reso_fwhm_2, "TES side:   60um, CNT side: 1 mm", "pe");
+  legend->AddEntry(gr_reso_fwhm_1, "TES: (100 x 100) #mum^{2}, CNTs: (3 x 3) mm^{2}", "pe");
+  legend->AddEntry(gr_reso_fwhm_2, "TES: (60 x 60) #mum^{2}, CNTs: (1 x 1) mm^{2}", "pe");
   }
   if(CD_number1==188 && CD_number2==222){
   legend->AddEntry(gr_reso_1, "TES side: 100um, CNT side: 3 mm", "pe");

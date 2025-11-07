@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
   float histo_min=0;
   float histo_max=0;  
   if      (strcmp(choice,"amp"   )==0){ magnifying = 1e+0; histo_min=0.; histo_max=1.;}
-  else if (strcmp(choice,"charge")==0){ magnifying = 1e+6; histo_min=0.; histo_max=20.;}
+  else if (strcmp(choice,"charge")==0){ magnifying = 1e+6; histo_min=0.; histo_max=30.;}
 
   //variabili per l'istogramma
   //float histo_min   = tree->GetMinimum(choice)*magnifying;
@@ -94,19 +94,35 @@ int main(int argc, char* argv[]){
   //CARICA
   if(strcmp(choice,"charge")==0){
     //fit_min    = 8.5; fit_max    =9;
-    A_min      = 1           ; A_max      = 5000       ; A_      = histo->Integral();
-    mu_min     = histo_min   ; mu_max     = histo_max  ; mu_     = (histo_max*0.7)  ;
-    sigmaL_min = 0.10        ; sigmaL_max = 10         ; sigmaL_ = 1                ;
-    sigmaR_min = 0.10        ; sigmaR_max = 10         ; sigmaR_ = 1                ; 
+    A_min      = 1;
+    A_max      = 5000;
+    A_         = histo->Integral();
+    mu_min     = 6.5;
+    mu_max     = 9.5;
+    mu_        = 8;
+    sigmaL_min = 0.01;
+    sigmaL_max = 20;
+    sigmaL_    = 1;
+    sigmaR_min = 0.010;
+    sigmaR_max = 20;
+    sigmaR_    = 1; 
   }
 
   //AMPIEZZA
   if(strcmp(choice,"amp")==0){
     //fit_min    = 0.615; fit_max    = 0.73;
-    A_min      = 1          ; A_max      = 5000        ; A_      = histo->Integral();
-    mu_min     = histo_min  ; mu_max     = histo_max   ; mu_     = (histo_max*0.7)  ;
-    sigmaL_min = 0.001      ; sigmaL_max = 0.5         ; sigmaL_ = 0.1              ;
-    sigmaR_min = 0.001      ; sigmaR_max = 0.1         ; sigmaR_ = 0.02             ;   
+    A_min      = 50;
+    A_max      = 10000;
+    A_         = histo->Integral();
+    mu_min     = 0.17;
+    mu_max     = 0.19;
+    mu_        = 0.18;
+    sigmaL_min = 0.001;
+    sigmaL_max = 0.5;
+    sigmaL_    = 0.01;
+    sigmaR_min = 0.001;
+    sigmaR_max = 0.5;
+    sigmaR_    = 0.02;   
   }
 
  
@@ -146,14 +162,13 @@ int main(int argc, char* argv[]){
   histo->Draw(); //"pe" per avere points+errors
 
   cruijff->SetLineColor(kRed-4);
-  cruijff->SetLineWidth(4);
   cruijff->SetLineWidth(5);
   cruijff->Draw("same");
 
   std::string outdir( Form("plots/CD%d/%s/%dV/", CD_number, meas, voltage));
   system( Form("mkdir -p %s", outdir.c_str()) );
   
-  c->SaveAs(Form("plots/CD%d/%s/%dV/%s_fit_%dbins.png",CD_number,meas,voltage, choice,nbins));
+  c->SaveAs(Form("plots/CD%d/%s/%dV/%s_fit_%dbins.png",CD_number,meas, voltage, choice,nbins));
   std::cout << "cruijff P: " << cruijff->GetProb() << std::endl;
 
   delete(cruijff);
