@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <sstream>
+#include <filesystem>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -36,6 +38,7 @@ int main( int argc, char* argv[] ) {
 
   //settings tree 
   float pshape[2502];
+  
   int   ev;
   int   lum;
   float sampling;
@@ -46,45 +49,47 @@ int main( int argc, char* argv[] ) {
   tree->SetBranchAddress( "sampling_time", &sampling );
 
   //preparazione grafica histo
-  TCanvas* c1 = new TCanvas("c1", "c1", 3600, 1700); //1800 850
+  TCanvas* c1 = new TCanvas("c1", "c1", 20000, 8000); //1800 850
   c1->cd();
 
   tree->GetEntry(1);
   std::vector<TH1D*> histos;
 
-  for(unsigned iEntry=0; iEntry<999; iEntry++){
+  for(unsigned iEntry=0; iEntry<1000; iEntry++){
     tree->GetEntry(iEntry);
-    
+    //float dyn_mean[2502]={0};
     std::string histname(Form("%dentry", iEntry));
     TH1D* h1 = new TH1D( histname.c_str(), "",2500,0.,2500*sampling*1E+6);
+    //DynamicMean(pshape, dyn_mean, 10);
     
     for(int i=0; i<2500; ++i ){
-      h1->SetBinContent( i+1, pshape[i] );
+      h1->SetBinContent((i+1), pshape[i] );
+      
     }
     histos.push_back(h1);
 
-    h1->SetLineWidth(3);
+    h1->SetLineWidth(20);
     gStyle->SetOptStat(0);
     
     //histo 'a persistenza'
-    h1->SetLineColorAlpha(kAzure+1, 0.01);
+    h1->SetLineColorAlpha(kAzure+8, 0.02);
     //h1->SetLineColor(kAzure+1); 
     
     h1->GetXaxis()->SetTitle("Time (#mus)");
     h1->GetYaxis()->SetTitle("Amplitude (V)");
-    h1->GetXaxis()->SetTitleSize(.05); //0.06 su singola, //0.08 su mini
-    h1->GetYaxis()->SetTitleSize(.05);
-    h1->GetXaxis()->SetLabelSize(0.04); //0.05 su singola, //0.07 su mini
-    h1->GetYaxis()->SetLabelSize(0.04);
+    h1->GetXaxis()->SetTitleSize(.07); //0.06 su singola, //0.08 su mini
+    h1->GetYaxis()->SetTitleSize(.07);
+    h1->GetXaxis()->SetLabelSize(0.08); //0.05 su singola, //0.07 su mini
+    h1->GetYaxis()->SetLabelSize(0.08);
     h1->GetYaxis()->SetTitleOffset(+0.95);
     h1->GetXaxis()->SetTitleOffset(+0.9);
-    h1->GetXaxis()->SetRangeUser(20,40);
-    h1->GetYaxis()->SetRangeUser(-1.5,0.2);
+    h1->GetXaxis()->SetRangeUser(0,500);
+    h1->GetYaxis()->SetRangeUser(-0.06,0.02);
     
     c1->SetBottomMargin(0.2);
     c1->SetLeftMargin(0.13);
     c1->SetRightMargin(0.04);
-    //gStyle->SetFrameLineWidth(0.5);
+    gStyle->SetFrameLineWidth(1);
     h1->Draw("l same");
     
     
