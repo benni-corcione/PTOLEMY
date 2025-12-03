@@ -10,6 +10,11 @@ ROOTFLAG = `${ROOTSYS}/bin/root-config --cflags --libs`
 
 EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVector -lMinuit -lEG  -lPhysics -lz -lTreePlayer -lRooFitCore -lRooFit
 
+addBranchFilteredPShapes_cd188 : addBranchFilteredPShapes_cd188.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o addBranchFilteredPShapes_cd188 addBranchFilteredPShapes_cd188.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+addBranchFilteredPShapes_cd204 : addBranchFilteredPShapes_cd204.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o addBranchFilteredPShapes_cd204 addBranchFilteredPShapes_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 amp_charge: amp_charge.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o amp_charge amp_charge.cpp $(ROOTFLAG) $(EXTRALIBS)
@@ -26,12 +31,17 @@ B60_H60: B60_H60.cpp graphics.h pshape_functions.h
 checkpshape: checkpshape.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkpshape checkpshape.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+checkpshape_filtered_cd188: checkpshape_filtered_cd188.cpp 
+	$(CC) -Wall $(INCLUDES) -o checkpshape_filtered_cd188 checkpshape_filtered_cd188.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+checkpshape_filtered_cd204: checkpshape_filtered_cd204.cpp 
+	$(CC) -Wall $(INCLUDES) -o checkpshape_filtered_cd204 checkpshape_filtered_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 checkpshapePhotons: checkpshapePhotons.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkpshapePhotons checkpshapePhotons.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 checkpshape_10k: checkpshape_10k.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkpshape_10k checkpshape_10k.cpp $(ROOTFLAG) $(EXTRALIBS)
-
 
 CheckTimeConst: CheckTimeConst.cpp
 	$(CC) -Wall $(INCLUDES) -o CheckTimeConst CheckTimeConst.cpp $(ROOTFLAG) $(EXTRALIBS)
@@ -57,7 +67,6 @@ computeRate: computeRate.cpp graphics.h pshape_functions.h CD_details.h AndCommo
 computeRate_basic: computeRate_basic.cpp graphics.h pshape_functions.h CD_details.h AndCommon.h
 	$(CC) -Wall $(INCLUDES) -o computeRate_basic computeRate_basic.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-
 correctRate: correctRate.cpp graphics.h pshape_functions.h CD_details.h AndCommon.h
 	$(CC) -Wall $(INCLUDES) -o correctRate correctRate.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -76,9 +85,6 @@ dark_counts: dark_counts.cpp
 double_check: double_check.cpp  pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o double_check double_check.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-drawSuperimposedHistos: drawSuperimposedHistos.cpp
-	$(CC) -Wall $(INCLUDES) -o drawSuperimposedHistos drawSuperimposedHistos.cpp $(ROOTFLAG) $(EXTRALIBS)
-
 draw_three_electrons: draw_three_electrons.cpp
 	$(CC) -Wall $(INCLUDES) -o draw_three_electrons draw_three_electrons.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -87,6 +93,15 @@ draw_ctrls: draw_ctrls.cpp
 
 drawAmpCharge: drawAmpCharge.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawAmpCharge drawAmpCharge.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawFinalFits: drawFinalFits.cpp AndCommon.h graphics.h CD_details.h
+	$(CC) -Wall $(INCLUDES) -o drawFinalFits drawFinalFits.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawFinalFits_filtered: drawFinalFits_filtered.cpp AndCommon.h graphics.h CD_details.h
+	$(CC) -Wall $(INCLUDES) -o drawFinalFits_filtered drawFinalFits_filtered.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawLowAmp: drawLowAmp.cpp AndCommon.h graphics.h CD_details.h
+	$(CC) -Wall $(INCLUDES) -o drawLowAmp drawLowAmp.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 drawMultipleHistos: drawMultipleHistos.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawMultipleHistos drawMultipleHistos.cpp $(ROOTFLAG) $(EXTRALIBS)
@@ -100,14 +115,17 @@ drawResolutionCFR: drawResolutionCFR.cpp graphics.h pshape_functions.h
 drawResolutionCFRall: drawResolutionCFRall.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawResolutionCFRall drawResolutionCFRall.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+drawResolutionCFR_filters_cd188: drawResolutionCFR_filters_cd188.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o drawResolutionCFR_filters_cd188 drawResolutionCFR_filters_cd188.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawResolutionCFR_filters_cd204: drawResolutionCFR_filters_cd204.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o drawResolutionCFR_filters_cd204 drawResolutionCFR_filters_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 drawPowCFR: drawPowCFR.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawPowCFR drawPowCFR.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-drawFinalFits: drawFinalFits.cpp AndCommon.h graphics.h CD_details.h
-	$(CC) -Wall $(INCLUDES) -o drawFinalFits drawFinalFits.cpp $(ROOTFLAG) $(EXTRALIBS)
-
-drawLowAmp: drawLowAmp.cpp AndCommon.h graphics.h CD_details.h
-	$(CC) -Wall $(INCLUDES) -o drawLowAmp drawLowAmp.cpp $(ROOTFLAG) $(EXTRALIBS)
+drawSuperimposedHistos: drawSuperimposedHistos.cpp
+	$(CC) -Wall $(INCLUDES) -o drawSuperimposedHistos drawSuperimposedHistos.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 FilterAmpCal: FilterAmpCal.cpp AndCommon.h graphics.h CD_details.h
 	$(CC) -Wall $(INCLUDES) -o FilterAmpCal FilterAmpCal.cpp $(ROOTFLAG) $(EXTRALIBS)
@@ -133,7 +151,6 @@ makeAllrawTreePhotons_10k: makeAllrawTreePhotons_10k.cpp AndCommon.h
 makeRawTree: makeRawTree.cpp AndCommon.h lecroyparser.h
 	$(CC) -Wall $(INCLUDES) -o makeRawTree makeRawTree.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-
 makeRawTreePhotons: makeRawTreePhotons.cpp AndCommon.h lecroyparser.h
 	$(CC) -Wall $(INCLUDES) -o makeRawTreePhotons makeRawTreePhotons.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -142,6 +159,7 @@ makeRawTreePhotons_10k: makeRawTreePhotons_10k.cpp AndCommon.h lecroyparser.h
 
 makeTree: makeTree.cpp pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o makeTree makeTree.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 makeTree_BolCal: makeTree_BolCal.cpp pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o makeTree_BolCal makeTree_BolCal.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -157,23 +175,23 @@ makeTreePhotons_10k: makeTreePhotons_10k.cpp pshape_functions_10k.h
 persistence_plot: persistence_plot.cpp pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o persistence_plot persistence_plot.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-persistence_plot_photons: persistence_plot_photons.cpp pshape_functions.h
-	$(CC) -Wall $(INCLUDES) -o persistence_plot_photons persistence_plot_photons.cpp $(ROOTFLAG) $(EXTRALIBS)
-
 persistence_plot_10k: persistence_plot_10k.cpp pshape_functions_10k.h
 	$(CC) -Wall $(INCLUDES) -o persistence_plot_10k persistence_plot_10k.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+persistence_plot_photons: persistence_plot_photons.cpp pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o persistence_plot_photons persistence_plot_photons.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 pshape_characterization: pshape_characterization.cpp pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o pshape_characterization pshape_characterization.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+SelfCalCurve: SelfCalCurve.cpp
+	$(CC) -Wall $(INCLUDES) -o SelfCalCurve SelfCalCurve.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 SelfCalibration: SelfCalibration.cpp
 	$(CC) -Wall $(INCLUDES) -o SelfCalibration SelfCalibration.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 SelfCalibrationPhotons: SelfCalibrationPhotons.cpp
 	$(CC) -Wall $(INCLUDES) -o SelfCalibrationPhotons SelfCalibrationPhotons.cpp $(ROOTFLAG) $(EXTRALIBS)
-
-SelfCalCurve: SelfCalCurve.cpp
-	$(CC) -Wall $(INCLUDES) -o SelfCalCurve SelfCalCurve.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 time_correlation: time_correlation.cpp 
 	$(CC) -Wall $(INCLUDES) -o time_correlation time_correlation.cpp $(ROOTFLAG) $(EXTRALIBS)
