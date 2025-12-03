@@ -6,6 +6,7 @@ std::vector<int> GetVoltages(int CD_number, char* misura){
  
   if(CD_number == 188) {
     for(int i=0; i<11; i++){ volts.push_back(95+i); }
+    //for(int i=0; i<10; i++){ volts.push_back(96+i); }
   }
 
 
@@ -68,13 +69,16 @@ float GetPhiTes(void){
 float GetYMax(int CD_number, char* choice, char* misura){
   float ymax=0;
 
-  if(CD_number == 188 && strcmp(choice,"amp"   )==0){ ymax = 2.3;}
-  if(CD_number == 188 && strcmp(choice,"charge")==0){ ymax = 4.3;}
+  if(CD_number == 188 && strcmp(choice,"amp"       )==0){ ymax = 2.3;}
+  if(CD_number == 188 && strcmp(choice,"amp_10kHz" )==0){ ymax = 3.5;}
+  if(CD_number == 188 && strcmp(choice,"amp_100kHz")==0){ ymax = 2.2;}
+  if(CD_number == 188 && strcmp(choice,"charge"    )==0){ ymax = 4.3;}
   
-  if(CD_number == 204 && strcmp(choice,"amp"   )==0 && strcmp(misura,"B60_preamp_post_cond1")==0){ ymax = 1   ;}
-  if(CD_number == 204 && strcmp(choice,"charge")==0 && strcmp(misura,"B60_preamp_post_cond1")==0){ ymax = 1.7 ;}
-  if(CD_number == 204 && strcmp(choice,"amp"   )==0 && strcmp(misura,"B60_post_cond3_moku"  )==0){ ymax = 0.75;}
-  if(CD_number == 204 && strcmp(choice,"charge")==0 && strcmp(misura,"B60_post_cond3_moku"  )==0){ ymax = 2.4 ;}
+  if(CD_number == 204 && strcmp(choice,"amp"      )==0 && strcmp(misura,"B60_preamp_post_cond1")==0){ ymax = 1   ;}
+  if(CD_number == 204 && strcmp(choice,"charge"   )==0 && strcmp(misura,"B60_preamp_post_cond1")==0){ ymax = 1.7 ;}
+  if(CD_number == 204 && strcmp(choice,"amp"      )==0 && strcmp(misura,"B60_post_cond3_moku"  )==0){ ymax = 0.75;}
+  if(CD_number == 204 && strcmp(choice,"amp_10kHz")==0 && strcmp(misura,"B60_post_cond3_moku"  )==0){ ymax = 1.75;}
+  if(CD_number == 204 && strcmp(choice,"charge"   )==0 && strcmp(misura,"B60_post_cond3_moku"  )==0){ ymax = 2.4 ;}
   
   if(CD_number == 222 && strcmp(choice,"amp"   )==0 && strcmp(misura,"F60_squidfilter_ER_031025_tr25" )==0){ ymax = 1.4;}
   if(CD_number == 222 && strcmp(choice,"charge")==0 && strcmp(misura,"F60_squidfilter_ER_031025_tr25" )==0){ ymax = 11.0;}
@@ -104,6 +108,29 @@ Histo SetHistoValues(int CD_number, char* choice, char* misura, int voltage){
     var.set_y_name("Counts / " + to_str(binsize) + " V");
   }
 
+   if(CD_number == 188 && strcmp(choice,"amp_10kHz")==0){
+    var.set_nbins(106);
+    var.set_range_min(0.);
+    var.set_range_max(1.);
+    var.set_hist_min(0.);
+    var.set_hist_max(0.4);
+    binsize = settings.Binsize((var.get_hist_max()-var.get_hist_min())/var.get_nbins());
+    var.set_x_name("Amplitude [V]");
+    var.set_y_name("Counts / " + to_str(binsize) + " V");
+  }
+
+    if(CD_number == 188 && strcmp(choice,"amp_100kHz")==0){
+    var.set_nbins(92);
+    var.set_range_min(0.);
+    var.set_range_max(1.);
+    var.set_hist_min(0.);
+    var.set_hist_max(0.8);
+    binsize = settings.Binsize((var.get_hist_max()-var.get_hist_min())/var.get_nbins());
+    var.set_x_name("Amplitude [V]");
+    var.set_y_name("Counts / " + to_str(binsize) + " V");
+  }
+
+    
   if(CD_number == 188 && strcmp(choice,"charge")==0){
     var.set_nbins(200);
     var.set_range_min(6);
@@ -143,6 +170,17 @@ Histo SetHistoValues(int CD_number, char* choice, char* misura, int voltage){
     var.set_hist_max(1.);
     var.set_range_min(0.55);
     var.set_range_max(0.67);
+    binsize = settings.Binsize((var.get_hist_max()-var.get_hist_min())/var.get_nbins());
+    var.set_x_name("Amplitude [V]");
+    var.set_y_name("Counts / " + to_str(binsize) + " V");
+  }
+
+    if(CD_number == 204 && strcmp(choice,"amp_10kHz")==0 && strcmp(misura,"B60_post_cond3_moku")==0){
+    var.set_nbins(900);
+    var.set_hist_min(0.);
+    var.set_hist_max(1.);
+    var.set_range_min(0.15);
+    var.set_range_max(0.25);
     binsize = settings.Binsize((var.get_hist_max()-var.get_hist_min())/var.get_nbins());
     var.set_x_name("Amplitude [V]");
     var.set_y_name("Counts / " + to_str(binsize) + " V");
@@ -266,6 +304,33 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     else                            {var.set_fit_min(0.6); }
     var.set_fit_max(0.96);
   }
+
+  if(CD_number == 188 && strcmp(choice,"amp_10kHz")==0){
+    var.set_mu_min(0.2)     ;  var.set_mu_max(0.32)  ;  var.set_mu(0.25)     ;
+    var.set_sigmaL_min(0.01) ;  var.set_sigmaL_max(0.5);  var.set_sigmaL(0.1) ;
+    var.set_sigmaR_min(0.001);  var.set_sigmaR_max(0.1);  var.set_sigmaR(0.03);
+    var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)     ;
+    var.set_A_min(1)         ;  var.set_A_max(3000)    ;
+    var.set_A(histo->Integral());
+    
+    //fit limits
+    var.set_fit_min(0.15);
+    var.set_fit_max(0.33);
+  }
+
+  if(CD_number == 188 && strcmp(choice,"amp_100kHz")==0){
+    var.set_mu_min(0.6)     ;  var.set_mu_max(0.75)  ;  var.set_mu(0.64)     ;
+    var.set_sigmaL_min(0.01) ;  var.set_sigmaL_max(0.5);  var.set_sigmaL(0.1) ;
+    var.set_sigmaR_min(0.005);  var.set_sigmaR_max(0.1);  var.set_sigmaR(0.03);
+    var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)     ;
+    var.set_A_min(1)         ;  var.set_A_max(3000)    ;
+    var.set_A(histo->Integral());
+    
+    //fit limits
+    var.set_fit_min(0.4);
+    var.set_fit_max(0.8);
+  }
+  
   
   if(CD_number == 188 && strcmp(choice,"charge")==0){
     var.set_mu_min(10)     ;  var.set_mu_max(17)  ;  var.set_mu(13)     ;
@@ -306,6 +371,8 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     if(voltage==106){var.set_fit_min(0.648); var.set_fit_max(0.67);}
   }
 
+  
+
   if(CD_number == 204 && strcmp(choice,"charge")==0 && strcmp(misura,"B60_preamp_post_cond1")==0){
     var.set_mu_min(8)     ;  var.set_mu_max(10)  ;  var.set_mu(8.7)     ;
     var.set_sigmaL_min(0.01) ;  var.set_sigmaL_max(0.5);  var.set_sigmaL(0.1) ;
@@ -335,7 +402,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     //if(voltage>100){var.set_mu_min(0.618); var.set_sigmaL_max(5E-2); var.set_sigmaL_min(4E-3); }
     //fit limits
     if(voltage==96 ){var.set_fit_min(0.604); var.set_fit_max(0.625);}
-    if(voltage==97 ){var.set_fit_min(0.6065); var.set_fit_max(0.625);}
+    if(voltage==97 ){var.set_fit_min(0.603); var.set_fit_max(0.625);}
     if(voltage==98 ){var.set_fit_min(0.6095); var.set_fit_max(0.63);}
     if(voltage==99 ){var.set_fit_min(0.609); var.set_fit_max(0.63);}
     if(voltage==100){var.set_fit_min(0.6125); var.set_fit_max(0.63);}
@@ -343,13 +410,33 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     if(voltage==102){var.set_fit_min(0.6145); var.set_fit_max(0.63);}
     if(voltage==103){var.set_fit_min(0.617); var.set_fit_max(0.635);}
     if(voltage==104){var.set_fit_min(0.616); var.set_fit_max(0.635);}
-    if(voltage==105){var.set_fit_min(0.616); var.set_fit_max(0.635);}
+    if(voltage==105){var.set_fit_min(0.614); var.set_fit_max(0.635);}
     if(voltage==106){var.set_fit_min(0.6179); var.set_fit_max(0.635);}
     if(voltage==107){var.set_fit_min(0.619); var.set_fit_max(0.635);}
     if(voltage==108){var.set_fit_min(0.618); var.set_fit_max(0.635);}
     if(voltage==109){var.set_fit_min(0.6145); var.set_fit_max(0.64);}
     if(voltage==110){var.set_fit_min(0.611); var.set_fit_max(0.64);}
 
+  }
+
+   if(CD_number == 204 && strcmp(choice,"amp_10kHz")==0 && strcmp(misura,"B60_post_cond3_moku")==0){
+    var.set_mu_min(0.21)     ;  var.set_mu_max(0.23)    ;  var.set_mu(0.22)    ;
+    var.set_sigmaL_min(1E-3) ;  var.set_sigmaL_max(1E-2);  var.set_sigmaL(6E-3); 
+    var.set_sigmaR_min(5E-4) ;  var.set_sigmaR_max(0.1);  var.set_sigmaR(2E-3) ;
+    var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)      ;
+    var.set_A_min(0)         ;  var.set_A_max(3000)    ;
+    var.set_A(histo->Integral());
+
+    //if(voltage>100){var.set_mu_min(0.618); var.set_sigmaL_max(5E-2); var.set_sigmaL_min(4E-3); }
+    //fit limits
+    if(voltage==96 ){var.set_fit_min(0.21); var.set_fit_max(0.225);}
+    if(voltage==97 ){var.set_fit_min(0.21); var.set_fit_max(0.225);}
+    if(voltage==98 ){var.set_fit_min(0.214); var.set_fit_max(0.23);}
+    if(voltage==99 ){var.set_fit_min(0.214); var.set_fit_max(0.23);}
+    if(voltage==100){var.set_fit_min(0.216); var.set_fit_max(0.23);}
+    if(voltage==101){var.set_fit_min(0.218); var.set_fit_max(0.235);}
+    if(voltage==102){var.set_fit_min(0.218); var.set_fit_max(0.235);}
+    if(voltage==103){var.set_fit_min(0.22); var.set_fit_max(0.24);}
   }
 
 
@@ -405,7 +492,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     if(voltage==125){var.set_fit_min(0.112) ; var.set_fit_max(0.12) ;}
     if(voltage==126){var.set_fit_min(0.112) ; var.set_fit_max(0.122);} 
     if(voltage==127){var.set_fit_min(0.112) ; var.set_fit_max(0.122);} 
-    if(voltage==128){var.set_fit_min(0.113) ; var.set_fit_max(0.122);} 
+    if(voltage==128){var.set_fit_min(0.1132) ; var.set_fit_max(0.122);} 
     if(voltage==129){var.set_fit_min(0.1125); var.set_fit_max(0.122);}
     if(voltage==130){var.set_fit_min(0.112 ); var.set_fit_max(0.122);} 
     
