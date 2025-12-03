@@ -26,7 +26,8 @@ int main() {
   Settings settings;
   TCanvas* c1 = new TCanvas( "c1", "", 1500, 1500 );
   settings.Margin(c1);
-  c1->SetLeftMargin(0.155);
+  c1->SetLeftMargin(0.185);
+  c1->SetBottomMargin(0.185);
   c1->cd();
   
   std::ifstream ifs188 ("data/power_CD188.txt"); 
@@ -37,23 +38,23 @@ int main() {
   TGraphErrors* gr_power204 = new TGraphErrors(0);
   TGraphErrors* gr_power222 = new TGraphErrors(0);
 
-  TLegend* legend = new TLegend(0.60,0.2,0.95,0.3);
-  legend->SetTextSize(0.030);
+  TLegend* legend = new TLegend(0.5,0.25,1.1,0.42);
+  legend->SetTextSize(0.038);
   legend->SetMargin(0.1);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
   
   //std::vector<int> colors = get_colors();
 
-  gr_power188->SetMarkerStyle(20);
-  gr_power204->SetMarkerStyle(21);
+  gr_power188->SetMarkerStyle(21);
+  gr_power204->SetMarkerStyle(20);
   gr_power222->SetMarkerStyle(22);
-  gr_power188->SetMarkerSize  (3);
-  gr_power204->SetMarkerSize  (3);
-  gr_power222->SetMarkerSize  (3);
-  gr_power188->SetLineWidth   (2);
-  gr_power204->SetLineWidth   (2);
-  gr_power222->SetLineWidth   (2);
+  gr_power188->SetMarkerSize  (5);
+  gr_power204->SetMarkerSize  (5);
+  gr_power222->SetMarkerSize  (5);
+  gr_power188->SetLineWidth   (3);
+  gr_power204->SetLineWidth   (3);
+  gr_power222->SetLineWidth   (3);
   gr_power188->SetMarkerColor(46);
   gr_power188->SetLineColor  (46);
   gr_power204->SetMarkerColor(38);
@@ -110,34 +111,40 @@ int main() {
   double xmin = 93. ;  //CD 188
   double xmax = 132.;  //CD 222
 
-  TH2D *h2_axes_power = new TH2D( "axes_power", "", 10, xmin, xmax, 10, 0.7 , 1.05  );
+  TH2D *h2_axes_power = new TH2D( "axes_power", "", 10, xmin, xmax, 10, 0.70 , 1.05);
   h2_axes_power->SetXTitle( "Nanotube voltage #it{V}_{CNT} (V)" );
   h2_axes_power->SetYTitle( "#it{P}_{J}(#it{V}_{CNT})/#it{P}_{J}(#it{V}_{CNT}^{ min})" );
   h2_axes_power->GetYaxis()->SetTitleOffset(1.9);
-  h2_axes_power->GetXaxis()->SetTitleOffset(1.5);
+  h2_axes_power->GetXaxis()->SetTitleOffset(1.3);
   h2_axes_power->GetYaxis()->SetDecimals(kTRUE);  // forza 1.00 invece di 1
   h2_axes_power->GetYaxis()->SetAxisColor (kBlack);
   h2_axes_power->GetYaxis()->SetTitleColor(kBlack);
   h2_axes_power->GetYaxis()->SetLabelColor(kBlack);
+  h2_axes_power->GetYaxis()->SetLabelSize(0.042);
+  h2_axes_power->GetXaxis()->SetLabelSize(0.042);
+  h2_axes_power->GetYaxis()->SetTitleSize(0.042);
+  h2_axes_power->GetXaxis()->SetTitleSize(0.042);
+  
 
   TLine* line_uno = new TLine( xmin, 1, xmax, 1 );
   line_uno->SetLineColor(kBlack);
   line_uno->SetLineStyle( 7 );
   line_uno->SetLineWidth( 3 );
-    
+  
   h2_axes_power->Draw("");
   line_uno   ->Draw("same" );
-  gr_power188->Draw("psame");
   gr_power222->Draw("psame");
   gr_power204->Draw("psame");
+  gr_power188->Draw("psame");
 
   gStyle->SetOptStat(0);
-  legend->AddEntry(gr_power188, "T-100-a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry(gr_power222, "T-100-b, CNTs: 1 mm^{2}", "pe"  );
-  legend->AddEntry(gr_power204, "T-60,      CNTs: 1 mm^{2}", "pe");
+  legend->AddEntry(gr_power188, "T100a, CNTs: 9 mm^{2}", "p");
+  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+  legend->AddEntry(gr_power222, "T100b, CNTs: 1 mm^{2}", "p"  );
+  legend->AddEntry(gr_power204, "T60,     CNTs: 1 mm^{2}", "p");
   legend->Draw("same");
  
-  c1->SaveAs("plots/articolo2/power_CFR_188_204_222.pdf");
+  c1->SaveAs("plots/articolo2/power_204_zoom.pdf");
 
   return 0;
 
