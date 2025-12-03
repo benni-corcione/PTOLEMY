@@ -140,25 +140,25 @@ int main(void) {
   float ymax_fwhm = 40 ;
 
   
-  gPad->SetGrid(1, 1);
-  gStyle->SetGridColor(kGray+1);   // grigio chiaro
-  gStyle->SetGridStyle(3);         // tratteggiata (default=3, continua=1)
-  gStyle->SetGridWidth(1);
-  
-  TLegend* legend = new TLegend(0.55,0.77,0.90,0.87);
-  legend->SetTextSize(0.03);
+  //gPad->SetGrid(1, 1);
+  //gStyle->SetGridColor(kGray+1);   // grigio chiaro
+  //gStyle->SetGridStyle(3);         // tratteggiata (default=3, continua=1)
+  //gStyle->SetGridWidth(1);
+
+  TLegend* legend = new TLegend(0.48,0.7,1.12,0.87);
+  legend->SetTextSize(0.038);
   legend->SetMargin   (0.1);
   legend->SetBorderSize (0);
   legend->SetFillStyle  (0);
   
   TH2D* h2_axes = new TH2D("axes_reso", "", 10, xmin_reso, xmax_reso, 10, 0., ymax_reso);
   gStyle->SetOptStat(0);
-  h2_axes->GetXaxis()->SetLabelSize(0.038);
-  h2_axes->GetXaxis()->SetTitleSize(0.04 );
-  h2_axes->GetYaxis()->SetLabelSize(0.038);
-  h2_axes->GetYaxis()->SetTitleSize(0.04 );
+  h2_axes->GetXaxis()->SetLabelSize(0.042);
+  h2_axes->GetXaxis()->SetTitleSize(0.042);
+  h2_axes->GetYaxis()->SetLabelSize(0.042);
+  h2_axes->GetYaxis()->SetTitleSize(0.042);
   h2_axes->GetYaxis()->SetTitleOffset(1.5);
-  h2_axes->GetXaxis()->SetTitleOffset(1.4);
+  h2_axes->GetXaxis()->SetTitleOffset(1.3);
   h2_axes->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
   h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution (eV)");
   h2_axes->Draw();
@@ -166,13 +166,13 @@ int main(void) {
   gStyle->SetTitleFontSize(0.07);
   
   for(int i=0; i<3; i++){
-    gr_reso[i]->SetMarkerSize  (3);
-    gr_reso[i]->SetLineWidth   (2);
+    gr_reso[i]->SetMarkerSize  (5);
+    gr_reso[i]->SetLineWidth   (3);
     gr_reso[i]->SetMarkerStyle(20);
   }
 
-  gr_reso[0]->SetMarkerStyle(20);
-  gr_reso[1]->SetMarkerStyle(21);
+  gr_reso[0]->SetMarkerStyle(21);
+  gr_reso[1]->SetMarkerStyle(20);
   gr_reso[2]->SetMarkerStyle(22);
   gr_reso[0]->SetMarkerColor(46);
   gr_reso[0]->SetLineColor  (46);
@@ -180,14 +180,15 @@ int main(void) {
   gr_reso[1]->SetLineColor  (38);
   gr_reso[2]->SetMarkerColor(92);
   gr_reso[2]->SetLineColor  (92);
-  
+ 
  
   gr_reso[0]->Draw("PESame");
   gr_reso[1]->Draw("PESame");
   gr_reso[2]->Draw("PESame");
-  legend->AddEntry(gr_reso[0], "T-100-a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso[2], "T-100-b, CNTs: 1 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso[1], "T-60,      CNTs: 1 mm^{2}", "pe");
+  legend->AddEntry(gr_reso[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
+  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+  legend->AddEntry(gr_reso[2], "T100b, CNTs: 1 mm^{2}", "pe"  );
+  legend->AddEntry(gr_reso[1], "T60,     CNTs: 1 mm^{2}", "pe");
   legend->Draw("same");
 
   c1->SaveAs("plots/articolo2/reso_cfrall.pdf"); 
@@ -196,25 +197,25 @@ int main(void) {
 
   TH2D* h2_axes_fwhm = new TH2D("axes_fwhm", "", 10, xmin_reso, xmax_reso, 10, 0., ymax_fwhm);
   gStyle->SetOptStat(0);
-  h2_axes_fwhm->GetXaxis()->SetLabelSize(0.038);
-  h2_axes_fwhm->GetXaxis()->SetTitleSize(0.04 );
-  h2_axes_fwhm->GetYaxis()->SetLabelSize(0.038);
-  h2_axes_fwhm->GetYaxis()->SetTitleSize(0.04 );
+  h2_axes_fwhm->GetXaxis()->SetLabelSize(0.042);
+  h2_axes_fwhm->GetXaxis()->SetTitleSize(0.042);
+  h2_axes_fwhm->GetYaxis()->SetLabelSize(0.042);
+  h2_axes_fwhm->GetYaxis()->SetTitleSize(0.042);
   h2_axes_fwhm->GetYaxis()->SetTitleOffset(1.5);
-  h2_axes_fwhm->GetXaxis()->SetTitleOffset(1.4);
+  h2_axes_fwhm->GetXaxis()->SetTitleOffset(1.3);
   h2_axes_fwhm->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
   h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution (eV)");
   h2_axes_fwhm->Draw();
   
   gStyle->SetTitleFontSize(0.07);
   for(int i=0; i<3; i++){
-    gr_reso_fwhm[i]->SetMarkerSize  (3);
-    gr_reso_fwhm[i]->SetLineWidth   (2);
+    gr_reso_fwhm[i]->SetMarkerSize  (5);
+    gr_reso_fwhm[i]->SetLineWidth   (3);
     gr_reso_fwhm[i]->SetMarkerStyle(20);
   }
 
-  gr_reso_fwhm[0]->SetMarkerStyle(20);
-  gr_reso_fwhm[1]->SetMarkerStyle(21);
+  gr_reso_fwhm[0]->SetMarkerStyle(21);
+  gr_reso_fwhm[1]->SetMarkerStyle(20);
   gr_reso_fwhm[2]->SetMarkerStyle(22);
   gr_reso_fwhm[0]->SetMarkerColor(46);
   gr_reso_fwhm[0]->SetLineColor  (46);
@@ -226,9 +227,10 @@ int main(void) {
   gr_reso_fwhm[0]->Draw("PESame");
   gr_reso_fwhm[1]->Draw("PESame");
   gr_reso_fwhm[2]->Draw("PESame");
-  legend->AddEntry(gr_reso_fwhm[0], "T-100-a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso_fwhm[2], "T-100-b, CNTs: 1 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso_fwhm[1], "T-60,      CNTs: 1 mm^{2}", "pe");
+  legend->AddEntry(gr_reso_fwhm[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
+  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+  legend->AddEntry(gr_reso_fwhm[2], "T100b, CNTs: 1 mm^{2}", "pe"  );
+  legend->AddEntry(gr_reso_fwhm[1], "T60,     CNTs: 1 mm^{2}", "pe");
   legend->Draw("same");
 
   TLine* line = new TLine(89, 1.5,102, 1.5 );
@@ -237,9 +239,62 @@ int main(void) {
   line->SetLineWidth( 3 );
   line->Draw("same");
 
+  TLatex* labelpepe = new TLatex( 102, 1.5, "1.5 eV" );
+  labelpepe->SetTextSize( 0.042 );
+  labelpepe->SetTextFont(42);   // font standard non bold
+  labelpepe->SetTextColor(38);
+  labelpepe->Draw("same");
+  
   c1->SaveAs("plots/articolo2/reso_cfrall_fwhm.pdf"); 
   c1->Clear();
- 
+
+  // stampa media e deviazione standard per i 6 dataset
+
+// stampa media e deviazione standard per i 6 dataset
+
+for(int j = 0; j < 3; j++){
+
+    // calcolo media per gauss
+    float sum_sigma  = 0;
+    float mean_sigma = 0;
+    
+    for(size_t i = 0; i < reso_sigma[j].size(); i++){
+      sum_sigma += reso_sigma[j][i];
+    }
+    mean_sigma = sum_sigma / reso_sigma[j].size();
+
+    //calcolo std_dev per gauss
+    float var_sigma = 0;
+    float std_sigma = 0;
+    for(size_t i = 0; i < reso_sigma[j].size(); i++){
+      var_sigma += (reso_sigma[j][i] - mean_sigma)*(reso_sigma[j][i] - mean_sigma);
+    }
+    std_sigma = sqrt(var_sigma / (reso_sigma[j].size()-1));
+
+
+    //calcolo media per fwhm
+    float sum_fwhm = 0;
+    float mean_fwhm = 0;
+    for(size_t i = 0; i < reso_fwhm[j].size(); i++){
+      sum_fwhm += reso_fwhm[j][i];
+    }
+    mean_fwhm = sum_fwhm / reso_fwhm[j].size();
+
+    //calcolo std dev per fwhm
+    float var_fwhm = 0;
+    float std_fwhm = 0;
+    for(size_t i = 0; i < reso_fwhm[j].size(); i++){
+      var_fwhm += (reso_fwhm[j][i] - mean_fwhm)*(reso_fwhm[j][i] - mean_fwhm);
+    }
+    std_fwhm = sqrt(var_fwhm / (reso_fwhm[j].size()-1));
+
+
+    std::cout << "Dataset " << j
+              << "  sigma: mean=" << mean_sigma << " std=" << std_sigma
+              << "  |  fwhm: mean=" << mean_fwhm << " std=" << std_fwhm
+              << std::endl;
+}
+
   
 return 0;
 
