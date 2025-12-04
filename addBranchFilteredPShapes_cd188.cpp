@@ -25,6 +25,9 @@ int main(int argc, char* argv[]) {
 
     std::string pshape_file1_path = path_pshape + std::to_string(voltage) + "V_filteredpshapes_100kHz.txt";
     std::string pshape_file2_path = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz.txt";
+    std::string pshape_file3_path = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz_100kHz.txt";
+    std::string pshape_file4_path = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz_160kHz.txt";
+    std::string pshape_file5_path = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz_100kHz_160kHz.txt";
 
     // ===== PRIMA FASE: riempio i branch nel treeraw ===== 
     TFile* file = TFile::Open(root_file_path.c_str(), "UPDATE");
@@ -32,7 +35,6 @@ int main(int argc, char* argv[]) {
       std::cout << "Error opening treeraw file. Exit program" << std::endl;
       return 1; }
     
-
     TTree* tree_raw = (TTree*)file->Get("treeraw");
     if(!tree_raw){
       std::cout << "Error getting treeraw in the file. Exit program" << std::endl;
@@ -47,8 +49,14 @@ int main(int argc, char* argv[]) {
     //creazione di nuovi branch
     float pshape_filtered_100kHz[2502];
     float pshape_filtered_10kHz[2502];
-    TBranch* br100 = tree_raw->Branch("pshape_filtered_100kHz", pshape_filtered_100kHz, "pshape_filtered_100kHz[2502]/F");
-    TBranch* br10  = tree_raw->Branch("pshape_filtered_10kHz",  pshape_filtered_10kHz,  "pshape_filtered_10kHz[2502]/F");
+    float pshape_filtered_10kHz_100kHz[2502];
+    float pshape_filtered_10kHz_160kHz[2502];
+    float pshape_filtered_10kHz_100kHz_160kHz[2502];
+    TBranch* br100    = tree_raw->Branch("pshape_filtered_100kHz",       pshape_filtered_100kHz,       "pshape_filtered_100kHz[2502]/F"      );
+    TBranch* br10     = tree_raw->Branch("pshape_filtered_10kHz",        pshape_filtered_10kHz,        "pshape_filtered_10kHz[2502]/F"       );
+    TBranch* br10_100 = tree_raw->Branch("pshape_filtered_10kHz_100kHz", pshape_filtered_10kHz_100kHz, "pshape_filtered_10kHz_100kHz[2502]/F");
+    TBranch* br10_160 = tree_raw->Branch("pshape_filtered_10kHz_160kHz", pshape_filtered_10kHz_160kHz, "pshape_filtered_10kHz_160kHz[2502]/F");
+    TBranch* br10_100_160 = tree_raw->Branch("pshape_filtered_10kHz_100kHz_160kHz", pshape_filtered_10kHz_100kHz_160kHz, "pshape_filtered_10kHz_100kHz_160kHz[2502]/F");
 
     //lettura della parte a 100kHz
     std::ifstream pshape100(pshape_file1_path);
@@ -100,6 +108,93 @@ int main(int argc, char* argv[]) {
     
     pshape10.close();
 
+    //lettura della parte a 10kHz+100kHz
+    std::ifstream pshape10_100(pshape_file3_path);
+    if(!pshape10_100.is_open()){
+      std::cout << "Error opening filtered shapes file @ 10 + 100kHz. Exit program" << std::endl;
+      return 1; }
+
+    for(Long64_t i = 0; i < nentries; i++) {
+      tree_raw->GetEntry(i);
+      std::string line;
+      int cnt = 0;
+
+      //ciclo di lettura file finché non arrivo a 2502 righe o il file non finisce
+      while(cnt < 2502 && std::getline(pshape10_100, line)) {
+	//salto riga se contiene "pshape nm"
+	if(line.find("pshape nm") != std::string::npos) continue;
+	//trasformo riga in stream per poter estrarre numeri
+	std::istringstream iss(line);
+	float x, y;
+	if(!(iss >> x >> y)) y = 0; //se non riesco a leggere due numeri, y=0
+	pshape_filtered_10kHz_100kHz[cnt] = y;
+	cnt++;
+      }
+
+      br10_100->Fill();
+    }
+    
+    pshape10_100.close();
+
+    //lettura della parte a 10kHz+160kHz
+    std::ifstream pshape10_160(pshape_file4_path);
+    if(!pshape10_160.is_open()){
+      std::cout << "Error opening filtered shapes file @ 10 + 160kHz. Exit program" << std::endl;
+      return 1; }
+
+    for(Long64_t i = 0; i < nentries; i++) {
+      tree_raw->GetEntry(i);
+      std::string line;
+      int cnt = 0;
+
+      //ciclo di lettura file finché non arrivo a 2502 righe o il file non finisce
+      while(cnt < 2502 && std::getline(pshape10_160, line)) {
+	//salto riga se contiene "pshape nm"
+	if(line.find("pshape nm") != std::string::npos) continue;
+	//trasformo riga in stream per poter estrarre numeri
+	std::istringstream iss(line);
+	float x, y;
+	if(!(iss >> x >> y)) y = 0; //se non riesco a leggere due numeri, y=0
+	pshape_filtered_10kHz_160kHz[cnt] = y;
+	cnt++;
+      }
+
+      br10_160->Fill();
+    }
+    
+    pshape10_160.close();
+
+
+     //lettura della parte a 10kHz+100kHz+160kHz
+    std::ifstream pshape10_100_160(pshape_file5_path);
+    if(!pshape10_100_160.is_open()){
+      std::cout << "Error opening filtered shapes file @ 10 + 100 + 160kHz. Exit program" << std::endl;
+      return 1; }
+
+    for(Long64_t i = 0; i < nentries; i++) {
+      tree_raw->GetEntry(i);
+      std::string line;
+      int cnt = 0;
+
+      //ciclo di lettura file finché non arrivo a 2502 righe o il file non finisce
+      while(cnt < 2502 && std::getline(pshape10_100_160, line)) {
+	//salto riga se contiene "pshape nm"
+	if(line.find("pshape nm") != std::string::npos) continue;
+	//trasformo riga in stream per poter estrarre numeri
+	std::istringstream iss(line);
+	float x, y;
+	if(!(iss >> x >> y)) y = 0; //se non riesco a leggere due numeri, y=0
+	pshape_filtered_10kHz_100kHz_160kHz[cnt] = y;
+	cnt++;
+      }
+
+      br10_100_160->Fill();
+    }
+    
+    pshape10_100_160.close();
+
+    
+    
     //sovrascrittura nel tree_raw in caso il branch esistesse già
     tree_raw->Write("", TObject::kOverwrite);
     file->Close();
@@ -120,8 +215,11 @@ int main(int argc, char* argv[]) {
        return 1; }
 
     //setto i branch da cui devo estrarre data
-    tree_raw2->SetBranchAddress("pshape_filtered_100kHz", pshape_filtered_100kHz);
-    tree_raw2->SetBranchAddress("pshape_filtered_10kHz",  pshape_filtered_10kHz);
+    tree_raw2->SetBranchAddress("pshape_filtered_100kHz",        pshape_filtered_100kHz      );
+    tree_raw2->SetBranchAddress("pshape_filtered_10kHz",         pshape_filtered_10kHz       );
+    tree_raw2->SetBranchAddress("pshape_filtered_10kHz_100kHz",  pshape_filtered_10kHz_100kHz);
+    tree_raw2->SetBranchAddress("pshape_filtered_10kHz_160kHz",  pshape_filtered_10kHz_160kHz);
+    tree_raw2->SetBranchAddress("pshape_filtered_10kHz_100kHz_160kHz",  pshape_filtered_10kHz_100kHz_160kHz);
 
     //apro file del tree
     TFile* file2 = TFile::Open(root_file_path2.c_str(), "UPDATE");
@@ -138,25 +236,40 @@ int main(int argc, char* argv[]) {
     float amp;
     tree->SetBranchAddress("amp", &amp);
 
-    float amp_100kHz, amp_10kHz;
-    float baseline_100kHz, baseline_10kHz;
+    float amp_100kHz, amp_10kHz, amp_10kHz_100kHz, amp_10kHz_160kHz, amp_10kHz_100kHz_160kHz;
+    float baseline_100kHz, baseline_10kHz, baseline_10kHz_100kHz, baseline_10kHz_160kHz, baseline_10kHz_100kHz_160kHz;
 
-    TBranch* brA100 = tree->Branch("amp_100kHz", &amp_100kHz, "amp_100kHz/F");
-    TBranch* brA10  = tree->Branch("amp_10kHz",  &amp_10kHz,  "amp_10kHz/F");
+    TBranch* brA100     = tree->Branch("amp_100kHz",        &amp_100kHz,        "amp_100kHz/F"      );
+    TBranch* brA10      = tree->Branch("amp_10kHz",         &amp_10kHz,         "amp_10kHz/F"       );
+    TBranch* brA10_100  = tree->Branch("amp_10kHz_100kHz",  &amp_10kHz_100kHz,  "amp_10kHz_100kHz/F");
+    TBranch* brA10_160  = tree->Branch("amp_10kHz_160kHz",  &amp_10kHz_160kHz,  "amp_10kHz_160kHz/F");
+    TBranch* brA10_100_160  = tree->Branch("amp_10kHz_100kHz_160kHz",  &amp_10kHz_100kHz_160kHz,  "amp_10kHz_100kHz_160kHz/F");
 
     for(Long64_t i = 0; i < nentries; i++) {
         tree_raw2->GetEntry(i);
         tree->GetEntry(i);
 
 	//funzioni definite nel pshape_functions.h
-        baseline_100kHz = GetBaseline(pshape_filtered_100kHz);
-        amp_100kHz      = GetAmp(pshape_filtered_100kHz, baseline_100kHz);
+        baseline_100kHz       = GetBaseline(pshape_filtered_100kHz);
+        amp_100kHz            = GetAmp(pshape_filtered_100kHz, baseline_100kHz);
 
-        baseline_10kHz = GetBaseline(pshape_filtered_10kHz);
-        amp_10kHz      = GetAmp(pshape_filtered_10kHz, baseline_10kHz);
+        baseline_10kHz        = GetBaseline(pshape_filtered_10kHz);
+        amp_10kHz             = GetAmp(pshape_filtered_10kHz, baseline_10kHz);
+
+	baseline_10kHz_100kHz = GetBaseline(pshape_filtered_10kHz_100kHz);
+        amp_10kHz_100kHz      = GetAmp(pshape_filtered_10kHz_100kHz, baseline_10kHz_100kHz);
+
+	baseline_10kHz_160kHz = GetBaseline(pshape_filtered_10kHz_160kHz);
+        amp_10kHz_160kHz      = GetAmp(pshape_filtered_10kHz_160kHz, baseline_10kHz_160kHz);
+
+	baseline_10kHz_100kHz_160kHz = GetBaseline(pshape_filtered_10kHz_100kHz_160kHz);
+        amp_10kHz_100kHz_160kHz      = GetAmp(pshape_filtered_10kHz_100kHz_160kHz, baseline_10kHz_100kHz_160kHz);
 
         brA100->Fill();
         brA10->Fill();
+	brA10_100->Fill();
+	brA10_160->Fill();
+	brA10_100_160->Fill();
     }
 
     //sovrascrittura su tree in caso esistano già i branch
