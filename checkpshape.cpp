@@ -47,9 +47,9 @@ int main( int argc, char* argv[] ) {
   int   lum;
   float sampling;
 
-  tree->SetBranchAddress( "event" ,        &ev       );
-  tree->SetBranchAddress( "lumi"  ,        &lum      );
-  tree->SetBranchAddress( "pshape",        &pshape   );
+  tree->SetBranchAddress( "event"        , &ev       );
+  tree->SetBranchAddress( "lumi"         , &lum      );
+  tree->SetBranchAddress( "pshape"       , &pshape   );
   tree->SetBranchAddress( "sampling_time", &sampling );
 
   //preparazione grafica histo
@@ -80,7 +80,7 @@ int main( int argc, char* argv[] ) {
       h1->GetYaxis()->SetTitleOffset(+0.95);
       h1->GetXaxis()->SetTitleOffset(+0.9);
       //h1->GetXaxis()->SetRangeUser(23.1,27);
-      h1->GetYaxis()->SetRangeUser(-0.25,0.05);
+      h1->GetYaxis()->SetRangeUser(-0.15,0.005);
       //h1->GetYaxis()->SetRangeUser(-0.5,0.5);
       //h1->GetYaxis()->SetRangeUser(-03,0.05); //dark counts
       //h1->GetXaxis()->SetNdivisions(406);
