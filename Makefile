@@ -16,6 +16,9 @@ addBranchFilteredPShapes_cd188 : addBranchFilteredPShapes_cd188.cpp graphics.h p
 addBranchFilteredPShapes_cd204 : addBranchFilteredPShapes_cd204.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o addBranchFilteredPShapes_cd204 addBranchFilteredPShapes_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+addBranchFilteredPShapes_cd222 : addBranchFilteredPShapes_cd222.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o addBranchFilteredPShapes_cd222 addBranchFilteredPShapes_cd222.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 amp_charge: amp_charge.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o amp_charge amp_charge.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -36,6 +39,9 @@ checkpshape_filtered_cd188: checkpshape_filtered_cd188.cpp
 
 checkpshape_filtered_cd204: checkpshape_filtered_cd204.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkpshape_filtered_cd204 checkpshape_filtered_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+checkpshape_filtered_cd222: checkpshape_filtered_cd222.cpp 
+	$(CC) -Wall $(INCLUDES) -o checkpshape_filtered_cd222 checkpshape_filtered_cd222.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 checkpshapePhotons: checkpshapePhotons.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkpshapePhotons checkpshapePhotons.cpp $(ROOTFLAG) $(EXTRALIBS)
@@ -120,6 +126,9 @@ drawResolutionCFR_filters_cd188: drawResolutionCFR_filters_cd188.cpp graphics.h 
 
 drawResolutionCFR_filters_cd204: drawResolutionCFR_filters_cd204.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawResolutionCFR_filters_cd204 drawResolutionCFR_filters_cd204.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawResolutionCFR_filters_cd222: drawResolutionCFR_filters_cd222.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o drawResolutionCFR_filters_cd222 drawResolutionCFR_filters_cd222.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 drawPowCFR: drawPowCFR.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawPowCFR drawPowCFR.cpp $(ROOTFLAG) $(EXTRALIBS)
