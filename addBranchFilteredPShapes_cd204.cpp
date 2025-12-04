@@ -24,7 +24,8 @@ int main(int argc, char* argv[]) {
 
     std::string root_file_path    = path_root + std::to_string(voltage) + "V/CD" + std::to_string(CD_number) + "_" + std::to_string(voltage) + "V_treeraw.root";
     std::string root_file_path2   = path_root + std::to_string(voltage) + "V/CD" + std::to_string(CD_number) + "_" + std::to_string(voltage) + "V_tree.root";
-    std::string pshape_file_path  = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz.txt";
+    std::string pshape_file1_path  = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz.txt";
+    std::string pshape_file2_path  = path_pshape + std::to_string(voltage) + "V_filteredpshapes_10kHz_160kHz.txt";
 
      // ===== PRIMA FASE: riempio i branch nel treeraw =====
     TFile* file = TFile::Open(root_file_path.c_str(), "UPDATE");
@@ -43,10 +44,12 @@ int main(int argc, char* argv[]) {
     tree_raw->SetBranchAddress("event", &event);
 
     float pshape_filtered_10kHz[2502];
+    float pshape_filtered_10kHz_160kHz[2502];
 
     TBranch* br10 = tree_raw->Branch("pshape_filtered_10kHz", pshape_filtered_10kHz, "pshape_filtered_10kHz[2502]/F");
+    TBranch* br10_160 = tree_raw->Branch("pshape_filtered_10kHz_160kHz", pshape_filtered_10kHz_160kHz, "pshape_filtered_10kHz_160kHz[2502]/F");
  
-    std::ifstream pshape10(pshape_file_path);
+    std::ifstream pshape10(pshape_file1_path);
     if(!pshape10.is_open()){
       std::cout << "Error opening file with filtered pshapes @ 10 kHz. Exit program" << std::endl;
       return 1; }
@@ -67,6 +70,28 @@ int main(int argc, char* argv[]) {
     }
     pshape10.close();
 
+    
+    std::ifstream pshape10_160(pshape_file2_path);
+    if(!pshape10_160.is_open()){
+      std::cout << "Error opening file with filtered pshapes @ 10 + 160 kHz. Exit program" << std::endl;
+      return 1; }
+
+    for(Long64_t i = 0; i < nentries; ++i) {
+      tree_raw->GetEntry(i);
+      std::string line;
+      int count = 0;
+	
+      while(count < 2502 && std::getline(pshape10_160, line)) {
+	if(line.find("pshape nm") != std::string::npos) continue;
+	std::istringstream iss(line);
+	float x, y;
+	if(!(iss >> x >> y)) y = 0;
+	pshape_filtered_10kHz_160kHz[count++] = y;
+      }
+      br10_160->Fill();
+    }
+    pshape10_160.close();
+
     tree_raw->Write("", TObject::kOverwrite);
     file->Close();
 
@@ -83,6 +108,7 @@ int main(int argc, char* argv[]) {
       return 1; }
 
     tree_raw2->SetBranchAddress("pshape_filtered_10kHz", pshape_filtered_10kHz);
+    tree_raw2->SetBranchAddress("pshape_filtered_10kHz_160kHz", pshape_filtered_10kHz_160kHz);
 
     TFile* file2 = TFile::Open(root_file_path2.c_str(), "UPDATE");
     if(!file2 || file2->IsZombie()){
@@ -97,10 +123,11 @@ int main(int argc, char* argv[]) {
     float amp;
     tree->SetBranchAddress("amp", &amp);
 
-    float amp_10kHz;
-    float baseline_10kHz;
+    float amp_10kHz, amp_10kHz_160kHz;
+    float baseline_10kHz, baseline_10kHz_160kHz;
 
     TBranch* brA10  = tree->Branch("amp_10kHz",  &amp_10kHz,  "amp_10kHz/F");
+    TBranch* brA10_160 = tree->Branch("amp_10kHz_160kHz",  &amp_10kHz_160kHz,  "amp_10kHz_160kHz/F");
 
     for(Long64_t i = 0; i < nentries; i++) {
 
@@ -110,7 +137,11 @@ int main(int argc, char* argv[]) {
         baseline_10kHz = GetBaseline(pshape_filtered_10kHz);
         amp_10kHz      = GetAmp(pshape_filtered_10kHz, baseline_10kHz);
 
+        baseline_10kHz_160kHz = GetBaseline(pshape_filtered_10kHz_160kHz);
+        amp_10kHz_160kHz = GetAmp(pshape_filtered_10kHz_160kHz, baseline_10kHz_160kHz);
+
         brA10->Fill();
+	brA10_160->Fill();
     }
 
     tree->Write("", TObject::kOverwrite);
