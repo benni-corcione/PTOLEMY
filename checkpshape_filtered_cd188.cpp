@@ -45,16 +45,23 @@ int main( int argc, char* argv[] ) {
   float pshape[2502];
   float pshape_filtered_100kHz[2502];
   float pshape_filtered_10kHz[2502];
+  float pshape_filtered_10kHz_100kHz[2502];
+  float pshape_filtered_10kHz_160kHz[2502];
+  float pshape_filtered_10kHz_100kHz_160kHz[2502];
+
   int   ev;
   int   lum;
   float sampling;
 
-  tree->SetBranchAddress( "event"          , &ev              );
-  tree->SetBranchAddress( "lumi"           , &lum             );
-  tree->SetBranchAddress( "pshape"         , &pshape          );
-  tree->SetBranchAddress( "pshape_filtered_100kHz", &pshape_filtered_100kHz);
-  tree->SetBranchAddress( "pshape_filtered_10kHz", &pshape_filtered_10kHz);
-  tree->SetBranchAddress( "sampling_time"  , &sampling        );
+  tree->SetBranchAddress( "event"                               , &ev                                 );
+  tree->SetBranchAddress( "lumi"                                , &lum                                );
+  tree->SetBranchAddress( "pshape"                              , &pshape                             );
+  tree->SetBranchAddress( "sampling_time"                       , &sampling                           );
+  tree->SetBranchAddress( "pshape_filtered_100kHz"              , &pshape_filtered_100kHz             );
+  tree->SetBranchAddress( "pshape_filtered_10kHz"               , &pshape_filtered_10kHz              );
+  tree->SetBranchAddress( "pshape_filtered_10kHz_100kHz"        , &pshape_filtered_10kHz_100kHz       );
+  tree->SetBranchAddress( "pshape_filtered_10kHz_160kHz"        , &pshape_filtered_10kHz_160kHz       );
+  tree->SetBranchAddress( "pshape_filtered_10kHz_100kHz_160kHz" , &pshape_filtered_10kHz_100kHz_160kHz);   
 
   //preparazione grafica histo
   TCanvas* c1 = new TCanvas("c1", "c1", 1800, 850); //1800 850
@@ -70,20 +77,33 @@ int main( int argc, char* argv[] ) {
       TH1D* h1 = new TH1D("h1", "", 2500,0.,2500*sampling*1.E+6);
       TH1D* h2 = new TH1D("h2", "", 2500,0.,2500*sampling*1.E+6);
       TH1D* h3 = new TH1D("h3", "", 2500,0.,2500*sampling*1.E+6);
+      TH1D* h4 = new TH1D("h4", "", 2500,0.,2500*sampling*1.E+6);
+      TH1D* h5 = new TH1D("h5", "", 2500,0.,2500*sampling*1.E+6);
+      TH1D* h6 = new TH1D("h6", "", 2500,0.,2500*sampling*1.E+6);
       check++;
       
       for(int i=0; i<2500; ++i ){
 	h1->SetBinContent( i+1, pshape[i] );
-	h2->SetBinContent( i+1, pshape_filtered_100kHz[i] );
-    h3->SetBinContent( i+1, pshape_filtered_10kHz[i] );
+	h2->SetBinContent( i+1, pshape_filtered_100kHz[i]              );
+        h3->SetBinContent( i+1, pshape_filtered_10kHz[i]               );
+	h4->SetBinContent( i+1, pshape_filtered_10kHz_100kHz[i]        );
+	h5->SetBinContent( i+1, pshape_filtered_10kHz_160kHz[i]        );
+	h6->SetBinContent( i+1, pshape_filtered_10kHz_100kHz_160kHz[i] );
       }
+      
       gStyle->SetOptStat(0);
       h1->SetLineColor(kAzure+5);
       h2->SetLineColor(kRed-7);
-      h3->SetLineColor(kPink-5);
+      h3->SetLineColor(kGreen-6);
+      h4->SetLineColor(kOrange-2);
+      h5->SetLineColor(kPink-5);
+      h6->SetLineColor(kBlue-10);
       h1->SetLineWidth(3);
       h2->SetLineWidth(3);
       h3->SetLineWidth(3);
+      h4->SetLineWidth(3);
+      h5->SetLineWidth(3);
+      h6->SetLineWidth(3);
       h1->GetXaxis()->SetTitle("Time (#mus)");
       h1->GetYaxis()->SetTitle("Amplitude (V)");
       h1->GetXaxis()->SetTitleSize(.07); //0.06 su singola, //0.08 su mini
@@ -95,6 +115,18 @@ int main( int argc, char* argv[] ) {
       //h1->GetXaxis()->SetRangeUser(23.1,27);
       h1->GetYaxis()->SetRangeUser(-1,0.05);
 
+      // Aggiungi legenda
+      auto leg2 = new TLegend(0.55, 0.25, 0.9, 0.50);
+      leg2->AddEntry(h1, "Unfiltered", "l");
+      leg2->AddEntry(h3, "10 kHz", "l");
+      leg2->AddEntry(h2, "100 kHz", "l"); 
+      leg2->AddEntry(h4, "100 kHz + 10 kHz", "l");
+      leg2->AddEntry(h5, "160 kHz + 10 kHz", "l");
+      leg2->AddEntry(h6, "160 kHz + 100 kHz + 10 kHz", "l");
+      leg2->SetBorderSize(0);
+      leg2->SetFillStyle(0);
+      leg2->SetTextSize(0.045);
+
       
       c1->SetBottomMargin(0.2);
       c1->SetLeftMargin(0.13);
@@ -103,6 +135,10 @@ int main( int argc, char* argv[] ) {
       h1->Draw("l same");
       h2->Draw("l same");
       h3->Draw("l same");
+      h4->Draw("l same");
+      h5->Draw("l same");
+      h6->Draw("l same");
+      leg2->Draw("same");
     }
   } 
   
@@ -115,7 +151,7 @@ int main( int argc, char* argv[] ) {
   system( Form("mkdir -p %s", outdir.c_str()) );
   //-p crea anche le parent se prima non esistono
 
-  c1->SaveAs(Form("%s/event%dlumi%d_filter100kHzand10kHz.png",outdir.c_str(),event,lumi));
+  c1->SaveAs(Form("%s/event%dlumi%d_filters.png",outdir.c_str(),event,lumi));
   
 
   delete(c1);
