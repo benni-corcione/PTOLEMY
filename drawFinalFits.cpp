@@ -311,10 +311,45 @@ void Input_Param_Ctrls(int argc, char* argv[]){
 
   //ctrl su scelta amp/charge
   if(strcmp(argv[3],"amp"   )!=0 &&
-     strcmp(argv[3],"charge")!=0 ){ 
+     strcmp(argv[3],"charge")!=0 &&
+     (atoi(argv[1]))==188 && (atoi(argv[1]))==204){
     std::cout << "Wrong choice! Choose between 'amp' and 'charge'" << std::endl;
     exit(1);
-  }
+    }
+
+  //ctrl su scelta amp/charge
+  if(strcmp(argv[3],"amp"                    )!=0 &&
+     strcmp(argv[3],"charge"                 )!=0 &&
+     strcmp(argv[3],"amp_10kHz"              )!=0 &&
+     strcmp(argv[3],"amp_100kHz"             )!=0 &&
+     strcmp(argv[3],"amp_10kHz_100kHz"       )!=0 &&
+     strcmp(argv[3],"amp_10kHz_160kHz"       )!=0 &&
+     strcmp(argv[3],"amp_10kHz_100kHz_160kHz")!=0 &&
+     (atoi(argv[1]))==188){
+    std::cout << "Wrong choice! Choose between 'amp','amp_10kHz','amp_100kHz','amp_10kHz_100kHz','amp_10kHz_160kHz' and 'charge'" << std::endl;
+    exit(1);
+    }
+
+  //ctrl su scelta amp/charge
+  if(strcmp(argv[3],"amp"             )!=0 &&
+     strcmp(argv[3],"charge"          )!=0 &&
+     strcmp(argv[3],"amp_10kHz"       )!=0 &&
+     strcmp(argv[3],"amp_10kHz_160kHz")!=0 &&
+     (atoi(argv[1]))==204){
+    std::cout << "Wrong choice! Choose between 'amp','amp_10kHz', 'amp_10kHz_160kHz' and 'charge'" << std::endl;
+    exit(1);
+    }
+
+   //ctrl su scelta amp/charge
+  if(strcmp(argv[3],"amp"             )!=0 &&
+     strcmp(argv[3],"charge"          )!=0 &&
+     strcmp(argv[3],"amp_10kHz"       )!=0 &&
+     strcmp(argv[3],"amp_100kHz"      )!=0 &&
+     strcmp(argv[3],"amp_10kHz_10kHz" )!=0 &&
+     (atoi(argv[1]))==222){
+    std::cout << "Wrong choice! Choose between 'amp','amp_10kHz', 'amp_10kHz_10kHz', 'amp_100kHz' and 'charge'" << std::endl;
+    exit(1);
+    }
   
 }
 
