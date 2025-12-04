@@ -47,25 +47,31 @@ int main() {
   //per dettagli sul programma vedere drawResolutionCFR_filters_c188.cpp che è analogo
   std::string f1 = "data/params_CD204B60_post_cond3_mokuamp.txt";
   std::string f2 = "data/params_CD204B60_post_cond3_mokuamp_10kHz.txt";
-
+  std::string f3 = "data/params_CD204B60_post_cond3_mokuamp_10kHz_160kHz.txt";
+  
   std::vector<float> V1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1;
   std::vector<float> V2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2;
+  std::vector<float> V3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3;
   std::vector<float> energy;
 
   if(!ReadParams(f1, V1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1))
     std::cout << "File 1 non trovato\n" << std::endl;
   if(!ReadParams(f2, V2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2))
     std::cout << "File 2 non trovato\n" << std::endl;
+  if(!ReadParams(f3, V3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3))
+    std::cout << "File 3 non trovato\n" << std::endl;
 
   float phi_tes = GetPhiTes();
 
-  std::vector<float> res1, res_err1;
-  std::vector<float> res2, res_err2;
+  std::vector<float> res1, res_err1, fwhm1, fwhm_err1;
+  std::vector<float> res2, res_err2, fwhm2, fwhm_err2;
+  std::vector<float> res3, res_err3, fwhm3, fwhm_err3;
  
   // Calcola le risoluzioni per ogni dataset
   for(size_t i=0;i<V1.size();i++){
     energy.push_back(V1[i] - phi_tes);
-
+    float sigmaL    = sL1[i];
+    float sigmaLerr = sLerr1[i];   
     float sigmaR    = sR1[i];
     float sigmaRerr = sRerr1[i];
     float mu        = mu1[i];
@@ -76,11 +82,21 @@ int main() {
     float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
                                 + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
 
+    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
+    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
+    float reso_fwhm = (fwhm/mu)* factor;
+    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
+    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
+    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
     res1.push_back(reso);
     res_err1.push_back(reso_err);
+    fwhm1.push_back(reso_fwhm);
+    fwhm_err1.push_back(reso_fwhm_err);
   }
 
   for(size_t i=0;i<V2.size();i++){
+    float sigmaL    = sL2[i];
+    float sigmaLerr = sLerr2[i];
     float sigmaR    = sR2[i];
     float sigmaRerr = sRerr2[i];
     float mu        = mu2[i];
@@ -90,25 +106,60 @@ int main() {
     float reso = sigmaR/mu * factor;
     float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
                                 + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
+  
+    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
+    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
+    float reso_fwhm = (fwhm/mu)* factor;
+    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
+    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
+    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
     res2.push_back(reso);
     res_err2.push_back(reso_err);
+    fwhm2.push_back(reso_fwhm);
+    fwhm_err2.push_back(reso_fwhm_err);
+  }
+
+  for(size_t i=0;i<V3.size();i++){
+    float sigmaL    = sL3[i];
+    float sigmaLerr = sLerr3[i];
+    float sigmaR    = sR3[i];
+    float sigmaRerr = sRerr3[i];
+    float mu        = mu3[i];
+    float muerr     = muerr3[i];
+    float factor    = (V3[i] - phi_tes);
+
+    float reso = sigmaR/mu * factor;
+    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
+                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
+
+    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
+    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
+    float reso_fwhm = (fwhm/mu)* factor;
+    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
+    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
+    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
+    res3.push_back(reso);
+    res_err3.push_back(reso_err);
+    fwhm3.push_back(reso_fwhm);
+    fwhm_err3.push_back(reso_fwhm_err);
   }
 
 
+  //GRAFICI RISOLUZIONE SIGMA
   // Creazione dei grafici con marker personalizzati
   TGraphErrors* g1 = new TGraphErrors(energy.size(), energy.data(), res1.data(), nullptr, res_err1.data());
   TGraphErrors* g2 = new TGraphErrors(energy.size(), energy.data(), res2.data(), nullptr, res_err2.data());
+  TGraphErrors* g3 = new TGraphErrors(energy.size(), energy.data(), res3.data(), nullptr, res_err3.data());
 
   // Impostazione dei marker 
-  g1->SetMarkerStyle(20);   g2->SetMarkerStyle(21); 
-  g1->SetMarkerSize(2);     g2->SetMarkerSize(2);
-  g1->SetMarkerColor(46);   g2->SetMarkerColor(91);
-  g1->SetLineWidth(3);      g2->SetLineWidth(3);
-  g1->SetLineColor(46);     g2->SetLineColor(91); 
+  g1->SetMarkerStyle(20);   g2->SetMarkerStyle(21);   g3->SetMarkerStyle(21); 
+  g1->SetMarkerSize(2);     g2->SetMarkerSize(2);     g3->SetMarkerSize(2);
+  g1->SetMarkerColor(46);   g2->SetMarkerColor(91);   g3->SetMarkerColor(38);
+  g1->SetLineWidth(3);      g2->SetLineWidth(3);      g3->SetLineWidth(3);
+  g1->SetLineColor(46);     g2->SetLineColor(91);     g3->SetLineColor(38);
 
   // Creazione della canvas
-  TCanvas* c = new TCanvas("c","Resolution",800,600);
+  TCanvas* c = new TCanvas("c","Resolution",800,800);
   TMultiGraph* mg = new TMultiGraph();
   c->SetLeftMargin(0.135);
   c->SetBottomMargin(0.135);
@@ -116,97 +167,78 @@ int main() {
   // Aggiungi grafici al multi-grafico
   mg->Add(g1, "P");
   mg->Add(g2, "P");
+  mg->Add(g3, "P");
 
   // Aggiungi legenda
-  auto leg = new TLegend(0.20, 0.75, 0.45, 0.88);
-  leg->AddEntry(g1, "Filtered 10 kHz", "P");
-  leg->AddEntry(g2, "Filtered 100 kHz", "P");
+  auto leg = new TLegend(0.15, 0.77, 0.36, 0.89);
+  leg->AddEntry(g1, "Unfiltered (100kHz online)", "P");
+  leg->AddEntry(g2, "Filtered 10 kHz", "P");
+  leg->AddEntry(g3, "Filtered 160 kHz + 10 kHz", "P");
   leg->SetBorderSize(0);
   leg->SetFillStyle(0); 
-  leg->SetTextSize(0.045); 
+  leg->SetTextSize(0.040); 
 
   mg->Draw("A");
   leg->Draw("same");
 
   // Personalizzazione degli assi
-  mg->GetXaxis()->SetTitle("Energy (V)");
-  mg->GetYaxis()->SetTitle("Resolution");
+  mg->GetXaxis()->SetTitle("Energy (eV)");
+  mg->GetYaxis()->SetTitle("Gaussian energy resolution (eV)");
   mg->GetXaxis()->SetTitleSize(0.05);  
   mg->GetYaxis()->SetTitleSize(0.05);  
   mg->GetXaxis()->SetLabelSize(0.05); 
   mg->GetYaxis()->SetLabelSize(0.05);
+  mg->GetYaxis()->SetRangeUser(0,1.6);
 
   c->SaveAs("plots/CD204/reso_CFR_filters.pdf");
 
-  // Calcola i rapporti delle risoluzioni e gli errori
-  std::vector<float> res_ratio_10kHz, res_err_ratio_10kHz;
+  //GRAFICI RISOLUZIONE FWHM
+  // Creazione dei grafici con marker personalizzati
+  TGraphErrors* g1_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm1.data(), nullptr, fwhm_err1.data());
+  TGraphErrors* g2_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm2.data(), nullptr, fwhm_err2.data());
+  TGraphErrors* g3_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm3.data(), nullptr, fwhm_err3.data());
 
-  for(size_t i = 0; i < V2.size(); i++) {
-    
-    // Calcolo del rapporto e dell'errore per reso_10kHz / reso_unfiltered
-    float reso_10kHz          = res2[i];
-    float reso_10kHz_err      = res_err2[i];
-    float reso_unfiltered     = res1[i];
-    float reso_unfiltered_err = res_err1[i];
-    
-    float ratio_10kHz     = reso_10kHz / reso_unfiltered;
-    float ratio_10kHz_err = ratio_10kHz * std::sqrt(std::pow(reso_10kHz_err / reso_10kHz, 2)
-						    + std::pow(reso_unfiltered_err / reso_unfiltered, 2));
-    //float ratio_10kHz_err = std::sqrt(std::pow((1 / reso_unfiltered) * reso_10kHz_err, 2)
-    //				      + std::pow((-reso_10kHz / std::pow(reso_unfiltered, 2)) * reso_unfiltered_err, 2));
+  // Impostazione dei marker 
+  g1_fwhm->SetMarkerStyle(20);   g2_fwhm->SetMarkerStyle(21);   g3_fwhm->SetMarkerStyle(21); 
+  g1_fwhm->SetMarkerSize(2);     g2_fwhm->SetMarkerSize(2);     g3_fwhm->SetMarkerSize(2);
+  g1_fwhm->SetMarkerColor(46);   g2_fwhm->SetMarkerColor(91);   g3_fwhm->SetMarkerColor(38);
+  g1_fwhm->SetLineWidth(3);      g2_fwhm->SetLineWidth(3);      g3_fwhm->SetLineWidth(3);
+  g1_fwhm->SetLineColor(46);     g2_fwhm->SetLineColor(91);     g3_fwhm->SetLineColor(38);
 
-    res_ratio_10kHz.push_back(ratio_10kHz);
-    res_err_ratio_10kHz.push_back(ratio_10kHz_err);
-  }
+  // Creazione della canvas
+  TCanvas* c_fwhm = new TCanvas("c_fwhm","Resolution",800,800);
+  TMultiGraph* mg_fwhm = new TMultiGraph();
+  c_fwhm->SetLeftMargin(0.135);
+  c_fwhm->SetBottomMargin(0.135);
 
-  // Creazione dei grafici per i rapporti
-  TGraphErrors* g_ratio_10kHz = new TGraphErrors(V1.size(), energy.data(), res_ratio_10kHz.data(), nullptr, res_err_ratio_10kHz.data());
-
-  // Impostazione dei marker per i grafici
-  g_ratio_10kHz->SetMarkerStyle(21);
-  g_ratio_10kHz->SetMarkerSize(2);
-  g_ratio_10kHz->SetMarkerColor(46); 
-  g_ratio_10kHz->SetLineWidth(3);
-  g_ratio_10kHz->SetLineColor(46); 
-
-  // Creazione della canvas per i rapporti
-  TCanvas* c2 = new TCanvas("c2", "Resolution Ratios", 800, 600);
-  TMultiGraph* mg2 = new TMultiGraph();
-  c2->SetLeftMargin(0.135);
-  c2->SetBottomMargin(0.135);
-
-  // Aggiungi i grafici al multi-grafico
-  mg2->Add(g_ratio_10kHz, "P");
+  // Aggiungi grafici al multi-grafico
+  mg_fwhm->Add(g1_fwhm, "P");
+  mg_fwhm->Add(g2_fwhm, "P");
+  mg_fwhm->Add(g3_fwhm, "P");
 
   // Aggiungi legenda
-  auto leg2 = new TLegend(0.15, 0.78, 0.45, 0.88);
-  leg2->AddEntry(g_ratio_10kHz, "10 kHz / Unfiltered", "P");
-  leg2->SetBorderSize(0);
-  leg2->SetFillStyle(0);
-  leg2->SetTextSize(0.045);
+  auto leg_fwhm = new TLegend(0.15, 0.77, 0.36, 0.89);
+  leg_fwhm->AddEntry(g1_fwhm, "Unfiltered (100kHz online)", "P");
+  leg_fwhm->AddEntry(g2_fwhm, "Filtered 10 kHz", "P");
+  leg_fwhm->AddEntry(g3_fwhm, "Filtered 160 kHz + 10 kHz", "P");
+  leg_fwhm->SetBorderSize(0);
+  leg_fwhm->SetFillStyle(0); 
+  leg_fwhm->SetTextSize(0.040); 
 
-  // Disegna i grafici
-  mg2->Draw("A");
-  leg2->Draw("same");
+  mg_fwhm->Draw("A");
+  leg_fwhm->Draw("same");
 
   // Personalizzazione degli assi
-  mg2->GetXaxis()->SetTitle("Energy (V)");
-  mg2->GetYaxis()->SetTitle("Resolution Ratio");
-  mg2->GetXaxis()->SetTitleSize(0.05);
-  mg2->GetYaxis()->SetTitleSize(0.05);
-  mg2->GetXaxis()->SetLabelSize(0.05);
-  mg2->GetYaxis()->SetLabelSize(0.05);
-  mg2->GetYaxis()->SetRangeUser(0.5,3.5);
-  mg2->GetXaxis()->SetRangeUser(95-phi_tes,104-phi_tes);
+  mg_fwhm->GetXaxis()->SetTitle("Energy (eV)");
+  mg_fwhm->GetYaxis()->SetTitle("fwhm energy resolution (eV)");
+  mg_fwhm->GetXaxis()->SetTitleSize(0.05);  
+  mg_fwhm->GetYaxis()->SetTitleSize(0.05);  
+  mg_fwhm->GetXaxis()->SetLabelSize(0.05); 
+  mg_fwhm->GetYaxis()->SetLabelSize(0.05);
+  mg_fwhm->GetYaxis()->SetRangeUser(0,5);
+  mg_fwhm->GetYaxis()->SetTitleOffset(1.3);
 
-  // Aggiungi una linea orizzontale tratteggiata su y = 1
-  TLine* line = new TLine(95.5-phi_tes, 1,103.5-phi_tes, 1);
-  line->SetLineStyle(2);  
-  line->SetLineColor(kBlack);  
-  line->SetLineWidth(2);  
-  line->Draw("same"); 
- 
-  c2->SaveAs("plots/CD204/reso_ratios.pdf");
-    
+  c_fwhm->SaveAs("plots/CD204/resofwhm_CFR_filters.pdf");
+
   return 0;
 }
