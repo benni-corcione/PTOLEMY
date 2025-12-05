@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     {std::cout << "Il programma per ora non lo fa" << std::endl; exit(1);}
   std::string file1;
   std::string file2;
-  if(CD_number1 == 188){file1 = "params_CD188conteggiamp.txt";}
+  if(CD_number1 == 188){file1 = "params_CD188conteggiamp_paper.txt";}
   if(CD_number2 == 204){file2 = "params_CD204B60_post_cond3_mokuamp.txt";}
   if(CD_number2 == 222){file2 = "params_CD222E100_squidfilter_ER_031025_tr12amp.txt";}
 

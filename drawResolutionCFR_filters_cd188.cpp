@@ -16,29 +16,39 @@
 // Legge un file e riempie i vettori
 bool ReadParams(const std::string& filename,
                 std::vector<float>& volts,
+		std::vector<float>& energy,
                 std::vector<float>& mu,
                 std::vector<float>& mu_err,
                 std::vector<float>& sigmaR,
                 std::vector<float>& sigmaR_err,
                 std::vector<float>& sigmaL,
-                std::vector<float>& sigmaL_err){
+                std::vector<float>& sigmaL_err,
+		std::vector<float>& reso_gaus,
+		std::vector<float>& reso_gaus_err,
+		std::vector<float>& reso_fwhm,
+		std::vector<float>& reso_fwhm_err){
 
   std::ifstream in(filename);
   if(!in.is_open()){
     return false; }
 
-  float V, mu_, muerr_, sigR_, sigRerr_, sigL_, sigLerr_;
+  float V, mu_, energy_, muerr_, sigR_, sigRerr_, sigL_, sigLerr_, reso_, reso_err_, fwhm_, fwhm_err_;
   std::string header;
   std::getline(in, header); // riga header
 
-  while(in >> V >> mu_ >> muerr_ >> sigR_ >> sigRerr_ >> sigL_ >> sigLerr_) {
+  while(in >> V >> energy_ >> mu_ >> muerr_ >> sigR_ >> sigRerr_ >> sigL_ >> sigLerr_ >> reso_ >> reso_err_ >> fwhm_ >> fwhm_err_) {
     volts.push_back(V);
+    energy.push_back(energy_);
     mu.push_back(mu_);
     mu_err.push_back(muerr_);
     sigmaR.push_back(sigR_);
     sigmaR_err.push_back(sigRerr_);
     sigmaL.push_back(sigL_);
     sigmaL_err.push_back(sigLerr_);
+    reso_gaus.push_back(reso_);
+    reso_gaus_err.push_back(reso_err_);
+    reso_fwhm.push_back(fwhm_);
+    reso_fwhm_err.push_back(fwhm_err_);
   }
 
   return true;
@@ -48,202 +58,42 @@ bool ReadParams(const std::string& filename,
 int main() {
   std::string f1 = "data/params_CD188conteggiamp_10kHz.txt";
   std::string f2 = "data/params_CD188conteggiamp_100kHz.txt";
-  std::string f3 = "data/params_CD188conteggiamp.txt";
+  std::string f3 = "data/params_CD188conteggiamp_paper.txt";
   std::string f4 = "data/params_CD188conteggiamp_10kHz_100kHz.txt";
   std::string f5 = "data/params_CD188conteggiamp_10kHz_160kHz.txt";
   std::string f6 = "data/params_CD188conteggiamp_10kHz_100kHz_160kHz.txt";
   
-  std::vector<float> V1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1;
-  std::vector<float> V2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2;
-  std::vector<float> V3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3;
-  std::vector<float> V4, mu4, muerr4, sR4, sRerr4, sL4, sLerr4;
-  std::vector<float> V5, mu5, muerr5, sR5, sRerr5, sL5, sLerr5;
-  std::vector<float> V6, mu6, muerr6, sR6, sRerr6, sL6, sLerr6;
-  std::vector<float> energy;
+  std::vector<float> V1, energy1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1, res1, res_err1, fwhm1, fwhm_err1;
+  std::vector<float> V2, energy2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2, res2, res_err2, fwhm2, fwhm_err2;
+  std::vector<float> V3, energy3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3, res3, res_err3, fwhm3, fwhm_err3;
+  std::vector<float> V4, energy4, mu4, muerr4, sR4, sRerr4, sL4, sLerr4, res4, res_err4, fwhm4, fwhm_err4;
+  std::vector<float> V5, energy5, mu5, muerr5, sR5, sRerr5, sL5, sLerr5, res5, res_err5, fwhm5, fwhm_err5;
+  std::vector<float> V6, energy6, mu6, muerr6, sR6, sRerr6, sL6, sLerr6, res6, res_err6, fwhm6, fwhm_err6;
 
-  if(!ReadParams(f1, V1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1))
+  if(!ReadParams(f1, V1, energy1, mu1, muerr1, sR1, sRerr1, sL1, sLerr1, res1, res_err1, fwhm1, fwhm_err1))
     std::cout << "File 1 non trovato\n" << std::endl;
-  if(!ReadParams(f2, V2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2))
+  if(!ReadParams(f2, V2, energy2, mu2, muerr2, sR2, sRerr2, sL2, sLerr2, res2, res_err2, fwhm2, fwhm_err2))
     std::cout << "File 2 non trovato\n" << std::endl;
-  if(!ReadParams(f3, V3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3))
+  if(!ReadParams(f3, V3, energy3, mu3, muerr3, sR3, sRerr3, sL3, sLerr3, res3, res_err3, fwhm3, fwhm_err3))
     std::cout << "File 3 non trovato\n" << std::endl;
-  if(!ReadParams(f4, V4, mu4, muerr4, sR4, sRerr4, sL4, sLerr4))
+  if(!ReadParams(f4, V4, energy4, mu4, muerr4, sR4, sRerr4, sL4, sLerr4, res4, res_err4, fwhm4, fwhm_err4))
     std::cout << "File 4 non trovato\n" << std::endl;
-  if(!ReadParams(f5, V5, mu5, muerr5, sR5, sRerr5, sL5, sLerr5))
+  if(!ReadParams(f5, V5, energy5,  mu5, muerr5, sR5, sRerr5, sL5, sLerr5, res5, res_err5, fwhm5, fwhm_err5))
     std::cout << "File 5 non trovato\n" << std::endl;
-  if(!ReadParams(f6, V6, mu6, muerr6, sR6, sRerr6, sL6, sLerr6))
+  if(!ReadParams(f6, V6, energy6, mu6, muerr6, sR6, sRerr6, sL6, sLerr6, res6, res_err6, fwhm6, fwhm_err6))
     std::cout << "File 6 non trovato\n" << std::endl;
 
   float phi_tes = GetPhiTes();
 
-  std::vector<float> res1, res_err1, fwhm1, fwhm_err1;
-  std::vector<float> res2, res_err2, fwhm2, fwhm_err2;
-  std::vector<float> res3, res_err3, fwhm3, fwhm_err3;
-  std::vector<float> res4, res_err4, fwhm4, fwhm_err4;
-  std::vector<float> res5, res_err5, fwhm5, fwhm_err5;
-  std::vector<float> res6, res_err6, fwhm6, fwhm_err6;
-
-  // Calcola le risoluzioni per ogni dataset
-  for(size_t i=0; i<V1.size(); i++){
-    //mi serviva di riempire il vettore di energie
-    energy.push_back(V1[i] - phi_tes);
-    float sigmaL    = sL1[i];
-    float sigmaLerr = sLerr1[i];
-    float sigmaR    = sR1[i];
-    float sigmaRerr = sRerr1[i];
-    float mu        = mu1[i];
-    float muerr     = muerr1[i];
-    float factor    = (V1[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-				+ sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res1.push_back(reso);
-    res_err1.push_back(reso_err);
-    fwhm1.push_back(reso_fwhm);
-    fwhm_err1.push_back(reso_fwhm_err);
-  }
-
-  for(size_t i=0;i<V2.size();i++){
-    float sigmaL    = sL2[i];
-    float sigmaLerr = sLerr2[i];
-    float sigmaR    = sR2[i];
-    float sigmaRerr = sRerr2[i];
-    float mu        = mu2[i];
-    float muerr     = muerr2[i];
-    float factor    = (V2[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res2.push_back(reso);
-    res_err2.push_back(reso_err);
-    fwhm2.push_back(reso_fwhm);
-    fwhm_err2.push_back(reso_fwhm_err);
-  }
-
-  for(size_t i=0;i<V3.size();i++){
-    float sigmaL    = sL3[i];
-    float sigmaLerr = sLerr3[i];
-    float sigmaR    = sR3[i];
-    float sigmaRerr = sRerr3[i];
-    float mu        = mu3[i];
-    float muerr     = muerr3[i];
-    float factor    = (V3[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res3.push_back(reso);
-    res_err3.push_back(reso_err);
-    fwhm3.push_back(reso_fwhm);
-    fwhm_err3.push_back(reso_fwhm_err);
-  }
-
-  for(size_t i=0;i<V4.size();i++){
-    float sigmaL    = sL4[i];
-    float sigmaLerr = sLerr4[i];
-    float sigmaR    = sR4[i];
-    float sigmaRerr = sRerr4[i];
-    float mu        = mu4[i];
-    float muerr     = muerr4[i];
-    float factor    = (V4[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res4.push_back(reso);
-    res_err4.push_back(reso_err);
-    fwhm4.push_back(reso_fwhm);
-    fwhm_err4.push_back(reso_fwhm_err);
-  }
-
-   for(size_t i=0;i<V5.size();i++){
-    float sigmaL    = sL5[i];
-    float sigmaLerr = sLerr5[i];
-    float sigmaR    = sR5[i];
-    float sigmaRerr = sRerr5[i];
-    float mu        = mu5[i];
-    float muerr     = muerr5[i];
-    float factor    = (V5[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res5.push_back(reso);
-    res_err5.push_back(reso_err);
-    fwhm5.push_back(reso_fwhm);
-    fwhm_err5.push_back(reso_fwhm_err);
-  }
-
-   for(size_t i=0;i<V6.size();i++){
-    float sigmaL    = sL6[i];
-    float sigmaLerr = sLerr6[i];
-    float sigmaR    = sR6[i];
-    float sigmaRerr = sRerr6[i];
-    float mu        = mu6[i];
-    float muerr     = muerr6[i];
-    float factor    = (V6[i] - phi_tes);
-
-    float reso = sigmaR/mu * factor;
-    float reso_err = std::sqrt( sigmaRerr*sigmaRerr/(mu*mu)
-                                + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) ) * factor;
-
-    float fwhm = (sigmaR + sigmaL) * sqrt(2*log(2));
-    float fwhm_err = sqrt(2*log(2)) * sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float reso_fwhm = (fwhm/mu)* factor;
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f) * factor;
-    res6.push_back(reso);
-    res_err6.push_back(reso_err);
-    fwhm6.push_back(reso_fwhm);
-    fwhm_err6.push_back(reso_fwhm_err);
-  }
-
+ 
   //GRAFICI RISOLUZIONE SIGMA
   // Creazione dei grafici senza errori sulle x
-  TGraphErrors* g1 = new TGraphErrors(energy.size(), energy.data(), res1.data(), nullptr, res_err1.data());
-  TGraphErrors* g2 = new TGraphErrors(energy.size(), energy.data(), res2.data(), nullptr, res_err2.data());
-  TGraphErrors* g3 = new TGraphErrors(energy.size(), energy.data(), res3.data(), nullptr, res_err3.data());
-  TGraphErrors* g4 = new TGraphErrors(energy.size(), energy.data(), res4.data(), nullptr, res_err4.data());
-  TGraphErrors* g5 = new TGraphErrors(energy.size(), energy.data(), res5.data(), nullptr, res_err5.data());
-  TGraphErrors* g6 = new TGraphErrors(energy.size(), energy.data(), res6.data(), nullptr, res_err6.data());
+  TGraphErrors* g1 = new TGraphErrors(energy1.size(), energy1.data(), res1.data(), nullptr, res_err1.data());
+  TGraphErrors* g2 = new TGraphErrors(energy2.size(), energy2.data(), res2.data(), nullptr, res_err2.data());
+  TGraphErrors* g3 = new TGraphErrors(energy3.size(), energy3.data(), res3.data(), nullptr, res_err3.data());
+  TGraphErrors* g4 = new TGraphErrors(energy4.size(), energy4.data(), res4.data(), nullptr, res_err4.data());
+  TGraphErrors* g5 = new TGraphErrors(energy5.size(), energy5.data(), res5.data(), nullptr, res_err5.data());
+  TGraphErrors* g6 = new TGraphErrors(energy6.size(), energy6.data(), res6.data(), nullptr, res_err6.data());
 
   // impostazioni grafiche
   g1->SetMarkerStyle(71);   g2->SetMarkerStyle(72);   g3->SetMarkerStyle(73);  
@@ -301,12 +151,12 @@ int main() {
 
   //GRAFICI RISOLUZIONE FWHM
   // Creazione dei grafici senza errori sulle x
-  TGraphErrors* g1_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm1.data(), nullptr, fwhm_err1.data());
-  TGraphErrors* g2_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm2.data(), nullptr, fwhm_err2.data());
-  TGraphErrors* g3_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm3.data(), nullptr, fwhm_err3.data());
-  TGraphErrors* g4_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm4.data(), nullptr, fwhm_err4.data());
-  TGraphErrors* g5_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm5.data(), nullptr, fwhm_err5.data());
-  TGraphErrors* g6_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm6.data(), nullptr, fwhm_err6.data());
+  TGraphErrors* g1_fwhm = new TGraphErrors(energy1.size(), energy1.data(), fwhm1.data(), nullptr, fwhm_err1.data());
+  TGraphErrors* g2_fwhm = new TGraphErrors(energy2.size(), energy2.data(), fwhm2.data(), nullptr, fwhm_err2.data());
+  TGraphErrors* g3_fwhm = new TGraphErrors(energy3.size(), energy3.data(), fwhm3.data(), nullptr, fwhm_err3.data());
+  TGraphErrors* g4_fwhm = new TGraphErrors(energy4.size(), energy4.data(), fwhm4.data(), nullptr, fwhm_err4.data());
+  TGraphErrors* g5_fwhm = new TGraphErrors(energy5.size(), energy5.data(), fwhm5.data(), nullptr, fwhm_err5.data());
+  TGraphErrors* g6_fwhm = new TGraphErrors(energy6.size(), energy6.data(), fwhm6.data(), nullptr, fwhm_err6.data());
 
   // impostazioni grafiche
   g1_fwhm->SetMarkerStyle(71);   g2_fwhm->SetMarkerStyle(21);   g3_fwhm->SetMarkerStyle(22);  

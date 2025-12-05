@@ -21,9 +21,9 @@
 
 int main(void) {
 
-  std::string file1 = "params_CD188conteggiamp_100kHz.txt";
-  std::string file2 = "params_CD204B60_post_cond3_mokuamp.txt";
-  std::string file3 = "params_CD188conteggiamp_paper.txt";
+  std::string file1 = "params_CD188conteggiamp_10kHz_160kHz.txt";
+  std::string file2 = "params_CD204B60_post_cond3_mokuamp_10kHz_160kHz.txt";
+  std::string file3 = "params_CD222E100_squidfilter_ER_031025_tr12amp.txt";
  
   std::vector<TGraphErrors*> gr_reso(3);
   std::vector<TGraphErrors*> gr_reso_fwhm(3);
@@ -55,6 +55,7 @@ int main(void) {
   std::vector<std::vector<float>> reso_gaus_err(3);
   std::vector<std::vector<float>>     reso_fwhm(3);
   std::vector<std::vector<float>> reso_fwhm_err(3);
+  
   
   float phi_tes = GetPhiTes();
 
@@ -98,10 +99,9 @@ int main(void) {
   
   int size[3] = {static_cast<int>(volts[0].size()),
 		 static_cast<int>(volts[1].size()),
-                 static_cast<int>(volts[2].size())};
+		 static_cast<int>(volts[2].size())};
 
-  
-   //calcolo di energia, risoluzione_sigma, errore risoluzione, risoluzione fwhm, errore risoluzione;
+  //calcolo di energia, risoluzione_sigma, errore risoluzione, risoluzione fwhm, errore risoluzione;
   for(int j=0; j<3; j++){
     for(int i=0; i<size[j]; i++) {
       gr_reso     [j]->SetPoint(i,energy[j][i],reso_gaus[j][i]);
@@ -112,6 +112,7 @@ int main(void) {
     }
   }
 
+
   c1->cd();
 
   gPad->SetTickx(1); // tick anche in alto
@@ -119,18 +120,24 @@ int main(void) {
   //grafico risoluzione
   //preparazine tela
   
-  float xmin_reso = 89.5 ;
-  float xmax_reso = 102;
+  float xmin_reso = 89 ;
+  float xmax_reso = 125;
   float ymax_reso = 2.3;
-  float ymax_fwhm = 70 ;
+  float ymax_fwhm = 100 ;
 
-  TLegend* legend = new TLegend(0.48,0.7,1.12,0.87);
+  
+  //gPad->SetGrid(1, 1);
+  //gStyle->SetGridColor(kGray+1);   // grigio chiaro
+  //gStyle->SetGridStyle(3);         // tratteggiata (default=3, continua=1)
+  //gStyle->SetGridWidth(1);
+
+  TLegend* legend = new TLegend(0.40,0.2,1.02,0.37);
   legend->SetTextSize(0.038);
   legend->SetMargin   (0.1);
   legend->SetBorderSize (0);
   legend->SetFillStyle  (0);
   
-  TH2D* h2_axes = new TH2D("axes_reso", "", 10, xmin_reso, xmax_reso, 10, 0, ymax_reso);
+  TH2D* h2_axes = new TH2D("axes_reso", "", 10, xmin_reso, xmax_reso, 10, 0., ymax_reso);
   gStyle->SetOptStat(0);
   h2_axes->GetXaxis()->SetLabelSize(0.042);
   h2_axes->GetXaxis()->SetTitleSize(0.042);
@@ -140,47 +147,42 @@ int main(void) {
   h2_axes->GetXaxis()->SetTitleOffset(1.3);
   h2_axes->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
   h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution (eV)");
-  h2_axes->GetYaxis()->SetNdivisions(510);
   h2_axes->Draw();
-  h2_axes->GetYaxis()->SetNdivisions(510);
- 
+
   gStyle->SetTitleFontSize(0.07);
   
   for(int i=0; i<3; i++){
     gr_reso[i]->SetMarkerSize  (5);
     gr_reso[i]->SetLineWidth   (3);
     gr_reso[i]->SetMarkerStyle(20);
-    
-    gr_reso[i]->GetYaxis()->SetNdivisions(510);
   }
 
   gr_reso[0]->SetMarkerStyle(21);
   gr_reso[1]->SetMarkerStyle(20);
   gr_reso[2]->SetMarkerStyle(22);
-  gr_reso[2]->SetMarkerColor(46);
-  gr_reso[2]->SetLineColor  (46);
+  gr_reso[0]->SetMarkerColor(46);
+  gr_reso[0]->SetLineColor  (46);
   gr_reso[1]->SetMarkerColor(38);
   gr_reso[1]->SetLineColor  (38);
-  gr_reso[0]->SetMarkerColor(kRed+2);
-  gr_reso[0]->SetLineColor  (kRed+2);
+  gr_reso[2]->SetMarkerColor(92);
+  gr_reso[2]->SetLineColor  (92);
  
-  gr_reso[0]->Draw("PSame");
-  gr_reso[1]->Draw("PSame");
-  gr_reso[2]->Draw("PSame");
-  legend->AddEntry(gr_reso[2], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+ 
+  gr_reso[0]->Draw("PESame");
+  gr_reso[1]->Draw("PESame");
+  gr_reso[2]->Draw("PESame");
   legend->AddEntry(gr_reso[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "filtered @ 100 kHz", "");
+  legend->AddEntry((TObject*)0, "filtered @ 160 kHz + 10 kHz", "");
+  legend->AddEntry(gr_reso[2], "T100b, CNTs: 1 mm^{2}", "pe"  );
   legend->AddEntry(gr_reso[1], "T60,     CNTs: 1 mm^{2}", "pe");
+  legend->AddEntry((TObject*)0, "filtered @ 160 kHz + 10 kHz", "");
   legend->Draw("same");
 
-  gPad->RedrawAxis();
-   
-  c1->SaveAs("plots/articolo2/reso_cfrall_100kHz_unfiltered.pdf"); 
+  c1->SaveAs("plots/articolo2/reso_cfrall_10kHz.pdf"); 
   c1->Clear();
   legend->Clear();
 
-  TH2D* h2_axes_fwhm = new TH2D("axes_fwhm", "", 10, xmin_reso, xmax_reso, 10, -5, ymax_fwhm);
+  TH2D* h2_axes_fwhm = new TH2D("axes_fwhm", "", 10, xmin_reso, xmax_reso, 10, 0., ymax_fwhm);
   gStyle->SetOptStat(0);
   h2_axes_fwhm->GetXaxis()->SetLabelSize(0.042);
   h2_axes_fwhm->GetXaxis()->SetTitleSize(0.042);
@@ -191,7 +193,6 @@ int main(void) {
   h2_axes_fwhm->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
   h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution (eV)");
   h2_axes_fwhm->Draw();
- 
   
   gStyle->SetTitleFontSize(0.07);
   for(int i=0; i<3; i++){
@@ -200,42 +201,60 @@ int main(void) {
     gr_reso_fwhm[i]->SetMarkerStyle(20);
   }
 
+   TLegend* legend2 = new TLegend(0.42,0.7,1.04,0.87);
+  legend2->SetTextSize(0.038);
+  legend2->SetMargin   (0.1);
+  legend2->SetBorderSize (0);
+  legend2->SetFillStyle  (0);
+
+  
   gr_reso_fwhm[0]->SetMarkerStyle(21);
   gr_reso_fwhm[1]->SetMarkerStyle(20);
   gr_reso_fwhm[2]->SetMarkerStyle(22);
-  gr_reso_fwhm[2]->SetMarkerColor(46);
-  gr_reso_fwhm[2]->SetLineColor  (46);
+  gr_reso_fwhm[0]->SetMarkerColor(46);
+  gr_reso_fwhm[0]->SetLineColor  (46);
   gr_reso_fwhm[1]->SetMarkerColor(38);
   gr_reso_fwhm[1]->SetLineColor  (38);
-  gr_reso_fwhm[0]->SetMarkerColor(kRed+2);
-  gr_reso_fwhm[0]->SetLineColor  (kRed+2);
+  gr_reso_fwhm[2]->SetMarkerColor(92);
+  gr_reso_fwhm[2]->SetLineColor  (92);
   
-  gr_reso_fwhm[0]->Draw("PSame");
-  gr_reso_fwhm[1]->Draw("PSame");
-  gr_reso_fwhm[2]->Draw("PSame");
-  legend->AddEntry(gr_reso_fwhm[2], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
-  legend->AddEntry(gr_reso_fwhm[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "filtered @ 100 kHz", "");
-  legend->AddEntry(gr_reso_fwhm[1], "T60,     CNTs: 1 mm^{2}", "pe");
-  legend->Draw("same");
+  gr_reso_fwhm[0]->Draw("PESame");
+  gr_reso_fwhm[1]->Draw("PESame");
+  gr_reso_fwhm[2]->Draw("PESame");
+  legend2->AddEntry(gr_reso_fwhm[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
+  legend2->AddEntry((TObject*)0, "filtered @ 160 kHz + 10 kHz", "");
+  legend2->AddEntry(gr_reso_fwhm[2], "T100b, CNTs: 1 mm^{2}", "pe"  );
+  legend2->AddEntry(gr_reso_fwhm[1], "T60,     CNTs: 1 mm^{2}", "pe");
+  legend2->AddEntry((TObject*)0, "filtered @ 160 kHz + 10 kHz", "");
+  legend2->Draw("same");
 
-  TLine* line = new TLine(89, 1.5,102, 1.5 );
+  TLine* line = new TLine(89,3,102,3 );
   line->SetLineColor(38);
   line->SetLineStyle( 2 );
   line->SetLineWidth( 3 );
   line->Draw("same");
 
-  TLatex* labelpepe = new TLatex( 99, 2.5, "1.5 eV" );
+  TLine* line2 = new TLine(117,4.5,125,4.5 );
+  line2->SetLineColor(92);
+  line2->SetLineStyle( 2 );
+  line2->SetLineWidth( 3 );
+  line2->Draw("same");
+  
+  TLatex* labelpepe = new TLatex( 102, 3, "3 eV" );
   labelpepe->SetTextSize( 0.042 );
   labelpepe->SetTextFont(42);   // font standard non bold
   labelpepe->SetTextColor(38);
   labelpepe->Draw("same");
 
-   gPad->RedrawAxis();
-   
-  c1->SaveAs("plots/articolo2/reso_cfrall_fwhm_100kHz_unfiltered.pdf"); 
+  TLatex* labelpepe2 = new TLatex( 115, 6.5, "4.5 eV" );
+  labelpepe2->SetTextSize( 0.042 );
+  labelpepe2->SetTextFont(42);   // font standard non bold
+  labelpepe2->SetTextColor(92);
+  labelpepe2->Draw("same");
+  
+  c1->SaveAs("plots/articolo2/reso_cfrall_fwhm_10kHz.pdf"); 
   c1->Clear();
+
   
 return 0;
 

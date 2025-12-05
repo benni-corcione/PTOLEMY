@@ -21,7 +21,7 @@
 
 int main(void) {
 
-  std::string file1 = "params_CD188conteggiamp.txt";
+  std::string file1 = "params_CD188conteggiamp_paper.txt";
   std::string file2 = "params_CD204B60_post_cond3_mokuamp.txt";
   std::string file3 = "params_CD222E100_squidfilter_ER_031025_tr12amp.txt";
  
@@ -43,13 +43,18 @@ int main(void) {
   filename.push_back("data/" + std::string(file2));
   filename.push_back("data/" + std::string(file3));
  
-  std::vector<std::vector<int>>    volts(3);
-  std::vector<std::vector<float>>     mu(3);
-  std::vector<std::vector<float>> mu_err(3);
-  std::vector<std::vector<float>>     sR(3);
-  std::vector<std::vector<float>> sR_err(3);
-  std::vector<std::vector<float>>     sL(3);
-  std::vector<std::vector<float>> sL_err(3);
+  std::vector<std::vector<int>>           volts(3);
+  std::vector<std::vector<float>>        energy(3);
+  std::vector<std::vector<float>>            mu(3);
+  std::vector<std::vector<float>>        mu_err(3);
+  std::vector<std::vector<float>>            sR(3);
+  std::vector<std::vector<float>>        sR_err(3);
+  std::vector<std::vector<float>>            sL(3);
+  std::vector<std::vector<float>>        sL_err(3);
+  std::vector<std::vector<float>>     reso_gaus(3);
+  std::vector<std::vector<float>> reso_gaus_err(3);
+  std::vector<std::vector<float>>     reso_fwhm(3);
+  std::vector<std::vector<float>> reso_fwhm_err(3);
   
   float phi_tes = GetPhiTes();
 
@@ -67,20 +72,25 @@ int main(void) {
    
     while(!infile.eof()) {
 
-      int val1;
-      float val2, val3, val4, val5, val6, val7;
+      int val0;
+      float val1, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11;
 
       getline(infile,line);
       if( line == "\n" || line == "") continue;
-      sscanf(line.c_str(),"%d %f %f %f %f %f %f", &val1, &val2, &val3, &val4, &val5, &val6, &val7);
+      sscanf(line.c_str(),"%d %f %f %f %f %f %f %f %f %f %f %f", &val0, &val1, &val2, &val3, &val4, &val5, &val6, &val7, &val8, &val9, &val10, &val11);
 
-      volts [j].push_back(val1);
-      mu    [j].push_back(val2);
-      mu_err[j].push_back(val3);
-      sR    [j].push_back(val4);
-      sR_err[j].push_back(val5);
-      sL    [j].push_back(val6);
-      sL_err[j].push_back(val7);
+      volts        [j].push_back(val0 );
+      energy       [j].push_back(val1 );
+      mu           [j].push_back(val2 );
+      mu_err       [j].push_back(val3 );
+      sR           [j].push_back(val4 );
+      sR_err       [j].push_back(val5 );
+      sL           [j].push_back(val6 );
+      sL_err       [j].push_back(val7 );
+      reso_gaus    [j].push_back(val8 );
+      reso_gaus_err[j].push_back(val9 );
+      reso_fwhm    [j].push_back(val10);
+      reso_fwhm_err[j].push_back(val11);
     
     } // !eof
     infile.close();
@@ -90,42 +100,18 @@ int main(void) {
 		 static_cast<int>(volts[1].size()),
 		 static_cast<int>(volts[2].size())};
 
-  
-  std::vector<std::vector<float>>         energy(3);  
-  std::vector<std::vector<float>>     reso_sigma(3);   
-  std::vector<std::vector<float>> reso_sigma_err(3);   
-  std::vector<std::vector<float>>      reso_fwhm(3);    
-  std::vector<std::vector<float>>  reso_fwhm_err(3);  
 
   //calcolo di energia, risoluzione_sigma, errore risoluzione, risoluzione fwhm, errore risoluzione;
   for(int j=0; j<3; j++){
-    
     for(int i=0; i<size[j]; i++) {
-      float fwhm     = (sR[j][i]+sL[j][i])*sqrt(2*log(2));
-      float fwhm_err = sqrt(2*log(2))*sqrt(sR_err[j][i]*sR_err[j][i]+sL_err[j][i]*sL_err[j][i]);
-      float piece1_s = sR_err[j][i]*sR_err[j][i]/(mu[j][i]*mu[j][i]);
-      float piece2_s = sR[j][i]*sR[j][i]*mu_err[j][i]*mu_err[j][i]/(mu[j][i]*mu[j][i]*mu[j][i]*mu[j][i]);
-      float piece1_f = fwhm_err*fwhm_err/(mu[j][i]*mu[j][i]);
-      float piece2_f = fwhm*fwhm*mu_err[j][i]*mu_err[j][i]/(mu[j][i]*mu[j][i]*mu[j][i]*mu[j][i]);
-    
-      energy        [j].push_back(volts[j][i]-phi_tes);
-      reso_sigma    [j].push_back(sR[j][i]/mu[j][i]*(energy[j][i]));
-      reso_fwhm     [j].push_back(fwhm/mu[j][i]*(energy[j][i]));
-      reso_sigma_err[j].push_back(sqrt(piece1_s+piece2_s)*(energy[j][i]));
-      reso_fwhm_err [j].push_back(sqrt(piece1_f+piece2_f)*(energy[j][i]));
-
-      gr_reso     [j]->SetPoint(i,energy[j][i],reso_sigma[j][i]);
-      gr_reso     [j]->SetPointError(i,0,reso_sigma_err[j][i]);
+      gr_reso     [j]->SetPoint(i,energy[j][i],reso_gaus[j][i]);
+      gr_reso     [j]->SetPointError(i,0,reso_gaus_err[j][i]);
       gr_reso_fwhm[j]->SetPoint(i,energy[j][i],reso_fwhm[j][i]);
       gr_reso_fwhm[j]->SetPointError(i,0,reso_fwhm_err[j][i]);
     
     }
   }
 
-  for(int i=0; i<size[2]; i++){
-    std::cout << reso_sigma_err[2][i] << " ";
-  }
-  std::cout << std::endl;
 
   c1->cd();
 
@@ -258,18 +244,18 @@ for(int j = 0; j < 3; j++){
     float sum_sigma  = 0;
     float mean_sigma = 0;
     
-    for(size_t i = 0; i < reso_sigma[j].size(); i++){
-      sum_sigma += reso_sigma[j][i];
+    for(size_t i = 0; i < reso_gaus[j].size(); i++){
+      sum_sigma += reso_gaus[j][i];
     }
-    mean_sigma = sum_sigma / reso_sigma[j].size();
+    mean_sigma = sum_sigma / reso_gaus[j].size();
 
     //calcolo std_dev per gauss
     float var_sigma = 0;
     float std_sigma = 0;
-    for(size_t i = 0; i < reso_sigma[j].size(); i++){
-      var_sigma += (reso_sigma[j][i] - mean_sigma)*(reso_sigma[j][i] - mean_sigma);
+    for(size_t i = 0; i < reso_gaus[j].size(); i++){
+      var_sigma += (reso_gaus[j][i] - mean_sigma)*(reso_gaus[j][i] - mean_sigma);
     }
-    std_sigma = sqrt(var_sigma / (reso_sigma[j].size()-1));
+    std_sigma = sqrt(var_sigma / (reso_gaus[j].size()-1));
 
 
     //calcolo media per fwhm
