@@ -299,8 +299,8 @@ int main() {
 
   c->SaveAs("plots/CD188/reso_CFR_filters.pdf");
 
-   //GRAFICI RISOLUZIONE FWHM
-   // Creazione dei grafici senza errori sulle x
+  //GRAFICI RISOLUZIONE FWHM
+  // Creazione dei grafici senza errori sulle x
   TGraphErrors* g1_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm1.data(), nullptr, fwhm_err1.data());
   TGraphErrors* g2_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm2.data(), nullptr, fwhm_err2.data());
   TGraphErrors* g3_fwhm = new TGraphErrors(energy.size(), energy.data(), fwhm3.data(), nullptr, fwhm_err3.data());
