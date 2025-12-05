@@ -390,7 +390,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
   if(CD_number == 188 && strcmp(choice,"amp")==0){
     var.set_mu_min(0.73)     ;  var.set_mu_max(0.939999)  ;  var.set_mu(0.8)     ;
     var.set_sigmaL_min(0.01) ;  var.set_sigmaL_max(0.5);  var.set_sigmaL(0.1) ;
-    var.set_sigmaR_min(0.001);  var.set_sigmaR_max(0.1);  var.set_sigmaR(0.03);
+    var.set_sigmaR_min(0.001);  var.set_sigmaR_max(0.1);  var.set_sigmaR(0.02);
     var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)     ;
     var.set_A_min(1)         ;  var.set_A_max(3000)    ;
     var.set_A(histo->Integral());

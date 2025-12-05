@@ -58,7 +58,8 @@ int main(int argc, char* argv[]) {
   std::string filename = "data/params_CD" + std::to_string(CD_number)
     + std::string(misura) + std::string(choice) + ".txt";
   std::ofstream ofs(filename);
-  ofs << "V (V)  mu (V)  mu_err (V) sigma (V) sigma_err (V)" << std::endl;
+  ofs << "V (V) E (eV) mu (V)  mu_err (V) sigmaR (V) sigmaR_err (V) sigmaL (V) sigmaL_err (V) reso_gaus (eV) reso_gaus_err (eV) reso_fwhm (eV) reso_fwhm_err (eV)" << std::endl;
+
 
   //impostazioni grafiche
   float magnifying = 1; //per avere numeri in carica più comodi (sono in E-6 sennò)
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
     
     Fit f_var = SetFitValues(CD_number,choice,histo,volts[i],misura);
     
-    //assegnazione parametri di fit
+     //assegnazione parametri di fit
     float mu_min     = f_var.get_mu_min();
     float mu_max     = f_var.get_mu_max();
     float mu_        = f_var.get_mu();
@@ -159,7 +160,7 @@ int main(int argc, char* argv[]) {
   if(strcmp(choice,"charge")==0){ histo->GetXaxis()->SetTitle("Charge (uC)");}
     histo->SetMarkerSize(2);
     histo->SetLineWidth(3);
-    histo->Fit(cruijff,"rx");
+    histo->Fit(cruijff,"RX");
     histo->SetNdivisions(510);
     histo->Draw(); //"pe" per avere points+errors
     
@@ -180,27 +181,36 @@ int main(int argc, char* argv[]) {
     float sigmaRerr = cruijff->GetParError(2);
     float sigmaL    = cruijff->GetParameter(1);
     float sigmaLerr = cruijff->GetParError(1);
-      
-    //l'errore sulla stabilità di ites-ibias è insito nei segnali che otteniamo
+
    
+    //l'errore sulla stabilità di ites-ibias è insito nei segnali che otteniamo
+
     //grafico media vs voltaggio
     gr_mu->SetPoint( i, volts[i], mu );
     gr_mu->SetPointError( i, 0., muerr );
-    
-    //scrittura su file param.txt
-    ofs << volts[i] << " " << mu << " " << muerr
-	<< " " << sigmaR << " " << sigmaRerr 
-        << " " << sigmaL << " " << sigmaLerr <<std::endl;
-    
-    float reso = sigmaR/mu*(volts[i]-phi_tes);
-    //correggo risoluzione togliendo in quadratura enegy spread di 0.1eV
-    //float reso_corr = sqrt( reso*reso - 0.1*0.1 );
-    float reso_err = sqrt( sigmaRerr*sigmaRerr/(mu*mu) + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) )*(volts[i]-phi_tes);
-    //reso_err = sqrt( reso_err*reso_err + 0.15*0.15 );
-    // the 0.15 V added in quadrature comes from the precision of the Keithley power supply
 
     float energy_ele = volts[i] - phi_carbon + (phi_carbon-phi_tes);
-
+    float reso = sigmaR/mu*(volts[i]-phi_tes);
+    float reso_err = sqrt( sigmaRerr*sigmaRerr/(mu*mu) + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) )*(energy_ele);
+   
+    //aggiunta fwhm 
+    float fwhm = (sigmaR+sigmaL)*sqrt(2*log(2));
+    float fwhm_err = sqrt(2*log(2))*sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
+    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
+    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
+    float reso_fwhm = fwhm/mu*(energy_ele);
+    float reso_fwhm_err = sqrt(piece1_f+piece2_f)*(energy_ele);
+    
+   
+    
+   //scrittura su file param.txt
+    ofs << volts[i] << " " << energy_ele << " "
+	<< mu << " " << muerr << " "
+	<< sigmaR << " " << sigmaRerr << " "
+	<< sigmaL << " " << sigmaLerr << " "
+	<< reso << " " << reso_err << " "
+	<< reso_fwhm << " " << reso_fwhm_err << std::endl;
+    
     gr_reso->SetPoint( i, energy_ele, reso );
     gr_reso->SetPointError( i, 0., reso_err );
 
@@ -348,6 +358,12 @@ void Input_Param_Ctrls(int argc, char* argv[]){
      strcmp(argv[3],"amp_10kHz_10kHz" )!=0 &&
      (atoi(argv[1]))==222){
     std::cout << "Wrong choice! Choose between 'amp','amp_10kHz', 'amp_10kHz_10kHz', 'amp_100kHz' and 'charge'" << std::endl;
+    exit(1);
+    }
+
+   //ctrl su scelta amp/charge
+  if(strcmp(argv[3],"amp")==0 && (atoi(argv[1]))==188){
+    std::cout << "Per studiare questi dati vai nella cartella Electron TES old e usa drawFits.cpp" << std::endl;
     exit(1);
     }
   
