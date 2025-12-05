@@ -103,9 +103,6 @@ drawAmpCharge: drawAmpCharge.cpp graphics.h pshape_functions.h
 drawFinalFits: drawFinalFits.cpp AndCommon.h graphics.h CD_details.h
 	$(CC) -Wall $(INCLUDES) -o drawFinalFits drawFinalFits.cpp $(ROOTFLAG) $(EXTRALIBS)
 
-drawFinalFits_filtered: drawFinalFits_filtered.cpp AndCommon.h graphics.h CD_details.h
-	$(CC) -Wall $(INCLUDES) -o drawFinalFits_filtered drawFinalFits_filtered.cpp $(ROOTFLAG) $(EXTRALIBS)
-
 drawLowAmp: drawLowAmp.cpp AndCommon.h graphics.h CD_details.h
 	$(CC) -Wall $(INCLUDES) -o drawLowAmp drawLowAmp.cpp $(ROOTFLAG) $(EXTRALIBS)
 
@@ -120,6 +117,12 @@ drawResolutionCFR: drawResolutionCFR.cpp graphics.h pshape_functions.h
 
 drawResolutionCFRall: drawResolutionCFRall.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawResolutionCFRall drawResolutionCFRall.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawResolutionCFRall_100kHz: drawResolutionCFRall_100kHz.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o drawResolutionCFRall_100kHz drawResolutionCFRall_100kHz.cpp $(ROOTFLAG) $(EXTRALIBS)
+
+drawResolutionCFRall_10kHz: drawResolutionCFRall_10kHz.cpp graphics.h pshape_functions.h
+	$(CC) -Wall $(INCLUDES) -o drawResolutionCFRall_10kHz drawResolutionCFRall_10kHz.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 drawResolutionCFR_filters_cd188: drawResolutionCFR_filters_cd188.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawResolutionCFR_filters_cd188 drawResolutionCFR_filters_cd188.cpp $(ROOTFLAG) $(EXTRALIBS)
