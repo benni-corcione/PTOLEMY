@@ -100,6 +100,9 @@ draw_ctrls: draw_ctrls.cpp
 drawAmpCharge: drawAmpCharge.cpp graphics.h pshape_functions.h
 	$(CC) -Wall $(INCLUDES) -o drawAmpCharge drawAmpCharge.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+drawFits: drawFits.cpp AndCommon.h graphics.h CD_details.h
+	$(CC) -Wall $(INCLUDES) -o drawFits drawFits.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 drawFinalFits: drawFinalFits.cpp AndCommon.h graphics.h CD_details.h
 	$(CC) -Wall $(INCLUDES) -o drawFinalFits drawFinalFits.cpp $(ROOTFLAG) $(EXTRALIBS)
 
