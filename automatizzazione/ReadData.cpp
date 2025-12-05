@@ -107,15 +107,16 @@ int main(int argc, char* argv[]){
 
     
     
-    while(!input_file.eof()){
-      //get current line
-      getline(input_file,line);
+   while (std::getline(input_file, line)) {
       std::replace(line.begin(), line.end(), ',', ' ');
-      //std::cout<< line[0] << std::endl;
-       while (!line.empty() && isspace(line.front())) line.erase(line.begin());
-      if(line == "\n" || line[0]=='F' || line[0]=='-' || line[0] == 'i'){ continue; }
+      while (!line.empty() && isspace(line.front())) line.erase(line.begin());
+  
+      // skippa righe vuote o di intestazione
+      if (line.empty()) continue;
+      if (line.rfind("ion", 0) == 0) continue; // salta righe che iniziano con "ion"
+      if (line[0] == 'F' || line[0] == '-') continue;
       else{
-	line_count+=1;
+	line_count += 1;
 	
 	//read lines
 	//righe dispari: variabili iniziali
@@ -125,14 +126,10 @@ int main(int argc, char* argv[]){
 	
 	if(line_count%2==0){
 	  sscanf(line.c_str(),"%d %f %f %f %f %f %f %f %f %f", &event_a, &x_f, &y_f, &z_f, &vx_f, &vy_f, &vz_f, &ke_f, &elev_f, &azim_f);
-
-	  
-	 
 	}
 	event = round(line_count/2);
 	tree.Fill();
-	
-      }//else su scansione file intero
+      }
     }//while su scansione file
     
     

@@ -16,11 +16,11 @@ adjustable V1_step      = 10
 adjustable V1_count     = 10
 adjustable energy       = 0.01
 
--- i due file GEM
-local gem_list = {
-  "tune_shift_0.gem",
-  "tune_shift_100.gem"
-}
+-- file GEM
+local gem_list = {}
+for i = 0, 20, 10 do -- partenza, fine inclusa, incremento
+  table.insert(gem_list, string.format("tune_shift_%d.gem", i))
+end
 
 -- === VARIABILI LOCALI ===
 local V1_voltage, V2_voltage
@@ -73,7 +73,7 @@ function segment.flym()
                         gemfile, V1_voltage, V2_voltage)
       simion.printer.type = "png"
       simion.printer.filename = img_filename
-      simion.printer.scale = 1
+      simion.printer.scale = 1 -- se metto 2 ho il doppio dei pixel ma è più lento nell'acquisizione
       simion.print_screen()
 
       -- stampa risultati nel file CSV/HTML

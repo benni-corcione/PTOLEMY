@@ -58,10 +58,9 @@ int main(int argc, char* argv[]){
   tree->SetBranchAddress("azim_f", &azim_f);
  
 
-  TH1F* sen_el = new TH1F("sen_el","",50,-0.5,+1.5);
-  
-  TH1F* elev_hist = new TH1F("elev_hist","",200,-3.3,3.3);
-  TH1F* azim_hist = new TH1F("azim_hist","",100,-3.3,3.3);
+  TH1F* sen_el = new TH1F("sen_el","",20,-0.5,+1.5);
+  TH1F* elev_hist = new TH1F("elev_hist","",50,-3.3,3.3);
+  TH1F* azim_hist = new TH1F("azim_hist","",50,-3.3,3.3);
   
   for(int iEntry=0; iEntry<nentries; iEntry++){
     tree->GetEntry(iEntry);
