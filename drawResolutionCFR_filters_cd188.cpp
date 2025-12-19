@@ -147,7 +147,7 @@ int main() {
   mg->GetYaxis()->SetLabelSize(0.05);
   //mg->GetYaxis()->SetRangeUser(-0.05,4); 
 
-  c->SaveAs("plots/CD188/reso_CFR_filters.pdf");
+  c->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall.pdf");
 
   //GRAFICI RISOLUZIONE FWHM
   // Creazione dei grafici senza errori sulle x
@@ -211,7 +211,7 @@ int main() {
   mg_fwhm->GetYaxis()->SetTitleOffset(1.3);
   mg_fwhm->GetYaxis()->SetRangeUser(0,110); 
 
-  c_fwhm->SaveAs("plots/CD188/resofwhm_CFR_filters.pdf");
+  c_fwhm->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall_fwhm.pdf");
 
   return 0;
 }
