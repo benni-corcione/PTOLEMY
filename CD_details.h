@@ -493,7 +493,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
 
 
   if(CD_number == 204 && strcmp(choice,"amp")==0 && strcmp(misura,"B60_post_cond3_moku")==0){
-    var.set_mu_min(0.61)      ;  var.set_mu_max(0.7)    ;  var.set_mu(0.61)    ;
+    var.set_mu_min(0.61)     ;  var.set_mu_max(0.7)    ;  var.set_mu(0.61)    ;
     var.set_sigmaL_min(1E-3) ;  var.set_sigmaL_max(1E-2);  var.set_sigmaL(6E-3); 
     var.set_sigmaR_min(5E-4) ;  var.set_sigmaR_max(0.1);  var.set_sigmaR(2E-3);
     var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)     ;
@@ -509,7 +509,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     if(voltage==100){var.set_fit_min(0.6125); var.set_fit_max(0.63);}
     if(voltage==101){var.set_fit_min(0.6165); var.set_fit_max(0.63);}
     if(voltage==102){var.set_fit_min(0.6145); var.set_fit_max(0.63);}
-    if(voltage==103){var.set_fit_min(0.617); var.set_fit_max(0.635);}
+    if(voltage==103){var.set_fit_min(0.6132); var.set_fit_max(0.635);}
     if(voltage==104){var.set_fit_min(0.616); var.set_fit_max(0.635);}
     if(voltage==105){var.set_fit_min(0.614); var.set_fit_max(0.635);}
     if(voltage==106){var.set_fit_min(0.6179); var.set_fit_max(0.635);}
