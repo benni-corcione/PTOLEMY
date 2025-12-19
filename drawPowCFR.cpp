@@ -38,7 +38,7 @@ int main() {
   TGraphErrors* gr_power204 = new TGraphErrors(0);
   TGraphErrors* gr_power222 = new TGraphErrors(0);
 
-  TLegend* legend = new TLegend(0.5,0.25,1.1,0.42);
+  TLegend* legend = new TLegend(0.2,0.25,1.1,0.35);
   legend->SetTextSize(0.038);
   legend->SetMargin(0.1);
   legend->SetBorderSize(0);
@@ -46,8 +46,8 @@ int main() {
   
   //std::vector<int> colors = get_colors();
 
-  gr_power188->SetMarkerStyle(21);
-  gr_power204->SetMarkerStyle(20);
+  gr_power188->SetMarkerStyle(20);
+  gr_power204->SetMarkerStyle(21);
   gr_power222->SetMarkerStyle(22);
   gr_power188->SetMarkerSize  (5);
   gr_power204->SetMarkerSize  (5);
@@ -86,8 +86,8 @@ int main() {
 
   while( ifs204 >> v2 >> i2 >> r2 >> p2 ) {
       
-    if(v2==95){norma2=p2*1E+12;}
-    if(v2<104){
+    if(v2==96){norma2=p2*1E+12;}
+    if(v2<104 && v2>95){
       gr_power204->SetPoint     ( iPoint, v2, p2*1E+12/norma2 ); // in pW
       //gr_power204->SetPointError( iPoint, 0., 0.0025*p2*1E+12/norma2 ); // in pW
       gr_power204->SetPointError( iPoint, 0., 0); // in pW
@@ -109,7 +109,7 @@ int main() {
   }
   
   double xmin = 93. ;  //CD 188
-  double xmax = 132.;  //CD 222
+  double xmax = 107.;  //CD 222
 
   TH2D *h2_axes_power = new TH2D( "axes_power", "", 10, xmin, xmax, 10, 0.70 , 1.05);
   h2_axes_power->SetXTitle( "Nanotube voltage #it{V}_{CNT} (V)" );
@@ -133,18 +133,18 @@ int main() {
   
   h2_axes_power->Draw("");
   line_uno   ->Draw("same" );
-  gr_power222->Draw("psame");
+  //gr_power222->Draw("psame");
   gr_power204->Draw("psame");
   gr_power188->Draw("psame");
 
   gStyle->SetOptStat(0);
-  legend->AddEntry(gr_power188, "T100a, CNTs: 9 mm^{2}", "p");
-  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
-  legend->AddEntry(gr_power222, "T100b, CNTs: 1 mm^{2}", "p"  );
-  legend->AddEntry(gr_power204, "T60,     CNTs: 1 mm^{2}", "p");
+  //legend->AddEntry(gr_power188, "T100, CNTs: 9 mm^{2}", "p");
+  legend->AddEntry(gr_power188, "Pepe et al. (2024)", "p");
+  //legend->AddEntry(gr_power222, "T100b, CNTs: 1 mm^{2}", "p"  );
+  legend->AddEntry(gr_power204, "This work", "p");
   legend->Draw("same");
  
-  c1->SaveAs("plots/articolo2/power_204_zoom.pdf");
+  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/power_CFR_188_204.pdf");
 
   return 0;
 

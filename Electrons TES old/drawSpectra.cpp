@@ -59,14 +59,14 @@ int main(void){
   }
   
   //tela
-  TCanvas* c = new TCanvas("c","",1400,1200);
+  TCanvas* c = new TCanvas("c","",1400,1400);
   settings.Margin(c);
   settings.general_style();
   c->SetLeftMargin(0.2);
   c->cd();
  
   TPad *pad_new = new TPad("pad_new" ,"",0,0,1,1);
-  TH2D *h2_axes_new = new TH2D( "axes_new", "", 10, 0, 0.7, 10, 0., 1000 );
+  TH2D *h2_axes_new = new TH2D( "axes_new", "", 10, 0, 0.7, 10, 0., 999 );
   h2_axes_new->SetXTitle( "Amplitude (V)" );
   h2_axes_new->SetYTitle("Counts");
   h2_axes_new->GetYaxis()->SetNdivisions(505);
@@ -91,22 +91,22 @@ int main(void){
   h1->SetFillStyle(3004);
   h1->SetFillColor(kBlack);
   h2->SetFillColor(46);
-  pad_new->SetLeftMargin(0.115);
-  pad_new->SetTopMargin(0.115);
+  pad_new->SetLeftMargin(0.12);
+  //pad_new->SetTopMargin(0.);
   pad_new->Draw();
   pad_new->cd();
   h2_axes_new->Draw("");
   h2->Draw("same");
 
-  TLatex* label2 = new TLatex( 0.02, 1020, "T60, CNTs: 1 mm^{2}" );
+  TLatex* label2 = new TLatex( 0.02, 1020, "This work" );
   label2->SetTextSize( 0.048 );
   label2->SetTextColor(46);
-  label2->Draw("same");
+  //label2->Draw("same");
 
-  TLatex* label1 = new TLatex(  0.02, 1080, "T100a, CNTs: 9 mm^{2}");
+  TLatex* label1 = new TLatex(  0.02, 1080, "Previous measurement");
   label1->SetTextSize( 0.048 );
   label1->SetTextColor(kBlack);
-  label1->Draw("same");
+  //label1->Draw("same");
 
   
   TLatex* labeltitle = new TLatex( 0.28, 930, "#it{V}_{cnt} = 100 V" );
@@ -114,7 +114,7 @@ int main(void){
   labeltitle->SetTextColor(46);
   //labeltitle->Draw("same");
   
-  TLatex* label3 = new TLatex( 0.53, 1020, "#bf{E_{e} = 96 eV}" );
+  TLatex* label3 = new TLatex( 0.50, 1020, "#bf{E_{e} = 96 eV}" );
   label3->SetTextSize( 0.052 );
   label3->SetTextColor(kBlack);
   label3->Draw("same");
@@ -130,20 +130,20 @@ int main(void){
   pad_old->cd();
 
   
-  TH2D* h2_axes_old = new TH2D("axes_old", "", 10, 0, 1., 10., 0, 228 );
+  TH2D* h2_axes_old = new TH2D("axes_old", "", 10, 0, 1., 10., 0, 240 );
   h2_axes_old->GetXaxis()->SetNdivisions(505);
   h2_axes_old->GetXaxis()->SetLabelSize(0.085);
   h2_axes_old->GetXaxis()->SetTitleOffset(1.);
   h2_axes_old->GetXaxis()->SetTitleSize(0.085);
   h2_axes_old->GetYaxis()->SetNdivisions(505);
   h2_axes_old->GetYaxis()->SetLabelSize(0.085);
-  h2_axes_old->GetYaxis()->SetTitleOffset(1.1);
+  h2_axes_old->GetYaxis()->SetTitleOffset(1.4);
   h2_axes_old->GetYaxis()->SetTitleSize(0.085);
   h2_axes_old->SetXTitle( "Amplitude (V)" );
   h2_axes_old->SetYTitle("Counts");
   h2_axes_old->Draw();
 
-  TLatex* labelpepe = new TLatex( 0.04, 200, "Pepe et al (2024)" );
+  TLatex* labelpepe = new TLatex( 0.04, 210, "Pepe et al. (2024)" );
   labelpepe->SetTextSize( 0.085 );
   labelpepe->SetTextFont(42);   // font standard non bold
   labelpepe->SetTextColor(kBlack);

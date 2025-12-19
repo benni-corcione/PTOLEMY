@@ -236,9 +236,9 @@ int main(void) {
 
   // stampa media e deviazione standard per i 6 dataset
 
-// stampa media e deviazione standard per i 6 dataset
+  // stampa media e deviazione standard per i 6 dataset
 
-for(int j = 0; j < 3; j++){
+  for(int j = 0; j < 3; j++){
 
     // calcolo media per gauss
     float sum_sigma  = 0;
@@ -279,10 +279,10 @@ for(int j = 0; j < 3; j++){
               << "  sigma: mean=" << mean_sigma << " std=" << std_sigma
               << "  |  fwhm: mean=" << mean_fwhm << " std=" << std_fwhm
               << std::endl;
-}
+  }
 
   
-return 0;
+  return 0;
 
 }
 

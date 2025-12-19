@@ -124,7 +124,7 @@ int main(void) {
   float ymax_reso = 2.3;
   float ymax_fwhm = 70 ;
 
-  TLegend* legend = new TLegend(0.48,0.7,1.12,0.87);
+  TLegend* legend = new TLegend(0.5,0.70,1.23,0.89);
   legend->SetTextSize(0.038);
   legend->SetMargin   (0.1);
   legend->SetBorderSize (0);
@@ -138,8 +138,8 @@ int main(void) {
   h2_axes->GetYaxis()->SetTitleSize(0.042);
   h2_axes->GetYaxis()->SetTitleOffset(1.5);
   h2_axes->GetXaxis()->SetTitleOffset(1.3);
-  h2_axes->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
-  h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution (eV)");
+  h2_axes->GetXaxis()->SetTitle("Electron kinetic energy E_{e} (eV)");
+  h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution #sigma_{gaus} (eV)");
   h2_axes->GetYaxis()->SetNdivisions(510);
   h2_axes->Draw();
   h2_axes->GetYaxis()->SetNdivisions(510);
@@ -154,33 +154,34 @@ int main(void) {
     gr_reso[i]->GetYaxis()->SetNdivisions(510);
   }
 
-  gr_reso[0]->SetMarkerStyle(21);
-  gr_reso[1]->SetMarkerStyle(20);
-  gr_reso[2]->SetMarkerStyle(22);
+  gr_reso[0]->SetMarkerStyle(89);
+  gr_reso[1]->SetMarkerStyle(21);
+  gr_reso[2]->SetMarkerStyle(20);
   gr_reso[2]->SetMarkerColor(46);
   gr_reso[2]->SetLineColor  (46);
   gr_reso[1]->SetMarkerColor(38);
   gr_reso[1]->SetLineColor  (38);
-  gr_reso[0]->SetMarkerColor(kRed+2);
-  gr_reso[0]->SetLineColor  (kRed+2);
+  gr_reso[0]->SetMarkerColor(kGray+1);
+  gr_reso[0]->SetLineColor  (kGray+1);
  
-  gr_reso[0]->Draw("PSame");
-  gr_reso[1]->Draw("PSame");
   gr_reso[2]->Draw("PSame");
-  legend->AddEntry(gr_reso[2], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
-  legend->AddEntry(gr_reso[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "filtered @ 100 kHz", "");
-  legend->AddEntry(gr_reso[1], "T60,     CNTs: 1 mm^{2}", "pe");
+  gr_reso[1]->Draw("PSame");
+  gr_reso[0]->Draw("PSame");
+  legend->AddEntry(gr_reso[2], "Pepe et al. (2024)", "pe"  );
+  //legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+  //legend->AddEntry(gr_reso[0], "T100, CNTs: 9 mm^{2}", "pe"  );
+  legend->AddEntry(gr_reso[0], "Pepe et al. (2024)", "pe");
+  legend->AddEntry((TObject*)0, "+ low-pass filter", "");
+  legend->AddEntry(gr_reso[1], "This work", "pe");
   legend->Draw("same");
 
-  gPad->RedrawAxis();
+  //gPad->RedrawAxis();
    
-  c1->SaveAs("plots/articolo2/reso_cfrall_100kHz_unfiltered.pdf"); 
+  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall.pdf"); 
   c1->Clear();
   legend->Clear();
 
-  TH2D* h2_axes_fwhm = new TH2D("axes_fwhm", "", 10, xmin_reso, xmax_reso, 10, -5, ymax_fwhm);
+  TH2D* h2_axes_fwhm = new TH2D("axes_fwhm", "", 10, xmin_reso, xmax_reso, 10, 0, ymax_fwhm);
   gStyle->SetOptStat(0);
   h2_axes_fwhm->GetXaxis()->SetLabelSize(0.042);
   h2_axes_fwhm->GetXaxis()->SetTitleSize(0.042);
@@ -188,8 +189,8 @@ int main(void) {
   h2_axes_fwhm->GetYaxis()->SetTitleSize(0.042);
   h2_axes_fwhm->GetYaxis()->SetTitleOffset(1.5);
   h2_axes_fwhm->GetXaxis()->SetTitleOffset(1.3);
-  h2_axes_fwhm->GetXaxis()->SetTitle("Electron kinetic energy (eV)");
-  h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution (eV)");
+  h2_axes_fwhm->GetXaxis()->SetTitle("Electron kinetic energy E_{e} (eV)");
+  h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution #sigma_{fwhm} (eV)");
   h2_axes_fwhm->Draw();
  
   
@@ -200,43 +201,90 @@ int main(void) {
     gr_reso_fwhm[i]->SetMarkerStyle(20);
   }
 
-  gr_reso_fwhm[0]->SetMarkerStyle(21);
-  gr_reso_fwhm[1]->SetMarkerStyle(20);
-  gr_reso_fwhm[2]->SetMarkerStyle(22);
+  gr_reso_fwhm[0]->SetMarkerStyle(89);
+  gr_reso_fwhm[1]->SetMarkerStyle(21);
+  gr_reso_fwhm[2]->SetMarkerStyle(20);
   gr_reso_fwhm[2]->SetMarkerColor(46);
   gr_reso_fwhm[2]->SetLineColor  (46);
   gr_reso_fwhm[1]->SetMarkerColor(38);
   gr_reso_fwhm[1]->SetLineColor  (38);
-  gr_reso_fwhm[0]->SetMarkerColor(kRed+2);
-  gr_reso_fwhm[0]->SetLineColor  (kRed+2);
+  gr_reso_fwhm[0]->SetMarkerColor(kGray+1);
+  gr_reso_fwhm[0]->SetLineColor  (kGray+1);
   
-  gr_reso_fwhm[0]->Draw("PSame");
-  gr_reso_fwhm[1]->Draw("PSame");
   gr_reso_fwhm[2]->Draw("PSame");
-  legend->AddEntry(gr_reso_fwhm[2], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
-  legend->AddEntry(gr_reso_fwhm[0], "T100a, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry((TObject*)0, "filtered @ 100 kHz", "");
-  legend->AddEntry(gr_reso_fwhm[1], "T60,     CNTs: 1 mm^{2}", "pe");
+  gr_reso_fwhm[1]->Draw("PSame");
+  gr_reso_fwhm[0]->Draw("PSame");
+  legend->AddEntry(gr_reso_fwhm[2], "Pepe et al. (2024)", "pe"  );
+  //legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
+  //legend->AddEntry(gr_reso_fwhm[0], "T100, CNTs: 9 mm^{2}", "pe"  );
+  legend->AddEntry(gr_reso_fwhm[0], "Pepe et al. (2024)", "pe");
+  legend->AddEntry((TObject*)0, "+ low-pass filter", "");
+  legend->AddEntry(gr_reso_fwhm[1], "This work", "pe");
   legend->Draw("same");
 
-  TLine* line = new TLine(89, 1.5,102, 1.5 );
+  TLine* line = new TLine(89.5, 1.4,102, 1.4 );
   line->SetLineColor(38);
   line->SetLineStyle( 2 );
   line->SetLineWidth( 3 );
-  line->Draw("same");
+  //line->Draw("same");
 
   TLatex* labelpepe = new TLatex( 99, 2.5, "1.5 eV" );
   labelpepe->SetTextSize( 0.042 );
   labelpepe->SetTextFont(42);   // font standard non bold
   labelpepe->SetTextColor(38);
-  labelpepe->Draw("same");
+  //labelpepe->Draw("same");
 
-   gPad->RedrawAxis();
+  gPad->RedrawAxis();
    
-  c1->SaveAs("plots/articolo2/reso_cfrall_fwhm_100kHz_unfiltered.pdf"); 
+  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall_fwhm.pdf"); 
   c1->Clear();
-  
+
+  // stampa media e deviazione standard per i 6 dataset
+
+for(int j = 0; j < 3; j++){
+
+    // calcolo media per gauss
+    float sum_sigma  = 0;
+    float mean_sigma = 0;
+    
+    for(size_t i = 0; i < reso_gaus[j].size(); i++){
+      sum_sigma += reso_gaus[j][i];
+    }
+    mean_sigma = sum_sigma / reso_gaus[j].size();
+
+    //calcolo std_dev per gauss
+    float var_sigma = 0;
+    float std_sigma = 0;
+    for(size_t i = 0; i < reso_gaus[j].size(); i++){
+      var_sigma += (reso_gaus[j][i] - mean_sigma)*(reso_gaus[j][i] - mean_sigma);
+    }
+    std_sigma = sqrt(var_sigma / (reso_gaus[j].size()-1));
+
+
+    //calcolo media per fwhm
+    float sum_fwhm = 0;
+    float mean_fwhm = 0;
+    for(size_t i = 0; i < reso_fwhm[j].size(); i++){
+      sum_fwhm += reso_fwhm[j][i];
+    }
+    mean_fwhm = sum_fwhm / reso_fwhm[j].size();
+
+    //calcolo std dev per fwhm
+    float var_fwhm = 0;
+    float std_fwhm = 0;
+    for(size_t i = 0; i < reso_fwhm[j].size(); i++){
+      var_fwhm += (reso_fwhm[j][i] - mean_fwhm)*(reso_fwhm[j][i] - mean_fwhm);
+    }
+    std_fwhm = sqrt(var_fwhm / (reso_fwhm[j].size()-1));
+
+
+    std::cout << "Dataset " << j
+              << "  sigma: mean=" << mean_sigma << " std=" << std_sigma
+              << "  |  fwhm: mean=" << mean_fwhm << " std=" << std_fwhm
+              << std::endl;
+}
+
+ 
 return 0;
 
 }

@@ -64,7 +64,7 @@ int main( int argc, char* argv[] ) {
   tree->SetBranchAddress( "pshape_filtered_10kHz_100kHz_160kHz" , &pshape_filtered_10kHz_100kHz_160kHz);   
 
   //preparazione grafica histo
-  TCanvas* c1 = new TCanvas("c1", "c1", 1800, 850); //1800 850
+  TCanvas* c1 = new TCanvas("c1", "c1", 1800, 1200); //1800 850
   c1->cd();
 
   //check se l'evento esiste
@@ -98,9 +98,9 @@ int main( int argc, char* argv[] ) {
       h4->SetLineColor(kOrange-2);
       h5->SetLineColor(kPink-5);
       h6->SetLineColor(kBlue-10);
-      h1->SetLineWidth(3);
-      h2->SetLineWidth(3);
-      h3->SetLineWidth(3);
+      h1->SetLineWidth(9);
+      h2->SetLineWidth(9);
+      h3->SetLineWidth(9);
       h4->SetLineWidth(3);
       h5->SetLineWidth(3);
       h6->SetLineWidth(3);
@@ -110,10 +110,10 @@ int main( int argc, char* argv[] ) {
       h1->GetYaxis()->SetTitleSize(.07);
       h1->GetXaxis()->SetLabelSize(0.08); //0.05 su singola, //0.07 su mini
       h1->GetYaxis()->SetLabelSize(0.08);
-      h1->GetYaxis()->SetTitleOffset(+0.95);
-      h1->GetXaxis()->SetTitleOffset(+0.9);
+      h1->GetYaxis()->SetTitleOffset(+1.1);
+      h1->GetXaxis()->SetTitleOffset(+1.0);
       //h1->GetXaxis()->SetRangeUser(23.1,27);
-      h1->GetYaxis()->SetRangeUser(-1,0.05);
+      h1->GetYaxis()->SetRangeUser(-0.69,0.099);
 
       // Aggiungi legenda
       auto leg2 = new TLegend(0.55, 0.25, 0.9, 0.50);
@@ -128,17 +128,17 @@ int main( int argc, char* argv[] ) {
       leg2->SetTextSize(0.045);
 
       
-      c1->SetBottomMargin(0.2);
-      c1->SetLeftMargin(0.13);
+      c1->SetBottomMargin(0.17);
+      c1->SetLeftMargin(0.15);
       c1->SetRightMargin(0.04);
-      gStyle->SetFrameLineWidth(0.5);
+      //gStyle->SetFrameLineWidth(0.5);
       h1->Draw("l same");
-      h2->Draw("l same");
-      h3->Draw("l same");
-      h4->Draw("l same");
-      h5->Draw("l same");
-      h6->Draw("l same");
-      leg2->Draw("same");
+      //h2->Draw("l same");
+      //h3->Draw("l same");
+      //h4->Draw("l same");
+      //h5->Draw("l same");
+      //h6->Draw("l same");
+      //leg2->Draw("same");
     }
   } 
   
