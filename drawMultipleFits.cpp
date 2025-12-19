@@ -60,7 +60,8 @@ int main(int argc, char* argv[]) {
 
   std::vector<int> volts;
   if(CD_number==188){volts.push_back(105); volts.push_back(103); volts.push_back(101); volts.push_back(97); measure = "conteggi"; colors.push_back(1); colors.push_back(46); colors.push_back(38); colors.push_back(30); }
-  if(CD_number==204){volts.push_back(105); volts.push_back(97); measure = "B60_post_cond3_moku"; colors.push_back(1); colors.push_back(30);}
+  if(CD_number==204){volts.push_back(103); volts.push_back(97); measure = "B60_post_cond3_moku"; colors.push_back(1); colors.push_back(30);}
+    // colors.push_back(38); colors.push_back(46);}
   if(CD_number==222){volts.push_back(123);  volts.push_back(128); measure = "E100_squidfilter_ER_031025_tr12"; colors.push_back(46); colors.push_back(38);}
 
   // carbon WF:
@@ -87,14 +88,17 @@ int main(int argc, char* argv[]) {
   float xmax = 0;
   int nbins;
   float scale_factor = 1.0;
-    if(CD_number == 204) scale_factor = 1.61;
+  if(CD_number == 204) scale_factor = 1.61;
+  //if(CD_number == 204) scale_factor = 1;
     if(CD_number == 222) scale_factor = 8.63;
     
   if(CD_number==188){ xmin = 0.73*scale_factor; xmax = 0.93999*scale_factor; nbins = 200*2;}
   //if(CD_number==204){ xmin = 0.55*scale_factor;  xmax = 0.67*scale_factor; nbins = 896;}
   //if(CD_number==222){ xmin = 0.09*scale_factor; xmax = 0.13*scale_factor; nbins = 650;}
 
-  if(CD_number==204){ xmin = 0.81;  xmax = 1.12; nbins = 404;}
+  //if(CD_number==204){ xmin = 0.81;  xmax = 1.12; nbins = 404;}
+  if(CD_number==204){ xmin = 0.87;  xmax = 1.07; nbins = 404;}
+  //if(CD_number==204){ xmin = 0.81/1.61;  xmax = 1.12/1.61; nbins = 404;}
   if(CD_number==222){ xmin = 0.81;  xmax = 1.12; nbins = 404;}
   
 
@@ -160,6 +164,9 @@ int main(int argc, char* argv[]) {
     if(CD_number==222){mu_ = 0.985;}
     if(CD_number==222){sigmaR_max = 0.03;}
     if(CD_number==204){sigmaL_min = 0.0097;}
+    //if(CD_number==204 && volts[i]==103){mu_ = 0.98/scale_factor; mu_max = 1.1/scale_factor;}
+    if(CD_number==204 && volts[i]==103){mu_ = 0.62*scale_factor; mu_max = 0.63*scale_factor;}
+    
     cruijff->SetParLimits(0,    mu_min,    mu_max);
     cruijff->SetParLimits(1,sigmaL_min,sigmaL_max); 
     cruijff->SetParLimits(2,sigmaR_min,sigmaR_max);
@@ -220,7 +227,7 @@ int main(int argc, char* argv[]) {
   if(CD_number==204){h2_axes->GetYaxis()->SetNdivisions(510);}
   if(CD_number==222){h2_axes->GetYaxis()->SetNdivisions(510);}
   h2_axes->GetXaxis()->SetNdivisions(510);
-  //h2_axes->GetXaxis()->SetNdivisions(505);
+  h2_axes->GetXaxis()->SetNdivisions(505);
   h2_axes->GetYaxis()->SetTitleOffset(1.5);
   h2_axes->SetYTitle( Form("Counts", (double)(histos[0]->GetXaxis()->GetBinWidth(13))) );
   if(CD_number==204){h2_axes->SetTitle("T60, CNTs: 1 mm^{2}");}
@@ -238,6 +245,8 @@ int main(int argc, char* argv[]) {
     //histos[i]->GetXaxis()->SetNdivisions(0);
     TF1* f = histos[i]->GetFunction(Form("cru_%s", histos[i]->GetName()));
     f->SetLineColor(colors[i]);
+    //f->SetLineColor(1);
+    //f->SetLineStyle(1);
     histos[i]->Draw("same");
     
     latex->SetTextColor(colors[i]);
@@ -248,8 +257,8 @@ int main(int argc, char* argv[]) {
     }
     if(CD_number==204){
       
-      if(i==0){ latex->DrawLatex( 1.005, 450, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()));}
-      if(i==1){ latex->DrawLatex( 0.875, 500, Form("#it{V}_{CNT} = %s V", histos[i]->GetName()) );}}
+      if(i==0){ latex->DrawLatex( 1.01, 500, "E_{e} = 99 eV");}
+      if(i==1){ latex->DrawLatex( 0.92, 500, Form("E_{e} = 93 eV", histos[i]->GetName()) );}}
     
   
   
