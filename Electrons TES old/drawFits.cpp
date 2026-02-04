@@ -175,6 +175,7 @@ int main() {
     //aggiunta fwhm
     
     float energy_ele = volts[i] - phi + (phi-phi_tes);
+     float energy_err = sqrt(0.0009 + pow((0.04+0.0015*volts[i]),2));
     
     float fwhm = (sigma+sigmaL)*sqrt(2*log(2));
     float fwhm_err = sqrt(2*log(2))*sqrt(sigmaerr*sigmaerr+sigmaLerr*sigmaLerr);
@@ -184,7 +185,8 @@ int main() {
     float reso_fwhm_err = sqrt(piece1_f+piece2_f)*(energy_ele);
    
     //scrittura su file param.txt
-    ofs << volts[i] << " " << energy_ele << " "
+    ofs << volts[i] << " " << energy_ele << " " 
+      	<< energy_err << " " 
 	<< mu << " " << muerr << " "
 	<< sigma << " " << sigmaerr << " "
 	<< sigmaL << " " << sigmaLerr << " "
