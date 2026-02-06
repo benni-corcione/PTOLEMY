@@ -21,9 +21,10 @@
 
 int main(void) {
 
-  std::string file1 = "params_CD188conteggiamp_100kHz.txt";
-  std::string file2 = "params_CD204B60_post_cond3_mokuamp.txt";
-  std::string file3 = "params_CD188conteggiamp_paper.txt";
+  std::string file1 = "params_CD188conteggiamp_paper.txt";
+  std::string file2 = "params_CD188conteggiamp_100kHz.txt";
+  std::string file3 = "params_CD204B60_post_cond3_mokuamp.txt";
+ 
  
   std::vector<TGraphErrors*> gr_reso(3);
   std::vector<TGraphErrors*> gr_reso_fwhm(3);
@@ -45,6 +46,7 @@ int main(void) {
  
   std::vector<std::vector<int>>           volts(3);
   std::vector<std::vector<float>>        energy(3);
+  std::vector<std::vector<float>>    energy_err(3);
   std::vector<std::vector<float>>            mu(3);
   std::vector<std::vector<float>>        mu_err(3);
   std::vector<std::vector<float>>            sR(3);
@@ -73,14 +75,15 @@ int main(void) {
     while(!infile.eof()) {
 
       int val0;
-      float val1, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11;
+      float val1, val1b, val2, val3, val4, val5, val6, val7, val8, val9, val10, val11;
 
       getline(infile,line);
       if( line == "\n" || line == "") continue;
-      sscanf(line.c_str(),"%d %f %f %f %f %f %f %f %f %f %f %f", &val0, &val1, &val2, &val3, &val4, &val5, &val6, &val7, &val8, &val9, &val10, &val11);
+      sscanf(line.c_str(),"%d %f %f %f %f %f %f %f %f %f %f %f %f", &val0, &val1, &val1b, &val2, &val3, &val4, &val5, &val6, &val7, &val8, &val9, &val10, &val11);
 
       volts        [j].push_back(val0 );
       energy       [j].push_back(val1 );
+      energy_err   [j].push_back(val1b);
       mu           [j].push_back(val2 );
       mu_err       [j].push_back(val3 );
       sR           [j].push_back(val4 );
@@ -99,15 +102,47 @@ int main(void) {
   int size[3] = {static_cast<int>(volts[0].size()),
 		 static_cast<int>(volts[1].size()),
                  static_cast<int>(volts[2].size())};
-
+   
   
    //calcolo di energia, risoluzione_sigma, errore risoluzione, risoluzione fwhm, errore risoluzione;
   for(int j=0; j<3; j++){
     for(int i=0; i<size[j]; i++) {
+      float stat_gaus, syst_gaus, stat_fwhm, syst_fwhm;
+
+      
+      if(j==0){ //paper
+	stat_gaus = reso_gaus_err[j][i];
+	syst_gaus = 0;
+	stat_fwhm = reso_fwhm_err[j][i];
+	//syst_fwhm = 0;
+	//syst_fwhm = 0.04 * reso_fwhm[j][i]; //4% da binnaggio e range - metodo 1
+	syst_fwhm = 0.115 * reso_fwhm[j][i]; //11.5% da binning per fwhm - metodo 2
+      }
+      
+      if(j==1){ //paper filtrato
+	stat_gaus = reso_gaus_err[j][i];
+	syst_gaus = 0;
+	//syst_gaus = 0.02 * reso_gaus[j][i];
+	stat_fwhm = reso_fwhm_err[j][i];
+	//syst_fwhm = 0;
+	//syst_fwhm = 0.04 * reso_fwhm[j][i]; //4% da binnaggio e range - metodo 1
+	syst_fwhm = 0.115 * reso_fwhm[j][i]; //11.5% da binning per fwhm - metodo 2
+      }
+
+      if(j==2){ //new data
+	stat_gaus = reso_gaus_err[j][i];
+	syst_gaus = 0.11 * reso_gaus[j][i];
+	stat_fwhm = reso_fwhm_err[j][i];
+	//syst_fwhm = 0.102 * reso_fwhm[j][i]; //quadratura binning&range e CB fit - metodo 1
+	syst_fwhm = 0.2 * reso_fwhm[j][i]; //20% da binning per fwhm - metodo 2
+      }
+
+      float reso_gaus_err_tot = sqrt(stat_gaus*stat_gaus+syst_gaus*syst_gaus);
+      float reso_fwhm_err_tot = sqrt(stat_fwhm*stat_fwhm+syst_fwhm*syst_fwhm);
       gr_reso     [j]->SetPoint(i,energy[j][i],reso_gaus[j][i]);
-      gr_reso     [j]->SetPointError(i,0,reso_gaus_err[j][i]);
+      gr_reso     [j]->SetPointError(i,0,reso_gaus_err_tot);
       gr_reso_fwhm[j]->SetPoint(i,energy[j][i],reso_fwhm[j][i]);
-      gr_reso_fwhm[j]->SetPointError(i,0,reso_fwhm_err[j][i]);
+      gr_reso_fwhm[j]->SetPointError(i,0,reso_fwhm_err_tot);
     
     }
   }
@@ -139,7 +174,7 @@ int main(void) {
   h2_axes->GetYaxis()->SetTitleOffset(1.5);
   h2_axes->GetXaxis()->SetTitleOffset(1.3);
   h2_axes->GetXaxis()->SetTitle("Electron kinetic energy E_{e} (eV)");
-  h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution #sigma_{gaus} (eV)");
+  h2_axes->GetYaxis()->SetTitle("TES Gaussian energy resolution #DeltaE_{gaus} (eV)");
   h2_axes->GetYaxis()->SetNdivisions(510);
   h2_axes->Draw();
   h2_axes->GetYaxis()->SetNdivisions(510);
@@ -154,30 +189,30 @@ int main(void) {
     gr_reso[i]->GetYaxis()->SetNdivisions(510);
   }
 
-  gr_reso[0]->SetMarkerStyle(89);
-  gr_reso[1]->SetMarkerStyle(21);
-  gr_reso[2]->SetMarkerStyle(20);
-  gr_reso[2]->SetMarkerColor(46);
-  gr_reso[2]->SetLineColor  (46);
-  gr_reso[1]->SetMarkerColor(38);
-  gr_reso[1]->SetLineColor  (38);
-  gr_reso[0]->SetMarkerColor(kGray+1);
-  gr_reso[0]->SetLineColor  (kGray+1);
+  gr_reso[1]->SetMarkerStyle(89);
+  gr_reso[2]->SetMarkerStyle(21);
+  gr_reso[0]->SetMarkerStyle(20);
+  gr_reso[0]->SetMarkerColor(46);
+  gr_reso[0]->SetLineColor  (46);
+  gr_reso[2]->SetMarkerColor(38);
+  gr_reso[2]->SetLineColor  (38);
+  gr_reso[1]->SetMarkerColor(kGray+1);
+  gr_reso[1]->SetLineColor  (kGray+1);
  
-  gr_reso[2]->Draw("PSame");
-  gr_reso[1]->Draw("PSame");
   gr_reso[0]->Draw("PSame");
-  legend->AddEntry(gr_reso[2], "Pepe et al. (2024)", "pe"  );
+  gr_reso[1]->Draw("PSame");
+  gr_reso[2]->Draw("PSame");
+  legend->AddEntry(gr_reso[0], "Pepe et al. (2024)", "pe"  );
   //legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
   //legend->AddEntry(gr_reso[0], "T100, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso[0], "Pepe et al. (2024)", "pe");
+  legend->AddEntry(gr_reso[1], "Pepe et al. (2024)", "pe");
   legend->AddEntry((TObject*)0, "+ low-pass filter", "");
-  legend->AddEntry(gr_reso[1], "This work", "pe");
+  legend->AddEntry(gr_reso[2], "This work", "pe");
   legend->Draw("same");
 
   //gPad->RedrawAxis();
    
-  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall.pdf"); 
+  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall_metodo2.pdf"); 
   c1->Clear();
   legend->Clear();
 
@@ -190,7 +225,7 @@ int main(void) {
   h2_axes_fwhm->GetYaxis()->SetTitleOffset(1.5);
   h2_axes_fwhm->GetXaxis()->SetTitleOffset(1.3);
   h2_axes_fwhm->GetXaxis()->SetTitle("Electron kinetic energy E_{e} (eV)");
-  h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution #sigma_{fwhm} (eV)");
+  h2_axes_fwhm->GetYaxis()->SetTitle("TES FWHM energy resolution #DeltaE_{fwhm} (eV)");
   h2_axes_fwhm->Draw();
  
   
@@ -201,25 +236,25 @@ int main(void) {
     gr_reso_fwhm[i]->SetMarkerStyle(20);
   }
 
-  gr_reso_fwhm[0]->SetMarkerStyle(89);
-  gr_reso_fwhm[1]->SetMarkerStyle(21);
-  gr_reso_fwhm[2]->SetMarkerStyle(20);
-  gr_reso_fwhm[2]->SetMarkerColor(46);
-  gr_reso_fwhm[2]->SetLineColor  (46);
-  gr_reso_fwhm[1]->SetMarkerColor(38);
-  gr_reso_fwhm[1]->SetLineColor  (38);
-  gr_reso_fwhm[0]->SetMarkerColor(kGray+1);
-  gr_reso_fwhm[0]->SetLineColor  (kGray+1);
+  gr_reso_fwhm[1]->SetMarkerStyle(89);
+  gr_reso_fwhm[2]->SetMarkerStyle(21);
+  gr_reso_fwhm[0]->SetMarkerStyle(20);
+  gr_reso_fwhm[0]->SetMarkerColor(46);
+  gr_reso_fwhm[0]->SetLineColor  (46);
+  gr_reso_fwhm[2]->SetMarkerColor(38);
+  gr_reso_fwhm[2]->SetLineColor  (38);
+  gr_reso_fwhm[1]->SetMarkerColor(kGray+1);
+  gr_reso_fwhm[1]->SetLineColor  (kGray+1);
   
   gr_reso_fwhm[2]->Draw("PSame");
   gr_reso_fwhm[1]->Draw("PSame");
   gr_reso_fwhm[0]->Draw("PSame");
-  legend->AddEntry(gr_reso_fwhm[2], "Pepe et al. (2024)", "pe"  );
+  legend->AddEntry(gr_reso_fwhm[0], "Pepe et al. (2024)", "pe"  );
   //legend->AddEntry((TObject*)0, "Pepe et al (2024)", "");
   //legend->AddEntry(gr_reso_fwhm[0], "T100, CNTs: 9 mm^{2}", "pe"  );
-  legend->AddEntry(gr_reso_fwhm[0], "Pepe et al. (2024)", "pe");
+  legend->AddEntry(gr_reso_fwhm[1], "Pepe et al. (2024)", "pe");
   legend->AddEntry((TObject*)0, "+ low-pass filter", "");
-  legend->AddEntry(gr_reso_fwhm[1], "This work", "pe");
+  legend->AddEntry(gr_reso_fwhm[2], "This work", "pe");
   legend->Draw("same");
 
   TLine* line = new TLine(89.5, 1.4,102, 1.4 );
@@ -236,7 +271,7 @@ int main(void) {
 
   gPad->RedrawAxis();
    
-  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall_fwhm.pdf"); 
+  c1->SaveAs("/Users/massimo/Documents/phd/PTOLEMY/Articoli/Firmati/new article/graphs/reso_cfrall_fwhm_metodo2.pdf"); 
   c1->Clear();
 
   // stampa media e deviazione standard per i 6 dataset
