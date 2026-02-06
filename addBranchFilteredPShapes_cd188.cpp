@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     for(Long64_t i = 0; i < nentries; i++) {
       tree_raw->GetEntry(i);
       std::string line;
-      int cnt = 0;
+      int cnt = 0; //counter
 
       //ciclo di lettura file finché non arrivo a 2502 righe o il file non finisce
       while(cnt < 2502 && std::getline(pshape100, line)) {
