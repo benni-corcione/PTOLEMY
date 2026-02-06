@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   std::string filename = "data/params_CD" + std::to_string(CD_number)
     + std::string(misura) + std::string(choice) + ".txt";
   std::ofstream ofs(filename);
-  ofs << "V (V) E (eV) mu (V)  mu_err (V) sigmaR (V) sigmaR_err (V) sigmaL (V) sigmaL_err (V) reso_gaus (eV) reso_gaus_err (eV) reso_fwhm (eV) reso_fwhm_err (eV)" << std::endl;
+  ofs << "V (V) E (eV) E_err (V) mu (V)  mu_err (V) sigmaR (V) sigmaR_err (V) sigmaL (V) sigmaL_err (V) reso_gaus (eV) reso_gaus_err (eV) reso_fwhm (eV) reso_fwhm_err (eV)" << std::endl;
 
 
   //impostazioni grafiche
@@ -182,6 +182,7 @@ int main(int argc, char* argv[]) {
     float sigmaL    = cruijff->GetParameter(1);
     float sigmaLerr = cruijff->GetParError(1);
 
+    if(strcmp(choice,"amp_100kHz")==0){  muerr = sqrt( muerr*muerr + 0.01*0.01*mu*mu ); }
    
     //l'errore sulla stabilità di ites-ibias è insito nei segnali che otteniamo
 
@@ -190,21 +191,30 @@ int main(int argc, char* argv[]) {
     gr_mu->SetPointError( i, 0., muerr );
 
     float energy_ele = volts[i] - phi_carbon + (phi_carbon-phi_tes);
+    float energy_err = sqrt(0.0009 + pow((0.04+0.0015*volts[i]),2));
     float reso = sigmaR/mu*(volts[i]-phi_tes);
-    float reso_err = sqrt( sigmaRerr*sigmaRerr/(mu*mu) + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) )*(energy_ele);
-   
+
+    float reso_err = sqrt( sigmaRerr*sigmaRerr*energy_ele*energy_ele/(mu*mu) + sigmaR*sigmaR*energy_ele*energy_ele*muerr*muerr/(mu*mu*mu*mu) + sigmaR*sigmaR*energy_err*energy_err/(mu*mu));
+
+     if(strcmp(choice,"amp_100kHz")==0){
+       reso = sigmaR/mu*(volts[i]);
+       reso_err = sqrt( sigmaRerr*sigmaRerr/(mu*mu) + sigmaR*sigmaR*muerr*muerr/(mu*mu*mu*mu) )*volts[i];
+     }
+ 
     //aggiunta fwhm 
     float fwhm = (sigmaR+sigmaL)*sqrt(2*log(2));
     float fwhm_err = sqrt(2*log(2))*sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
-    float piece1_f = fwhm_err*fwhm_err/(mu*mu);
-    float piece2_f = fwhm*fwhm*muerr*muerr/(mu*mu*mu*mu);
+    float piece1_f = fwhm_err*fwhm_err*energy_ele*energy_ele/(mu*mu);
+    float piece2_f = fwhm*fwhm*muerr*muerr*energy_ele*energy_ele/(mu*mu*mu*mu);
+    float piece3_f = fwhm*fwhm*energy_err*energy_err/(mu*mu);
     float reso_fwhm = fwhm/mu*(energy_ele);
-    float reso_fwhm_err = sqrt(piece1_f+piece2_f)*(energy_ele);
+    float reso_fwhm_err = sqrt(piece1_f+piece2_f+piece3_f);
     
    
     
    //scrittura su file param.txt
     ofs << volts[i] << " " << energy_ele << " "
+	<< energy_err << " " 
 	<< mu << " " << muerr << " "
 	<< sigmaR << " " << sigmaRerr << " "
 	<< sigmaL << " " << sigmaLerr << " "
@@ -217,7 +227,9 @@ int main(int argc, char* argv[]) {
     //gr_reso_corr->SetPoint( i, energy_ele, reso_corr );
     //gr_reso_corr->SetPointError( i, 0., reso_err );
     
-    std::cout << "E = " << volts[i]-phi_tes << " sigma = " << reso << " +/- " << reso_err << std::endl;
+    std::cout << "E = " << volts[i]-phi_tes << " DE_gaus = " << reso << " +/- " << reso_err << std::endl;
+    std::cout << "E = " << volts[i]-phi_tes << " DE_fwhm = " << reso_fwhm << " +/- " << reso_fwhm_err << std::endl;
+    std::cout << "fwhm = " << fwhm << std::endl;
     
     //gr_reso_fwhm->SetPoint( i, energy_ele, reso*2*sqrt(2*log(2)) );
     //gr_reso_fwhm->SetPointError( i, 0., reso_err*2*sqrt(2*log(2)) );
