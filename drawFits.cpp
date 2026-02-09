@@ -42,12 +42,11 @@ float getCorr( double v, TGraphErrors* gr_temp_vs_V, TGraphErrors* gr_corr );
 
 int main() {
 
-  TStyle* style = setStyle();
-
-  style->SetPadLeftMargin(0.17);
-  style->SetPadRightMargin(0.04);
-  style->SetPadTopMargin(0.04);
-  style->SetPadBottomMargin(0.15);
+  //TStyle* style = setStyle();
+  //style->SetPadLeftMargin(0.17);
+  //style->SetPadRightMargin(0.04);
+  //style->SetPadTopMargin(0.04);
+  //style->SetPadBottomMargin(0.15);
 
   std::vector<int> colors = get_colors();
 
@@ -94,7 +93,8 @@ int main() {
   TFile* file_corr = TFile::Open("corr_VvsT.root", "read" );
   TGraphErrors* gr_corr = (TGraphErrors*)file_corr->Get("corr");
 
-  TCanvas* c1 = new TCanvas( "c1", "", 600, 600 );
+  TCanvas* c1 = new TCanvas( "c1", "", 1500, 1500 );
+  c1->SetLeftMargin(0.13);
   c1->cd();
 
   for( unsigned i=0; i<volts.size(); i++ ) {
@@ -108,7 +108,9 @@ int main() {
     TTree* tree = (TTree*)file->Get("tree");
 
     std::string histname(Form("%d", volts[i]));
-    TH1D* h1_amp = new TH1D( histname.c_str(), "", 200, 0., 1. );
+    int nbins = 200;
+    float binsize = 1./nbins;
+    TH1D* h1_amp = new TH1D( histname.c_str(), "", nbins, 0., 1. );
     tree->Project(histname.c_str(), "amp");
 
     float fitmin = (volts[i]<100. && volts[i]!=97.) ? 0.5 : 0.6;
@@ -145,11 +147,21 @@ int main() {
 
     if(volts[i]==101){cruijff->SetParameter( 0, 0.82);} // mu}
     h1_amp->Fit( cruijff, "RX" );
-
+    h1_amp->SetLineWidth(2);
+    
     c1->Clear();
+    cruijff->SetLineColor(kRed-4);
+    cruijff->SetLineWidth(3);
+    cruijff->SetNpx(1000);
+    h1_amp->SetLineColor(kBlack);
+    h1_amp->GetYaxis()->SetTitle(Form("Counts/%.3f", binsize));
+    h1_amp->GetXaxis()->SetTitle("Amplitude [V]");
+    h1_amp->SetTitle(Form("%d V", volts[i]));
+
+    gStyle->SetOptStat(0);
     h1_amp->Draw();
-    //cruijff->Draw("Lsame");
-    c1->SaveAs(Form("fits/%d.pdf", volts[i]));
+    cruijff->Draw("Lsame");
+    c1->SaveAs(Form("plots/CD188/conteggi/%dV/%d_final.pdf", volts[i],volts[i]));
 
     float mu = cruijff->GetParameter(0);
     float muerr = cruijff->GetParError(0);
