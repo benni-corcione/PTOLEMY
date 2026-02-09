@@ -19,12 +19,6 @@
 #include "AndCommon.h"
 #include "CD_details.h"
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-//++PROGRAMMA SETTATO SOLO SULLO STUDIO DI: +++++++++++++++++++//
-// cd_188, conteggi, amp//
-// cd_204, preamp_post_cond1_18dic, amp//
-// cd_204, preamp_post_cond1_18dic, charge//
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
 void Input_Param_Ctrls(int argc, char* argv[]);
 
@@ -82,6 +76,7 @@ int main(int argc, char* argv[]) {
   char* misura    =       argv[2]  ;
 
   std::vector<int> volts = GetVoltages(CD_number,misura);
+  std::vector<float> prob;
   std::vector<float> syst_gaus;
   std::vector<float> syst_gaus_err;
  
@@ -90,6 +85,12 @@ int main(int argc, char* argv[]) {
   settings.Margin(c1);
   c1->SetLeftMargin(0.155);
   c1->cd();
+
+  std::string filename = "data/params_CD" + std::to_string(CD_number)
+    + std::string(misura) + std::string(choice) + ".txt";
+  std::ofstream ofs(filename);
+  ofs << "V (V) E (eV) E_err (V) mu (V)  mu_err (V) sigmaR (V) sigmaR_err (V) sigmaL (V) sigmaL_err (V) reso_gaus (eV) reso_gaus_err (eV) reso_fwhm (eV) reso_fwhm_err (eV)" << std::endl;
+
 
   float phi_tes = GetPhiTes();
   
@@ -112,7 +113,7 @@ int main(int argc, char* argv[]) {
     
     //impostazione per gli histos
     //int nbins = h_var.get_nbins();
-    int nbins =1400;
+    int nbins = 800;
 
     float binsize = settings.Binsize(1./nbins);
     const char* x_amp = "Amplitude [V]";
@@ -149,15 +150,19 @@ int main(int argc, char* argv[]) {
 
     if(CD_number==204){
       fitmin_cb = 0.6 ;
-      fitmax_cb = 0.65;
-      if(volts[i]==96 ) fitmin_cb = 0.59 ;
-      if(volts[i]==97 ) fitmin_cb = 0.6  ;
+      fitmax_cb = 0.625;
+      if(volts[i]==96 ) fitmin_cb = 0.59 ; //800 bin
+      //if(volts[i]==96 ) fitmin_cb = 0.595  ; //700 bin
+      //if(volts[i]==97 ) fitmin_cb = 0.59  ; //700 bin
+      if(volts[i]==97 ) fitmin_cb = 0.59  ; //800 bin
       if(volts[i]==98 ) fitmin_cb = 0.602;
-      if(volts[i]==99 ) fitmin_cb = 0.603;
+      //if(volts[i]==99 ) fitmin_cb = 0.601; //700 bin
+      if(volts[i]==99 ) fitmin_cb = 0.60; //800 bin
       if(volts[i]==100) fitmin_cb = 0.592;
       if(volts[i]==101) fitmin_cb = 0.608;
       if(volts[i]==102) fitmin_cb = 0.60 ;
-      if(volts[i]==103) fitmin_cb = 0.59 ;
+      if(volts[i]==103) fitmin_cb = 0.61 ;
+      if(volts[i]>96)   fitmax_cb = 0.65;
     }
     
     TF1 *cb  = new TF1(Form("cb_%d", volts[i]), Crystal_Ball, fitmin_cb, fitmax_cb, 5);
@@ -178,28 +183,33 @@ int main(int argc, char* argv[]) {
       cb->SetParameter(4, (double)(histo->Integral()) ); // A
 
       if(volts[i]==95 ){cb->SetParameter(0, 0.61 );}
-      if(volts[i]==96 ){cb->SetParameter(0, 0.61 );
-                        cb->SetParameter(1, 0.035);}
-      if(volts[i]==97 ){cb->SetParameter(0, 0.61 );
-                        cb->SetParameter(1, 0.035);} 
-      if(volts[i]==98 ){cb->SetParameter(0, 0.61 );}
+      //if(volts[i]==96 ){cb->SetParameter(0, 0.61 );
+      //                cb->SetParameter(1, 0.035);}
+      if(volts[i]==97 ){cb->SetParameter(0, 0.611);
+	cb->SetParameter(1, 0.035);
+      	cb->SetParLimits(0, 0.608, 0.612);
+      	cb->SetParLimits(1, 0.002, 0.004); } 
+      if(volts[i]==98 ){cb->SetParameter(0, 0.65 );
+	cb->SetParLimits(0, 0.614, 0.625); }
+      if(volts[i]==99 ){cb->SetParameter(0, 0.65 );
+	cb->SetParLimits(0, 0.613, 0.625); }
       if(volts[i]==100){cb->SetParameter(0, 0.62 );
-	                cb->SetParameter(1, 0.035);
-			cb->SetParLimits(2, 0, 2 );
-			cb->SetParameter(3, 0.3  );
-	                cb->SetParameter(4, 300  );}
+	cb->SetParameter(1, 0.035);
+	cb->SetParLimits(2, 0, 2 );
+	cb->SetParameter(3, 0.3  );
+	cb->SetParameter(4, 300  );}
       if(volts[i]==101){cb->SetParameter(0, 0.62 );}
       if(volts[i]==102){cb->SetParameter(0, 0.62 );
-	                cb->SetParameter(1, 0.035);
-  	                cb->SetParLimits(0, 0.618, 0.625);
-                  	cb->SetParLimits(1, 0.001, 0.04 );} 
+	cb->SetParameter(1, 0.035);
+	cb->SetParLimits(0, 0.618, 0.625);
+	cb->SetParLimits(1, 0.001, 0.04 );} 
       if(volts[i]==103){cb->SetParameter(0, 0.62 );
-                        cb->SetParameter(1, 0.035);
-			cb->SetParameter(3, 0.3  ); 
-			cb->SetParLimits(0, 0.618, 0.625);
-	                cb->SetParLimits(2, 0, 2 );}
+	cb->SetParameter(1, 0.035);
+	cb->SetParameter(3, 0.3  ); 
+	cb->SetParLimits(0, 0.618, 0.625);
+	cb->SetParLimits(2, 0, 2 );}
       if(volts[i]==104){cb->SetParameter(0, 0.66 ); 
-                        cb->SetParameter(1, 0.035);}   
+	cb->SetParameter(1, 0.035);}   
     } // if(CD_number==204)
     
     Fit f_var = SetFitValues(CD_number,choice,histo,volts[i],misura);
@@ -249,22 +259,24 @@ int main(int argc, char* argv[]) {
     histo->SetMarkerSize(2);
     histo->SetLineWidth(3);
     histo->Fit(cb, "RX0");
-    histo->Fit(cruijff,"RX+");
+    histo->Fit(cruijff,"RX0Q");
    
     histo->SetNdivisions(510);
-    histo->Draw(); //"pe" per avere points+errors
+   
 
     cb->SetLineColor(kRed-4);
     cb->SetLineWidth(5);
     cb->SetNpx(1000);
-    //cb->Draw("same");
-    cruijff->Draw("same");
+   
+    //cruijff->Draw("same");
     settings.graphic_histo(histo,range_min,range_max,x_amp,y_amp.c_str(),volts[i]);
     settings.general_style();
-    histo->SetLineWidth(3);
-
+    histo->SetLineWidth(4);
     
-    //estrazione parametri dal fit
+    histo->Draw(); //"pe" per avere points+errors
+    cb->Draw("same");
+    
+     //estrazione parametri dal fit
     float mu_cb        = cb->GetParameter(0);
     float muerr_cb     = cb->GetParError(0);
     float sigmaR_cb    = cb->GetParameter(1);
@@ -290,7 +302,8 @@ int main(int argc, char* argv[]) {
     //l'errore sulla stabilità di ites-ibias è insito nei segnali che otteniamo
     float reso = sigmaR/mu*(volts[i]-phi_tes);
     float reso_err = sqrt( sigmaRerr*sigmaRerr*energy_ele*energy_ele/(mu*mu) + sigmaR*sigmaR*energy_ele*energy_ele*muerr*muerr/(mu*mu*mu*mu) + sigmaR*sigmaR*energy_err*energy_err/(mu*mu));
-   
+
+    /*
     float fwhm      = (sigmaR+sigmaL)*sqrt(2*log(2));
     float fwhm_err  = sqrt(2*log(2))*sqrt(sigmaRerr*sigmaRerr+sigmaLerr*sigmaLerr);
     float piece1_f  = fwhm_err*fwhm_err*energy_ele*energy_ele/(mu*mu);
@@ -298,20 +311,42 @@ int main(int argc, char* argv[]) {
     float piece3_f  = fwhm*fwhm*energy_err*energy_err/(mu*mu);
     float reso_fwhm = fwhm/mu*(energy_ele);
     float reso_fwhm_err = sqrt(piece1_f+piece2_f+piece3_f);
+    */
+
+    //RISOLUZIONE FWHM CB
+    float cb_max      = cb->GetMaximum(fitmin_cb, fitmax_cb);
+    float Ytarget     = cb_max*0.5;
+    float x1          = cb->GetX(Ytarget, fitmin_cb, mu_cb);
+    float x2          = cb->GetX(Ytarget, mu_cb, fitmax_cb);
+    
+    float fwhm_cb     = x2-x1;
+    float fwhm_errcb  = 0;
+    float piece1_fcb  = fwhm_errcb*fwhm_errcb*energy_ele*energy_ele/(mu_cb*mu_cb);
+    float piece2_fcb  = fwhm_cb*fwhm_cb*muerr_cb*muerr_cb*energy_ele*energy_ele/(mu_cb*mu_cb*mu_cb*mu_cb);
+    float piece3_fcb  = fwhm_cb*fwhm_cb*energy_err*energy_err/(mu_cb*mu_cb);
+    float reso_fwhm_cb = fwhm_cb/mu_cb*(energy_ele);
+    float reso_fwhm_err_cb = sqrt(piece1_fcb+piece2_fcb+piece3_fcb);
+    
+     //scrittura su file param.txt
+    ofs << volts[i] << " " << energy_ele << " "
+	<< energy_err << " " 
+	<< mu << " " << muerr << " "
+	<< sigmaR << " " << sigmaRerr << " "
+	<< sigmaL << " " << sigmaLerr << " "
+	<< reso_cb << " " << reso_errcb << " "
+	<< reso_fwhm_cb << " " << reso_fwhm_err_cb << std::endl;
 
     
     std::cout << "-----CRYSTAL  BALL-----" << std::endl; 
     std::cout << "E = " << volts[i]-phi_tes << " DE_gaus = " << reso_cb << " +/- " << reso_errcb << std::endl;
+    std::cout << "E = " << volts[i]-phi_tes << " DE_fwhm = " << reso_fwhm_cb << " +/- " << reso_fwhm_err_cb << std::endl;
     std::cout << "P: " << cb->GetProb()*100 << "%" << std::endl;
-    std::cout << "-----GAUSSIANA-----" << std::endl;
-    std::cout << "E = " << volts[i]-phi_tes << " DE_gaus = " << reso << " +/- " << reso_err << std::endl;
-    std::cout << "E = " << volts[i]-phi_tes << " DE_fwhm = " << reso_fwhm << " +/- " << reso_fwhm_err << std::endl;
-    std::cout << "P: " << cruijff->GetProb()*100 << "%" << std::endl;
 
+    prob.push_back(cb->GetProb()*100);
 
     std::string outdir( Form("plots/CD%d/%s/%dV", CD_number, misura, volts[i]));
     system( Form("mkdir -p %s", outdir.c_str()) );
-    c1->SaveAs(Form("plots/CD%d/%s/%dV/both_%s_fit_%dbins_final.png",CD_number,misura,volts[i],choice,nbins));
+    c1->SaveAs(Form("plots/CD%d/%s/%dV/crystralball_%dbins_final.png",CD_number,misura,volts[i],nbins));
 
     
     float systgaus = abs(reso_cb-reso)/(1.*reso);
@@ -321,12 +356,13 @@ int main(int argc, char* argv[]) {
 
   } //for sui voltaggi vari
 
+  ofs.close();
+
   std::cout << std::endl;
-  for(int j=0; j<syst_gaus.size(); j++){
-    std::cout << syst_gaus[j]*100 << " +- " << syst_gaus_err[j]*100 << std::endl;
+  for(int i=0; i<prob.size(); i++){
+    std::cout << volts[i] << " V --> prob: " << prob[i] << std::endl;
+
   }
-  std::cout << std::endl;
-  
   return 0;
 
 }
