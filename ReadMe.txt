@@ -58,6 +58,7 @@ drawSpectra                     : draw cd204 amp with cd188 amp in inset as for 
 drawSuperimposedHistos          : draw multiple histos one on top of the other fitting the amp full-absorption peak
 drawSyst_Bin                    : cfr with plot and fit of same datset fitted at different binnings to calculate the systematics from the discrepancy in the energy resolution
 drawSyst_Range                  : cfr with plot and fit of same datset fitted at different fitmin and fitmax to calculate the systematics from the discrepancy in the energy resolution
+drawSystematics_cb              : calculate systematics for gaussian energy resolution of cd 204 using different fit ranges and binning, then modifying titles by hand creates the superimposed histos (only if run one voltage per time)
 draw_ctrls                      : draw pshape with selected controls (charge, width, doubles triggered)
 draw_three_electrons            : draw pshapes of three electrons superimposed (fit if you want)
 fitAmpChargeData                : fit of histograms (ranges and fits params have to be decided)
