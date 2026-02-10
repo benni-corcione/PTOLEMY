@@ -70,11 +70,11 @@ int main(void) {
   float phi_tes = GetPhiTes();
 
   //paper, bin1, bin2, fitrange1, fitrange2
-  //int nbins[5] = {700, 600, 800, 700, 700};
-  int nbins[5] = {800, 700, 900, 800, 800};
+  int nbins[5] = {700, 600, 800, 700, 700};
+  //int nbins[5] = {800, 700, 900, 800, 800};
   
-  //for(unsigned i=0; i<volts.size(); i++) {
-  for(unsigned i=2; i<3; i++) {
+  for(unsigned i=0; i<volts.size(); i++) {
+  //for(unsigned i=2; i<3; i++) {
     std::cout << std::endl << std::endl;
     std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
     std::cout << "V = " << volts[i] << std::endl << std::endl;
@@ -235,6 +235,7 @@ int main(void) {
   int index_range[3] = {0,3,4};
   int index_bins[3]  = {0,1,2};
 
+  /*
   
   //PER FARE IL DISEGNO, SELEZIONARE NEL CICLO SOPRA SOLO IL VOLTAGGIO RICHIESTO ALTRIMENTI VERRà DISEGNATO SEMPRE E SOLO L'ULTIMO VOLTAGGIO ESPLORATO
   //SEGNARE A MANO IL NOME DEL VOLTAGGIO DESIDERATO
@@ -289,7 +290,7 @@ int main(void) {
    c1->SaveAs(Form("plots/CD%d/%s/103V/superimposed_bin_103V.png",CD_number,misura));
 
    
-  
+  */
   return 0;
 
 }

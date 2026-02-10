@@ -220,7 +220,7 @@ int main(void) {
     float systgaus_err = sqrt(((reso_gaus_err[v][j]*reso_gaus_err[v][j])/(1.*reso_gaus[v][0]*reso_gaus[v][0]))+(reso_gaus[v][j]*reso_gaus[v][j]*reso_gaus_err[v][0]*reso_gaus_err[v][0])/(1.*reso_gaus[v][0]*reso_gaus[v][0]*reso_gaus[v][0]*reso_gaus[v][0]));
 
     media+=(systgaus*100);
-    std::cout << systgaus * 100 << " +- " << systgaus_err << std::endl;
+    std::cout << systgaus * 100 << " +- " << systgaus_err * 100 << std::endl;
     }
     std::cout << "MEDIA --> " << media/4. << std::endl;
     std::cout << std::endl;

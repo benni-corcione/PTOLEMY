@@ -420,7 +420,7 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
   }
 
   if(CD_number == 188 && strcmp(choice,"amp_100kHz")==0){
-    var.set_mu_min(0.6)     ;  var.set_mu_max(0.75)  ;  var.set_mu(0.64)     ;
+    var.set_mu_min(0.6)      ;  var.set_mu_max(0.75)  ;  var.set_mu(0.64)     ;
     var.set_sigmaL_min(0.01) ;  var.set_sigmaL_max(0.5);  var.set_sigmaL(0.1) ;
     var.set_sigmaR_min(0.005);  var.set_sigmaR_max(0.1);  var.set_sigmaR(0.03);
     var.set_alfa_min(0)      ;  var.set_alfa_max(1)    ;  var.set_alfa(0)     ;
@@ -500,15 +500,17 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     var.set_A_min(0)         ;  var.set_A_max(3000)    ;
     var.set_A(histo->Integral());
 
+    if(voltage==100){ var.set_mu_min(0.615);  var.set_mu_max(0.622);  var.set_mu(0.62);}
+
     //if(voltage>100){var.set_mu_min(0.618); var.set_sigmaL_max(5E-2); var.set_sigmaL_min(4E-3); }
     //fit limits
-    if(voltage==96 ){var.set_fit_min(0.604); var.set_fit_max(0.625);}
-    if(voltage==97 ){var.set_fit_min(0.603); var.set_fit_max(0.625);}
-    if(voltage==98 ){var.set_fit_min(0.6095); var.set_fit_max(0.63);}
+    if(voltage==96 ){var.set_fit_min(0.602); var.set_fit_max(0.625);}
+    if(voltage==97 ){var.set_fit_min(0.606); var.set_fit_max(0.625);}
+    if(voltage==98 ){var.set_fit_min(0.606); var.set_fit_max(0.63);}
     if(voltage==99 ){var.set_fit_min(0.609); var.set_fit_max(0.63);}
-    if(voltage==100){var.set_fit_min(0.6125); var.set_fit_max(0.63);}
-    if(voltage==101){var.set_fit_min(0.6165); var.set_fit_max(0.63);}
-    if(voltage==102){var.set_fit_min(0.6145); var.set_fit_max(0.63);}
+    if(voltage==100){var.set_fit_min(0.611); var.set_fit_max(0.63);}
+    if(voltage==101){var.set_fit_min(0.61); var.set_fit_max(0.63);}
+    if(voltage==102){var.set_fit_min(0.614); var.set_fit_max(0.63);}
     if(voltage==103){var.set_fit_min(0.6132); var.set_fit_max(0.635);}
     if(voltage==104){var.set_fit_min(0.616); var.set_fit_max(0.635);}
     if(voltage==105){var.set_fit_min(0.614); var.set_fit_max(0.635);}
@@ -517,6 +519,8 @@ Fit SetFitValues(int CD_number, char* choice, TH1F* histo, int voltage, char* mi
     if(voltage==108){var.set_fit_min(0.618); var.set_fit_max(0.635);}
     if(voltage==109){var.set_fit_min(0.6145); var.set_fit_max(0.64);}
     if(voltage==110){var.set_fit_min(0.611); var.set_fit_max(0.64);}
+
+    
 
   }
 
