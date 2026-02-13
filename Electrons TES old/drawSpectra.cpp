@@ -66,9 +66,9 @@ int main(void){
   c->cd();
  
   TPad *pad_new = new TPad("pad_new" ,"",0,0,1,1);
-  TH2D *h2_axes_new = new TH2D( "axes_new", "", 10, 0, 0.7, 10, 0., 999 );
+  TH2D *h2_axes_new = new TH2D( "axes_new", "", 10, 0.001, 0.7, 10, 0., 999 );
   h2_axes_new->SetXTitle( "Amplitude (V)" );
-  h2_axes_new->SetYTitle("Counts");
+  h2_axes_new->SetYTitle("Counts / 0.005 V");
   h2_axes_new->GetYaxis()->SetNdivisions(505);
   h2_axes_new->GetYaxis()->SetTitleOffset(1.3);
   h2_axes_new->GetYaxis()->SetAxisColor (kBlack);
@@ -130,7 +130,7 @@ int main(void){
   pad_old->cd();
 
   
-  TH2D* h2_axes_old = new TH2D("axes_old", "", 10, 0, 1., 10., 0, 240 );
+  TH2D* h2_axes_old = new TH2D("axes_old", "", 10, 0.001, 1., 10., 0, 240 );
   h2_axes_old->GetXaxis()->SetNdivisions(505);
   h2_axes_old->GetXaxis()->SetLabelSize(0.085);
   h2_axes_old->GetXaxis()->SetTitleOffset(1.);
@@ -140,7 +140,7 @@ int main(void){
   h2_axes_old->GetYaxis()->SetTitleOffset(1.4);
   h2_axes_old->GetYaxis()->SetTitleSize(0.085);
   h2_axes_old->SetXTitle( "Amplitude (V)" );
-  h2_axes_old->SetYTitle("Counts");
+  h2_axes_old->SetYTitle("Counts / 0.01 V");
   h2_axes_old->Draw();
 
   TLatex* labelpepe = new TLatex( 0.04, 210, "Pepe et al. (2024)" );
